@@ -807,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
       splash.style.visibility = 'hidden';
       setTimeout(() => splash.remove(), 700);
     }
-  }, 900);
+  }, 3400);
 
   window._app = { goBack, onTaskPassed, toast, navigate, saveLang };
 
