@@ -16,6 +16,7 @@ let _state = {
 
 let _backStack = [];
 let _activeScreen = 'home';
+let _newsAutoRefreshTimer = null;
 
 // ── Persistence ───────────────────────────────────────────────────────────────
 
@@ -24,6 +25,12 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) _state = { ..._state, ...JSON.parse(raw) };
   } catch {}
+  if (_state.lang) setLang(_state.lang);
+}
+
+function saveLang(lang) {
+  _state.lang = lang;
+  saveState();
 }
 
 function saveState() {
@@ -48,11 +55,13 @@ function show(screenId) {
     btn.classList.toggle('active', btn.dataset.screen === screenId);
   });
 
-  if (screenId === 'home') renderHome();
+  if (screenId === 'home') { renderHome(); _startNewsAutoRefresh(); }
+  else _stopNewsAutoRefresh();
   if (screenId === 'courses') renderCourses();
   if (screenId === 'sandbox') initSandboxScreen();
   if (screenId === 'ai-chat') initAiChatScreen();
   if (screenId === 'settings') renderSettings();
+  if (screenId === 'news') renderNewsScreen();
 }
 
 function goBack() {
@@ -74,24 +83,25 @@ function renderHome() {
   const greeting = document.getElementById('home-greeting');
   if (greeting) {
     const hour = new Date().getHours();
-    const greetings = hour < 12 ? 'Доброго ранку! 🌅' : hour < 18 ? 'Привіт! Готовий кодити? 💻' : 'Добрий вечір! 🌙';
-    greeting.textContent = greetings;
+    greeting.textContent = hour < 12 ? t('home_greeting_morning') : hour < 18 ? t('home_greeting_day') : t('home_greeting_evening');
   }
 
   checkStreak();
 
   const daily = getDailyChallenge();
-  const dailyTitle = document.getElementById('daily-title');
-  const dailyMeta = document.getElementById('daily-meta');
-  if (dailyTitle) dailyTitle.textContent = daily.title;
-  if (dailyMeta) dailyMeta.textContent = `${daily.lang} · +${daily.xp} XP`;
+  const dailyTitleEl = document.getElementById('daily-title');
+  const dailyMetaEl = document.getElementById('daily-meta');
+  const homeDailyTitle = document.getElementById('home-daily-title');
+  if (homeDailyTitle) homeDailyTitle.textContent = t('home_daily');
+  if (dailyTitleEl) dailyTitleEl.textContent = daily.title;
+  if (dailyMetaEl) dailyMetaEl.textContent = `${daily.lang} · +${daily.xp} XP`;
 
-  document.getElementById('btn-daily-start')?.addEventListener('click', () => {
-    navigate('courses');
-  });
+  document.getElementById('btn-daily-start')?.addEventListener('click', () => navigate('courses'));
 
   const continueWrap = document.getElementById('home-continue-wrap');
   const continueCard = document.getElementById('home-continue');
+  const continueTitleEl = document.getElementById('home-continue-title');
+  if (continueTitleEl) continueTitleEl.textContent = t('home_continue_title');
   if (_state.lastCourse && continueWrap && continueCard) {
     const course = COURSES[_state.lastCourse];
     if (course) {
@@ -100,32 +110,21 @@ function renderHome() {
         <span style="font-size:28px">${course.icon}</span>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:600">${course.name}</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">Продовж з того місця</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${t('home_continue_sub')}</div>
         </div>
         <span style="color:var(--primary);font-size:18px">→</span>`;
       continueCard.onclick = () => navigate('courses');
     }
   }
 
-  const grid = document.getElementById('home-course-grid');
-  if (grid) {
-    grid.innerHTML = '';
-    Object.values(COURSES).forEach(course => {
-      const completed = countCompleted(course);
-      const total = countTotal(course);
-      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-      const card = document.createElement('div');
-      card.className = 'course-card fade-in';
-      card.innerHTML = `
-        <div class="course-icon">${course.icon}</div>
-        <div class="course-name">${course.name}</div>
-        <div class="course-progress-bar">
-          <div class="course-progress-fill" style="width:${progress}%;background:${course.color}"></div>
-        </div>`;
-      card.onclick = () => { navigate('courses'); };
-      grid.appendChild(card);
-    });
-  }
+  const newsTitleEl = document.getElementById('home-news-title');
+  const newsAllBtn = document.getElementById('btn-home-news-all');
+  const newsRefreshBtn = document.getElementById('btn-home-news-refresh');
+  if (newsTitleEl) newsTitleEl.textContent = t('home_news');
+  if (newsAllBtn) { newsAllBtn.textContent = t('home_news_all'); newsAllBtn.onclick = () => navigate('news'); }
+  if (newsRefreshBtn) newsRefreshBtn.onclick = () => fetchHomeNews(true);
+
+  fetchHomeNews(false);
 }
 
 // ── XP / Streak ───────────────────────────────────────────────────────────────
@@ -137,10 +136,10 @@ function updateXpDisplay() {
   const progress = getXpProgress(xp);
 
   const badge = document.getElementById('level-badge');
-  if (badge) badge.textContent = level.icon + ' ' + level.name;
+  if (badge) badge.textContent = level.icon + ' ' + (t('level_' + level.name) || level.name);
 
   const xpNum = document.getElementById('xp-number');
-  if (xpNum) xpNum.textContent = next ? `${xp} / ${next.min} XP` : `${xp} XP (Макс!)`;
+  if (xpNum) xpNum.textContent = next ? `${xp} / ${next.min} XP` : `${xp} ${t('xp_max')}`;
 
   const bar = document.getElementById('xp-bar');
   if (bar) bar.style.width = progress + '%';
@@ -176,12 +175,12 @@ function addXp(amount) {
   const newLevel = getLevel(_state.xp);
   updateXpDisplay();
 
-  showXpModal(amount, newLevel.name !== oldLevel.name ? `Рівень підвищено: ${newLevel.icon} ${newLevel.name}!` : null);
+  showXpModal(amount, newLevel.name !== oldLevel.name ? `🎉 ${newLevel.icon} ${t('level_' + newLevel.name) || newLevel.name}!` : null);
 }
 
 function onTaskPassed(challengeId, xp) {
   if (_state.completedChallenges.includes(challengeId)) {
-    toast('Ти вже виконав цю задачу! ✅');
+    toast(t('already_done'));
     return;
   }
   _state.completedChallenges.push(challengeId);
@@ -331,10 +330,14 @@ function renderSettings() {
   const progressInfo = document.getElementById('settings-progress-info');
   if (progressInfo) {
     const level = getLevel(_state.xp);
-    progressInfo.textContent = `${level.icon} ${level.name} · ${_state.xp} XP · Streak: ${_state.streak} днів · Виконано: ${_state.completedChallenges.length} задач`;
+    const lvlName = t('level_' + level.name) || level.name;
+    progressInfo.textContent = `${level.icon} ${lvlName} · ${_state.xp} XP · ${t('streak_label')} ${_state.streak} ${t('streak_days')} · ${t('completed_label')} ${_state.completedChallenges.length} ${t('completed_of')}`;
   }
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === _state.theme);
+  });
+  document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === getLang());
   });
   _renderOllamaSettings();
 }
@@ -344,48 +347,48 @@ async function _renderOllamaSettings() {
   const ctrl = document.getElementById('settings-ollama-controls');
   if (!info || !ctrl) return;
 
-  info.textContent = '⟳ Перевірка...';
+  info.textContent = t('settings_ollama_checking');
   ctrl.innerHTML = '';
 
   const { installed, running } = await checkOllamaStatus();
 
   if (!installed) {
-    info.textContent = '❌ Ollama не встановлена';
+    info.textContent = t('settings_ollama_missing');
     const btn = document.createElement('button');
     btn.className = 'btn btn-primary';
-    btn.textContent = '⬇ Встановити Ollama';
+    btn.textContent = t('settings_ollama_install');
     btn.onclick = _settingsInstallOllama;
     ctrl.appendChild(btn);
     return;
   }
 
   if (!running) {
-    info.textContent = '⚠️ Ollama встановлена, але не запущена';
+    info.textContent = t('settings_ollama_stopped');
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
-    const startBtn = _makeBtn('btn-secondary', '▶ Запустити', async () => {
-      startBtn.textContent = 'Запуск...';
+    const startBtn = _makeBtn('btn-secondary', t('settings_ollama_start'), async () => {
+      startBtn.textContent = t('loading');
       startBtn.disabled = true;
       await fetch('/api/start-ollama');
       _renderOllamaSettings();
     });
-    const unBtn = _makeBtn('btn-danger', '🗑 Видалити Ollama', _settingsUninstallOllama);
+    const unBtn = _makeBtn('btn-danger', t('settings_ollama_uninstall'), _settingsUninstallOllama);
     row.append(startBtn, unBtn);
     ctrl.appendChild(row);
     return;
   }
 
-  info.textContent = '✅ Ollama запущена і готова';
+  info.textContent = t('settings_ollama_running');
 
   const topRow = document.createElement('div');
   topRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
-  topRow.appendChild(_makeBtn('btn-danger', '🗑 Видалити Ollama', _settingsUninstallOllama));
+  topRow.appendChild(_makeBtn('btn-danger', t('settings_ollama_uninstall'), _settingsUninstallOllama));
   ctrl.appendChild(topRow);
 
   const modLabel = document.createElement('div');
   modLabel.className = 'settings-label';
   modLabel.style.marginTop = '14px';
-  modLabel.textContent = 'Встановлені моделі';
+  modLabel.textContent = t('settings_models_installed');
   ctrl.appendChild(modLabel);
 
   const modelList = document.createElement('div');
@@ -397,7 +400,7 @@ async function _renderOllamaSettings() {
   const popLabel = document.createElement('div');
   popLabel.className = 'settings-label';
   popLabel.style.marginTop = '14px';
-  popLabel.textContent = 'Популярні моделі для коду';
+  popLabel.textContent = t('settings_models_popular');
   ctrl.appendChild(popLabel);
 
   const POPULAR_MODELS = [
@@ -416,7 +419,7 @@ async function _renderOllamaSettings() {
     card.innerHTML = `<div class="mpcard-name">${m.name}</div><div class="mpcard-size">${m.size}</div><div class="mpcard-desc">${m.desc}</div>`;
     const btn = document.createElement('button');
     btn.className = 'btn btn-secondary mpcard-btn';
-    btn.textContent = '⬇ Завантажити';
+    btn.textContent = t('settings_model_dl');
     btn.onclick = () => _settingsPullModel(m.id, card, btn);
     card.appendChild(btn);
     popGrid.appendChild(card);
@@ -432,7 +435,7 @@ async function _loadInstalledModels(container, popGrid) {
     const { models = [] } = await resp.json();
     container.innerHTML = '';
     if (!models.length) {
-      container.innerHTML = '<span style="color:var(--text2);font-size:13px">Немає встановлених моделей</span>';
+      container.innerHTML = `<span style="color:var(--text2);font-size:13px">${t('settings_models_none')}</span>`;
       return;
     }
     models.forEach(name => {
@@ -451,19 +454,19 @@ async function _loadInstalledModels(container, popGrid) {
           const baseId = card.dataset.modelId.split(':')[0];
           if (name === card.dataset.modelId || name.startsWith(baseId + ':')) {
             const btn = card.querySelector('.mpcard-btn');
-            btn.textContent = '✅ Встановлена';
+            btn.textContent = t('settings_model_ok');
             btn.disabled = true;
           }
         });
       }
     });
   } catch {
-    container.innerHTML = '<span style="color:var(--red);font-size:13px">Помилка завантаження</span>';
+    container.innerHTML = `<span style="color:var(--red);font-size:13px">${t('settings_models_none')}</span>`;
   }
 }
 
 async function _settingsDeleteModel(modelName, rowEl) {
-  if (!confirm(`Видалити модель ${modelName}?`)) return;
+  if (!confirm(t('settings_model_del_confirm', modelName))) return;
   rowEl.innerHTML = '<span style="color:var(--text2)">⟳ Видалення...</span>';
   try {
     const resp = await fetch('/api/delete-model', {
@@ -471,7 +474,7 @@ async function _settingsDeleteModel(modelName, rowEl) {
       body: JSON.stringify({ model: modelName }),
     });
     const { ok, error } = await resp.json();
-    if (ok) { rowEl.remove(); toast(`Модель ${modelName} видалена`); }
+    if (ok) { rowEl.remove(); toast(t('settings_model_deleted', modelName)); }
     else rowEl.innerHTML = `<span style="color:var(--red);font-size:13px">❌ ${error}</span>`;
   } catch (e) {
     rowEl.innerHTML = `<span style="color:var(--red);font-size:13px">❌ ${e.message}</span>`;
@@ -479,7 +482,7 @@ async function _settingsDeleteModel(modelName, rowEl) {
 }
 
 async function _settingsPullModel(modelId, cardEl, btn) {
-  btn.textContent = '⟳ Завантаження...';
+  btn.textContent = t('settings_model_dling');
   btn.disabled = true;
   try {
     await fetch('/api/pull-model', {
@@ -491,8 +494,8 @@ async function _settingsPullModel(modelId, cardEl, btn) {
         const { status, logs, message } = await (await fetch('/api/ollama-pull-progress')).json();
         if (status === 'done') {
           clearInterval(iv);
-          btn.textContent = '✅ Встановлена';
-          toast(`Модель ${modelId} завантажена! 🎉`);
+          btn.textContent = t('settings_model_ok');
+          toast(t('settings_model_pulled', modelId));
           _renderOllamaSettings();
         } else if (status === 'error') {
           clearInterval(iv);
@@ -510,18 +513,49 @@ async function _settingsPullModel(modelId, cardEl, btn) {
   }
 }
 
-function _settingsInstallOllama() {
+async function _settingsInstallOllama() {
   const ctrl = document.getElementById('settings-ollama-controls');
   if (!ctrl) return;
-  ctrl.innerHTML = `<div class="install-progress"><div class="progress-text" id="s-install-text">Встановлення Ollama...</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="s-install-bar" style="width:5%"></div></div></div>`;
-  startOllamaInstall(() => {
-    toast('Ollama встановлена! ✅');
-    _renderOllamaSettings();
-  });
+  const textEl = document.createElement('div');
+  textEl.className = 'progress-text';
+  textEl.textContent = t('settings_ollama_installing');
+  const barFill = document.createElement('div');
+  barFill.className = 'progress-bar-fill';
+  barFill.style.width = '5%';
+  const barWrap = document.createElement('div');
+  barWrap.className = 'progress-bar-wrap';
+  barWrap.appendChild(barFill);
+  const prog = document.createElement('div');
+  prog.className = 'install-progress';
+  prog.append(textEl, barWrap);
+  ctrl.innerHTML = '';
+  ctrl.appendChild(prog);
+
+  try { await fetch('/api/install-ollama', { method: 'POST' }); } catch {}
+
+  const iv = setInterval(async () => {
+    try {
+      const resp = await fetch('/api/ollama-install-progress');
+      const data = await resp.json();
+      const statusMap = { pending: t('loading'), downloading: t('loading'), installing: t('installing') };
+      textEl.textContent = statusMap[data.status] || data.status;
+      if (data.status === 'downloading') barFill.style.width = '40%';
+      if (data.status === 'installing') barFill.style.width = '75%';
+      if (data.status === 'done') {
+        clearInterval(iv);
+        barFill.style.width = '100%';
+        toast('Ollama ✅');
+        _renderOllamaSettings();
+      } else if (data.status === 'error') {
+        clearInterval(iv);
+        textEl.textContent = t('error_prefix') + (data.message || '');
+      }
+    } catch {}
+  }, 1500);
 }
 
 function _settingsUninstallOllama() {
-  if (!confirm('Видалити Ollama? AI-ментор буде недоступний до повторного встановлення.')) return;
+  if (!confirm(t('settings_ollama_uninstall_confirm'))) return;
   fetch('/api/uninstall-ollama', { method: 'POST' })
     .then(() => { toast('Ollama видалена'); _renderOllamaSettings(); })
     .catch(e => toast('Помилка: ' + e.message));
@@ -559,7 +593,7 @@ function showXpModal(xp, levelUpMsg) {
   const sub = document.getElementById('xp-modal-sub');
   if (!modal) return;
   text.textContent = `+${xp} XP`;
-  sub.textContent = levelUpMsg || 'Задачу виконано! 🎉';
+  sub.textContent = levelUpMsg || t('modal_xp_done');
   modal.style.display = 'flex';
 }
 
@@ -597,6 +631,119 @@ function applyTheme(theme) {
   });
 }
 
+// ── News ──────────────────────────────────────────────────────────────────────
+
+let _newsCache = null;
+
+function _newsTimeAgo(ts) {
+  if (!ts) return '';
+  const mins = Math.round((Date.now() / 1000 - ts) / 60);
+  if (mins < 60) return `${mins} ${t('home_news_ago_min')}`;
+  if (mins < 1440) return `${Math.round(mins / 60)} ${t('home_news_ago_h')}`;
+  return `${Math.round(mins / 1440)} ${t('home_news_ago_d')}`;
+}
+
+function _buildNewsCard(a, compact) {
+  const card = document.createElement('div');
+  card.className = 'news-card fade-in';
+  card.innerHTML = `
+    <div class="news-card-top">
+      <span class="news-source">${a.source}</span>
+      <span class="news-time">${_newsTimeAgo(a.timestamp)}</span>
+    </div>
+    <div class="news-title">${escHtml(a.title)}</div>
+    ${!compact && a.desc ? `<div class="news-desc">${escHtml(a.desc)}</div>` : ''}
+    <a class="news-read-link" href="${a.link}" target="_blank" rel="noopener">${t('home_news_read')}</a>`;
+  return card;
+}
+
+async function _fetchNews(forceRefresh) {
+  if (_newsCache && !forceRefresh) return _newsCache;
+  try {
+    const resp = await fetch('/api/ai-news');
+    const data = await resp.json();
+    if (data.articles?.length) {
+      _newsCache = data.articles;
+      return _newsCache;
+    }
+    if (data.fetching) return null;
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+async function fetchHomeNews(forceRefresh) {
+  const container = document.getElementById('home-news-list');
+  if (!container) return;
+  container.innerHTML = `<div class="news-loading">${t('home_news_loading')}</div>`;
+
+  let articles = await _fetchNews(forceRefresh);
+  if (!articles) {
+    const iv = setInterval(async () => {
+      articles = await _fetchNews(false);
+      if (articles !== null) {
+        clearInterval(iv);
+        _renderHomeNews(container, articles);
+      }
+    }, 2000);
+    return;
+  }
+  _renderHomeNews(container, articles);
+}
+
+function _renderHomeNews(container, articles) {
+  container.innerHTML = '';
+  if (!articles.length) {
+    container.innerHTML = `<div class="news-loading">${t('home_news_error')}</div>`;
+    return;
+  }
+  articles.slice(0, 4).forEach(a => container.appendChild(_buildNewsCard(a, true)));
+}
+
+function _startNewsAutoRefresh() {
+  if (_newsAutoRefreshTimer) return;
+  _newsAutoRefreshTimer = setInterval(() => {
+    if (_activeScreen === 'home') fetchHomeNews(true);
+    if (_activeScreen === 'news') fetchNewsScreen(true);
+  }, 600_000);
+}
+
+function _stopNewsAutoRefresh() {
+  if (_newsAutoRefreshTimer) { clearInterval(_newsAutoRefreshTimer); _newsAutoRefreshTimer = null; }
+}
+
+async function renderNewsScreen() {
+  const container = document.getElementById('news-full-list');
+  if (!container) return;
+  container.innerHTML = `<div class="news-loading">${t('news_loading')}</div>`;
+  await fetchNewsScreen(false);
+}
+
+async function fetchNewsScreen(forceRefresh) {
+  const container = document.getElementById('news-full-list');
+  if (!container) return;
+
+  let articles = await _fetchNews(forceRefresh);
+  if (!articles) {
+    const iv = setInterval(async () => {
+      articles = await _fetchNews(false);
+      if (articles !== null) { clearInterval(iv); _renderFullNews(container, articles); }
+    }, 2000);
+    return;
+  }
+  _renderFullNews(container, articles);
+}
+
+function _renderFullNews(container, articles) {
+  container.innerHTML = '';
+  if (!articles.length) {
+    container.innerHTML = `<div class="news-loading">${t('news_error')}</div>`;
+    return;
+  }
+  articles.forEach(a => container.appendChild(_buildNewsCard(a, false)));
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -611,18 +758,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-sandbox-back')?.addEventListener('click', goBack);
 
   document.getElementById('btn-uninstall-app')?.addEventListener('click', () => {
-    if (!confirm('Видалити Strucode? Всі файли програми будуть видалені. Прогрес збережений у браузері не постраждає.')) return;
+    if (!confirm(t('settings_uninstall_confirm'))) return;
     fetch('/api/uninstall-app', { method: 'POST' })
-      .then(() => toast('Видалення... Додаток закриється'))
+      .then(() => toast(t('settings_uninstall_done')))
       .catch(e => toast('Помилка: ' + e.message));
   });
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
-    if (confirm('Скинути весь прогрес? Цю дію не можна відмінити.')) {
-      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], hearts: 3, theme: _state.theme, aiModel: _state.aiModel };
+    if (confirm(t('settings_reset_confirm'))) {
+      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], hearts: 3, theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang };
       saveState();
       renderSettings();
-      toast('Прогрес скинуто');
+      toast(t('settings_reset_done'));
     }
   });
 
@@ -633,6 +780,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-xp-modal-close')?.addEventListener('click', () => {
     document.getElementById('modal-xp-gain').style.display = 'none';
   });
+
+  document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.lang;
+      setLang(lang);
+      saveLang(lang);
+      document.querySelectorAll('.lang-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+      const cur = _activeScreen;
+      show(cur);
+    });
+  });
+
+  document.getElementById('btn-news-back')?.addEventListener('click', goBack);
+  document.getElementById('btn-news-refresh')?.addEventListener('click', () => fetchNewsScreen(true));
 
   setupChallengeHandlers();
   setupSandboxHandlers();
@@ -648,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 900);
 
-  window._app = { goBack, onTaskPassed, toast, navigate };
+  window._app = { goBack, onTaskPassed, toast, navigate, saveLang };
 
   checkOllamaStatus();
 });

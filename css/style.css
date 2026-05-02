@@ -994,3 +994,94 @@ body {
 
 /* Monaco editor override */
 .monaco-editor .margin { background: var(--editor-bg) !important; }
+
+/* ══ NEWS ════════════════════════════════════════════════════════════════════ */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.section-title-actions { display: flex; gap: 6px; align-items: center; }
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background var(--trans);
+}
+.btn-text:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
+
+.news-loading {
+  color: var(--text2);
+  font-size: 13px;
+  padding: 16px 0;
+  text-align: center;
+}
+
+.news-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color var(--trans);
+}
+.news-card:hover { border-color: var(--primary); }
+.news-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.news-source {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.news-time { font-size: 11px; color: var(--text2); }
+.news-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.news-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-read-link {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.news-read-link:hover { text-decoration: underline; }
+
+/* ══ LANG TOGGLE ════════════════════════════════════════════════════════════ */
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lang-toggle-btn {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--trans);
+  font-weight: 500;
+}
+.lang-toggle-btn.active, .lang-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }

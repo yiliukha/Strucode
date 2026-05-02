@@ -545,6 +545,96 @@ def _run_java(code: str) -> dict:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+# ── AI News (RSS) ────────────────────────────────────────────────────────────
+
+_NEWS_SOURCES = [
+    ('TechCrunch AI', 'https://techcrunch.com/category/artificial-intelligence/feed/'),
+    ('The Verge AI',  'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'),
+    ('VentureBeat',   'https://venturebeat.com/category/ai/feed/'),
+]
+_NEWS_CACHE_TTL = 600  # 10 minutes
+_news_cache: dict = {'data': [], 'fetched_at': 0.0, 'fetching': False}
+
+
+def _et_text(el, tag):
+    child = el.find(tag)
+    return child.text if child is not None else None
+
+
+def _parse_date_ts(date_str):
+    if not date_str:
+        return 0
+    try:
+        from email.utils import parsedate_to_datetime
+        return parsedate_to_datetime(date_str).timestamp()
+    except Exception:
+        pass
+    try:
+        from datetime import datetime, timezone
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00')).timestamp()
+    except Exception:
+        return 0
+
+
+def _parse_rss(xml_bytes, source_name):
+    import xml.etree.ElementTree as ET
+    import re as _re
+    items = []
+    try:
+        root = ET.fromstring(xml_bytes)
+        channel = root.find('channel')
+        entries = []
+        if channel is not None:
+            entries = channel.findall('item')
+            for item in entries:
+                title = _et_text(item, 'title') or ''
+                link = _et_text(item, 'link') or ''
+                desc = _et_text(item, 'description') or ''
+                desc = _re.sub(r'<[^>]+>', '', desc).strip()[:280]
+                pub = _et_text(item, 'pubDate') or ''
+                if title and link:
+                    items.append({'title': title.strip(), 'link': link.strip(),
+                                  'desc': desc, 'source': source_name,
+                                  'timestamp': _parse_date_ts(pub), 'pub_date': pub})
+        else:
+            # Atom feed
+            ns = 'http://www.w3.org/2005/Atom'
+            for entry in root.findall(f'{{{ns}}}entry') or root.findall('entry'):
+                title_el = entry.find(f'{{{ns}}}title') or entry.find('title')
+                link_el  = entry.find(f'{{{ns}}}link')  or entry.find('link')
+                summ_el  = entry.find(f'{{{ns}}}summary') or entry.find('summary')
+                upd_el   = entry.find(f'{{{ns}}}updated') or entry.find('updated')
+                title = (title_el.text or '') if title_el is not None else ''
+                link  = (link_el.get('href', '') if link_el is not None else '')
+                desc  = (summ_el.text or '') if summ_el is not None else ''
+                desc  = _re.sub(r'<[^>]+>', '', desc).strip()[:280]
+                pub   = (upd_el.text or '') if upd_el is not None else ''
+                if title and link:
+                    items.append({'title': title.strip(), 'link': link.strip(),
+                                  'desc': desc, 'source': source_name,
+                                  'timestamp': _parse_date_ts(pub), 'pub_date': pub})
+    except Exception as exc:
+        log.error('RSS parse error %s: %s', source_name, exc)
+    return items
+
+
+def _fetch_news_bg():
+    global _news_cache
+    all_items = []
+    for name, url in _NEWS_SOURCES:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = resp.read()
+            all_items.extend(_parse_rss(data, name))
+        except Exception as exc:
+            log.error('News fetch %s: %s', name, exc)
+    all_items.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+    _news_cache['data'] = all_items[:30]
+    _news_cache['fetched_at'] = time.time()
+    _news_cache['fetching'] = False
+
+
 # ── HTTP server ───────────────────────────────────────────────────────────────
 
 PORT = 8767
@@ -580,6 +670,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._system_info()
         elif path == '/api/check-java':
             self._json(_check_java())
+        elif path == '/api/ai-news':
+            self._ai_news()
         else:
             super().do_GET()
 
@@ -830,6 +922,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._json({'ok': True})
         except Exception as e:
             self._json({'ok': False, 'error': str(e)})
+
+    def _ai_news(self):
+        global _news_cache
+        now = time.time()
+        stale = now - _news_cache['fetched_at'] > _NEWS_CACHE_TTL
+        if stale and not _news_cache['fetching']:
+            _news_cache['fetching'] = True
+            threading.Thread(target=_fetch_news_bg, daemon=True).start()
+        self._json({
+            'articles': _news_cache['data'],
+            'fetching': _news_cache['fetching'],
+            'age': int(now - _news_cache['fetched_at']) if _news_cache['fetched_at'] else -1,
+        })
 
     def _chat(self):
         try:
