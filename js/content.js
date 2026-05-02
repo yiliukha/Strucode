@@ -270,8 +270,8 @@ Object.entries(user); // [['name','Alice'], ...]</code></pre>`,
             challenges: [
               {
                 id: 'js-l06-c1',
-                title: 'Об'єкт person',
-                prompt: 'Створи об'єкт <code>const person</code> з полями: <code>name</code> (рядок), <code>age</code> (число), <code>city</code> (рядок). Будь-які значення.',
+                title: "Об'єкт person",
+                prompt: "Створи об'єкт <code>const person</code> з полями: <code>name</code> (рядок), <code>age</code> (число), <code>city</code> (рядок). Будь-які значення.",
                 starterCode: 'const person = {\n  // твій код\n};\n',
                 tests: [
                   { expression: 'typeof person.name', expected: 'string', desc: 'person.name — рядок' },
@@ -316,7 +316,7 @@ const merged = { ...user, role: 'admin' };</code></pre>`,
               {
                 id: 'js-l07-c1',
                 title: 'Деструктуризація об\'єкта',
-                prompt: 'З об'єкту <code>config</code> нижче деструктуризуй <code>host</code> і <code>port</code> у змінні.',
+                prompt: "З об'єкту <code>config</code> нижче деструктуризуй <code>host</code> і <code>port</code> у змінні.",
                 starterCode: 'const config = { host: "localhost", port: 3000, debug: true };\n// деструктуризуй host і port\n',
                 tests: [
                   { expression: 'host', expected: 'localhost', desc: 'host = "localhost"' },
