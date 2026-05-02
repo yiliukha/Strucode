@@ -140,7 +140,7 @@
 <!-- ══ SCREEN: SANDBOX ════════════════════════════════════════════════════ -->
 <div id="screen-sandbox" class="screen">
   <div class="challenge-header">
-    <span class="logo-text">🔬 Sandbox</span>
+    <button class="btn-back" id="btn-sandbox-back">← Головна</button>
     <div class="challenge-controls">
       <select class="lang-select" id="sandbox-lang-select">
         <option value="javascript">🟨 JavaScript</option>
@@ -152,6 +152,7 @@
       <button class="btn btn-hint" id="btn-sandbox-ai">🤖 Ask AI</button>
       <button class="btn btn-icon-sm" id="btn-sandbox-clear" title="Clear">🗑</button>
     </div>
+    <span class="logo-text" style="margin-left:auto;font-size:14px">🔬 Sandbox</span>
   </div>
   <div class="challenge-layout">
     <div class="challenge-left">
@@ -241,6 +242,10 @@
       <div class="settings-label">AI Mentor (Ollama)</div>
       <div class="settings-info" id="settings-ollama-info">Перевірка...</div>
       <div id="settings-ollama-controls"></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">Додаток</div>
+      <button class="btn btn-danger" id="btn-uninstall-app">🗑 Видалити Strucode</button>
     </div>
     <div class="settings-footer">
       <div>Strucode v1.0</div>

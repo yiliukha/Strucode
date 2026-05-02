@@ -253,10 +253,6 @@ async function executeCode(code, language, outputId, runtimeId) {
   setOutputLoading(outputId, 'Виконую...');
   if (runtimeId) document.getElementById(runtimeId).textContent = '';
 
-  if (language === 'java') {
-    document.getElementById(outputId).innerHTML = '<span style="color:var(--gold)">Java sandbox: запуск потребує JDK. Поки що перевір логіку вручну або встанови JDK.</span>';
-    return;
-  }
   if (language === 'sql') {
     document.getElementById(outputId).innerHTML = '<span style="color:var(--gold)">SQL sandbox: запуск потребує бази даних. Перевір синтаксис та логіку запиту.</span>';
     return;
@@ -271,7 +267,9 @@ async function executeCode(code, language, outputId, runtimeId) {
     const data = await resp.json();
 
     const panel = document.getElementById(outputId);
-    if (data.error) {
+    if (data.jdk_missing) {
+      panel.innerHTML = _buildJdkGuideHtml(data.install_guide || '');
+    } else if (data.error) {
       panel.innerHTML = (data.output ? escHtml(data.output) + '\n' : '') +
         `<span class="output-error">${escHtml(data.error)}</span>`;
     } else {
@@ -300,6 +298,25 @@ function renderTestResults(results) {
     div.innerHTML = `<span class="test-icon">${icon}</span><span class="test-desc">${escHtml(r.desc)}${escHtml(extra)}</span>`;
     container.appendChild(div);
   });
+}
+
+function _buildJdkGuideHtml(guide) {
+  const lines = guide ? guide.split('\n').filter(Boolean) : [];
+  const rows = lines.map(line => {
+    const cmd = line.replace(/\s*\(.*\)\s*$/, '').trim();
+    const os = (line.match(/\(([^)]+)\)/) || [])[1] || '';
+    return `<div class="jdk-guide-row">
+      <span class="jdk-guide-os">${escHtml(os)}</span>
+      <code class="jdk-guide-cmd">${escHtml(cmd)}</code>
+      <button class="jdk-copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(cmd)});this.textContent='✓';setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+    </div>`;
+  }).join('');
+  return `<div class="jdk-guide">
+    <div class="jdk-guide-title">☕ JDK не встановлено</div>
+    <div class="jdk-guide-sub">Встанови Java Development Kit для запуску Java-коду:</div>
+    ${rows}
+    <div class="jdk-guide-sub" style="margin-top:8px">Після встановлення перезапусти Strucode.</div>
+  </div>`;
 }
 
 function setOutputLoading(panelId, text) {

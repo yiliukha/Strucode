@@ -378,6 +378,226 @@ promise.then(result => console.log(result)); // Готово!</code></pre>
     ],
   },
 
+  java: {
+    id: 'java',
+    name: 'Java',
+    icon: '☕',
+    color: '#f89820',
+    desc: 'Мова для Android, enterprise та backend. Строга типізація, ООП.',
+    language: 'java',
+    locked: false,
+    modules: [
+      {
+        id: 'java-basics',
+        title: 'Основи Java',
+        icon: '🔤',
+        lessons: [
+          {
+            id: 'java-l01',
+            title: 'Перша програма',
+            theory: `<h2>Hello, Java World!</h2>
+<p>Кожна Java-програма починається з класу і методу <code>main</code>.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}</code></pre>
+<h3>Що тут відбувається</h3>
+<ul>
+  <li><code>public class Main</code> — оголошення класу (ім'я файлу = ім'я класу)</li>
+  <li><code>public static void main(String[] args)</code> — точка входу в програму</li>
+  <li><code>System.out.println()</code> — вивести рядок з переносом</li>
+  <li><code>System.out.print()</code> — вивести рядок без переносу</li>
+</ul>
+<h3>Компіляція та запуск</h3>
+<pre><code>javac Main.java  # компілювати
+java Main        # запустити</code></pre>`,
+            challenges: [
+              {
+                id: 'java-l01-c1',
+                title: 'Hello, World!',
+                prompt: 'Виведи рядок <code>Hello, World!</code> за допомогою <code>System.out.println</code>.',
+                starterCode: 'public class Main {\n    public static void main(String[] args) {\n        // твій код тут\n    }\n}\n',
+                tests: [{ type: 'output_contains', expected: 'Hello, World!', desc: 'Вивести Hello, World!' }],
+                xp: 10,
+                language: 'java',
+              },
+              {
+                id: 'java-l01-c2',
+                title: 'Кілька рядків',
+                prompt: 'Виведи два рядки: спочатку <code>Java</code>, потім <code>Coding</code> (кожен з нового рядка).',
+                starterCode: 'public class Main {\n    public static void main(String[] args) {\n        // два println\n    }\n}\n',
+                tests: [
+                  { type: 'output_contains', expected: 'Java', desc: 'Є рядок Java' },
+                  { type: 'output_contains', expected: 'Coding', desc: 'Є рядок Coding' },
+                ],
+                xp: 10,
+                language: 'java',
+              },
+            ],
+          },
+          {
+            id: 'java-l02',
+            title: 'Змінні та типи',
+            theory: `<h2>Типи даних у Java</h2>
+<p>Java — строго типізована мова. Кожна змінна має конкретний тип.</p>
+<h3>Примітивні типи</h3>
+<pre><code>int age = 25;           // ціле число
+double price = 9.99;    // число з плаваючою точкою
+boolean isAdmin = true; // булевий
+char grade = 'A';       // один символ</code></pre>
+<h3>String — рядок</h3>
+<pre><code>String name = "Alice";
+String msg = "Привіт, " + name + "!";
+System.out.println(msg); // Привіт, Alice!
+
+// Корисні методи
+name.length()         // 5
+name.toUpperCase()    // ALICE
+name.contains("li")  // true</code></pre>
+<h3>var (Java 10+)</h3>
+<pre><code>var count = 42;     // Java сам визначає тип
+var text = "hello"; // String</code></pre>`,
+            challenges: [
+              {
+                id: 'java-l02-c1',
+                title: 'Змінні',
+                prompt: 'Оголоси <code>int year = 2024</code>, <code>String lang = "Java"</code>, і виведи їх в одному рядку: <code>Java 2024</code>.',
+                starterCode: 'public class Main {\n    public static void main(String[] args) {\n        int year = 2024;\n        String lang = "Java";\n        // виведи lang + " " + year\n    }\n}\n',
+                tests: [{ type: 'output_contains', expected: 'Java 2024', desc: 'Вивести Java 2024' }],
+                xp: 15,
+                language: 'java',
+              },
+            ],
+          },
+          {
+            id: 'java-l03',
+            title: 'Умови та цикли',
+            theory: `<h2>if / else та цикли</h2>
+<h3>Умовний оператор</h3>
+<pre><code>int score = 85;
+if (score >= 90) {
+    System.out.println("Відмінно");
+} else if (score >= 70) {
+    System.out.println("Добре");
+} else {
+    System.out.println("Потрібно більше практики");
+}</code></pre>
+<h3>Цикл for</h3>
+<pre><code>for (int i = 1; i <= 5; i++) {
+    System.out.println("Крок " + i);
+}
+// Виведе: Крок 1, Крок 2, ..., Крок 5</code></pre>
+<h3>Цикл while</h3>
+<pre><code>int n = 1;
+while (n <= 3) {
+    System.out.println(n);
+    n++;
+}</code></pre>`,
+            challenges: [
+              {
+                id: 'java-l03-c1',
+                title: 'FizzBuzz',
+                prompt: 'Виведи числа від 1 до 15. Замість кратних 3 пиши <code>Fizz</code>, кратних 5 — <code>Buzz</code>, кратних і 3, і 5 — <code>FizzBuzz</code>.',
+                starterCode: 'public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i <= 15; i++) {\n            // if/else або ternary\n        }\n    }\n}\n',
+                tests: [
+                  { type: 'output_contains', expected: 'FizzBuzz', desc: 'Є FizzBuzz (15)' },
+                  { type: 'output_contains', expected: 'Fizz', desc: 'Є Fizz (3)' },
+                  { type: 'output_contains', expected: 'Buzz', desc: 'Є Buzz (5)' },
+                ],
+                xp: 20,
+                language: 'java',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'java-oop',
+        title: 'ООП у Java',
+        icon: '🏗',
+        lessons: [
+          {
+            id: 'java-l04',
+            title: 'Класи та об\'єкти',
+            theory: `<h2>Об'єктно-орієнтоване програмування</h2>
+<p>Java побудована навколо класів. Клас — шаблон, об'єкт — екземпляр цього шаблону.</p>
+<pre><code>public class Dog {
+    String name;
+    int age;
+
+    Dog(String name, int age) {  // конструктор
+        this.name = name;
+        this.age = age;
+    }
+
+    void bark() {
+        System.out.println(name + " says: Woof!");
+    }
+}
+
+// Використання:
+Dog dog = new Dog("Rex", 3);
+dog.bark(); // Rex says: Woof!</code></pre>
+<h3>Access modifiers</h3>
+<ul>
+  <li><code>public</code> — доступно звідусіль</li>
+  <li><code>private</code> — тільки всередині класу</li>
+  <li><code>protected</code> — клас + підкласи</li>
+</ul>`,
+            challenges: [
+              {
+                id: 'java-l04-c1',
+                title: 'Клас Person',
+                prompt: 'Створи клас <code>Person</code> з полями <code>name</code> (String) і <code>age</code> (int). Додай конструктор. Створи об\'єкт <code>Person p = new Person("Alice", 25)</code> і виведи <code>Alice is 25</code>.',
+                starterCode: 'public class Main {\n    static class Person {\n        String name;\n        int age;\n        // конструктор\n    }\n\n    public static void main(String[] args) {\n        Person p = new Person("Alice", 25);\n        // виведи name + " is " + age\n    }\n}\n',
+                tests: [{ type: 'output_contains', expected: 'Alice is 25', desc: 'Вивести Alice is 25' }],
+                xp: 25,
+                language: 'java',
+              },
+            ],
+          },
+          {
+            id: 'java-l05',
+            title: 'Методи та повернення значення',
+            theory: `<h2>Методи в Java</h2>
+<pre><code>public class Calculator {
+    // Метод з поверненням значення
+    static int add(int a, int b) {
+        return a + b;
+    }
+
+    // Метод без повернення (void)
+    static void printResult(int result) {
+        System.out.println("Результат: " + result);
+    }
+
+    public static void main(String[] args) {
+        int sum = add(3, 4);
+        printResult(sum); // Результат: 7
+    }
+}</code></pre>
+<h3>Перевантаження (overloading)</h3>
+<pre><code>static int add(int a, int b) { return a + b; }
+static double add(double a, double b) { return a + b; }
+// Java вибере потрібний метод за типом аргументів</code></pre>`,
+            challenges: [
+              {
+                id: 'java-l05-c1',
+                title: 'Метод max',
+                prompt: 'Напиши метод <code>static int max(int a, int b)</code>, що повертає більше з двох чисел. Виведи результат: <code>max(10, 25) = 25</code>.',
+                starterCode: 'public class Main {\n    static int max(int a, int b) {\n        // поверни більше\n    }\n\n    public static void main(String[] args) {\n        System.out.println("max(10, 25) = " + max(10, 25));\n    }\n}\n',
+                tests: [{ type: 'output_contains', expected: 'max(10, 25) = 25', desc: 'max(10, 25) = 25' }],
+                xp: 20,
+                language: 'java',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
   python: {
     id: 'python',
     name: 'Python',

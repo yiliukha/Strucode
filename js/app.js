@@ -333,32 +333,206 @@ function renderSettings() {
     const level = getLevel(_state.xp);
     progressInfo.textContent = `${level.icon} ${level.name} · ${_state.xp} XP · Streak: ${_state.streak} днів · Виконано: ${_state.completedChallenges.length} задач`;
   }
-
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === _state.theme);
   });
+  _renderOllamaSettings();
+}
 
-  const ollamaInfo = document.getElementById('settings-ollama-info');
-  const ollamaControls = document.getElementById('settings-ollama-controls');
-  if (ollamaInfo) {
-    checkOllamaStatus().then(({ installed, running }) => {
-      ollamaInfo.textContent = running ? '✅ Ollama запущена і готова' : installed ? '⚠️ Встановлена, але не запущена' : '❌ Не встановлена';
-      if (ollamaControls) {
-        ollamaControls.innerHTML = '';
-        if (installed && !running) {
-          const btn = document.createElement('button');
-          btn.className = 'btn btn-secondary';
-          btn.textContent = '▶ Запустити Ollama';
-          btn.onclick = async () => {
-            btn.textContent = 'Запуск...';
-            await fetch('/api/start-ollama');
-            renderSettings();
-          };
-          ollamaControls.appendChild(btn);
-        }
+async function _renderOllamaSettings() {
+  const info = document.getElementById('settings-ollama-info');
+  const ctrl = document.getElementById('settings-ollama-controls');
+  if (!info || !ctrl) return;
+
+  info.textContent = '⟳ Перевірка...';
+  ctrl.innerHTML = '';
+
+  const { installed, running } = await checkOllamaStatus();
+
+  if (!installed) {
+    info.textContent = '❌ Ollama не встановлена';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.textContent = '⬇ Встановити Ollama';
+    btn.onclick = _settingsInstallOllama;
+    ctrl.appendChild(btn);
+    return;
+  }
+
+  if (!running) {
+    info.textContent = '⚠️ Ollama встановлена, але не запущена';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+    const startBtn = _makeBtn('btn-secondary', '▶ Запустити', async () => {
+      startBtn.textContent = 'Запуск...';
+      startBtn.disabled = true;
+      await fetch('/api/start-ollama');
+      _renderOllamaSettings();
+    });
+    const unBtn = _makeBtn('btn-danger', '🗑 Видалити Ollama', _settingsUninstallOllama);
+    row.append(startBtn, unBtn);
+    ctrl.appendChild(row);
+    return;
+  }
+
+  info.textContent = '✅ Ollama запущена і готова';
+
+  const topRow = document.createElement('div');
+  topRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+  topRow.appendChild(_makeBtn('btn-danger', '🗑 Видалити Ollama', _settingsUninstallOllama));
+  ctrl.appendChild(topRow);
+
+  const modLabel = document.createElement('div');
+  modLabel.className = 'settings-label';
+  modLabel.style.marginTop = '14px';
+  modLabel.textContent = 'Встановлені моделі';
+  ctrl.appendChild(modLabel);
+
+  const modelList = document.createElement('div');
+  modelList.id = 'settings-model-list';
+  modelList.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+  modelList.innerHTML = '<span style="color:var(--text2);font-size:13px">⟳ Завантаження...</span>';
+  ctrl.appendChild(modelList);
+
+  const popLabel = document.createElement('div');
+  popLabel.className = 'settings-label';
+  popLabel.style.marginTop = '14px';
+  popLabel.textContent = 'Популярні моделі для коду';
+  ctrl.appendChild(popLabel);
+
+  const POPULAR_MODELS = [
+    { id: 'deepseek-coder:6.7b', name: 'DeepSeek Coder 6.7B', size: '3.8GB', desc: 'Найкраща для коду' },
+    { id: 'codellama:7b',        name: 'Code Llama 7B',       size: '3.8GB', desc: 'Meta, Python/JS' },
+    { id: 'qwen2.5-coder:7b',    name: 'Qwen 2.5 Coder 7B',  size: '4.7GB', desc: 'Alibaba, сучасна' },
+    { id: 'llama3.2:3b',         name: 'Llama 3.2 3B',        size: '2GB',   desc: 'Швидка, загальна' },
+  ];
+
+  const popGrid = document.createElement('div');
+  popGrid.className = 'model-popular-grid';
+  POPULAR_MODELS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'model-popular-card';
+    card.dataset.modelId = m.id;
+    card.innerHTML = `<div class="mpcard-name">${m.name}</div><div class="mpcard-size">${m.size}</div><div class="mpcard-desc">${m.desc}</div>`;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary mpcard-btn';
+    btn.textContent = '⬇ Завантажити';
+    btn.onclick = () => _settingsPullModel(m.id, card, btn);
+    card.appendChild(btn);
+    popGrid.appendChild(card);
+  });
+  ctrl.appendChild(popGrid);
+
+  _loadInstalledModels(modelList, popGrid);
+}
+
+async function _loadInstalledModels(container, popGrid) {
+  try {
+    const resp = await fetch('/api/ollama-models');
+    const { models = [] } = await resp.json();
+    container.innerHTML = '';
+    if (!models.length) {
+      container.innerHTML = '<span style="color:var(--text2);font-size:13px">Немає встановлених моделей</span>';
+      return;
+    }
+    models.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'model-row';
+      row.innerHTML = `<span class="model-row-name">${name}</span>`;
+      const del = document.createElement('button');
+      del.className = 'btn btn-danger model-row-del';
+      del.textContent = '🗑';
+      del.title = 'Видалити';
+      del.onclick = () => _settingsDeleteModel(name, row);
+      row.appendChild(del);
+      container.appendChild(row);
+      if (popGrid) {
+        popGrid.querySelectorAll('.model-popular-card').forEach(card => {
+          const baseId = card.dataset.modelId.split(':')[0];
+          if (name === card.dataset.modelId || name.startsWith(baseId + ':')) {
+            const btn = card.querySelector('.mpcard-btn');
+            btn.textContent = '✅ Встановлена';
+            btn.disabled = true;
+          }
+        });
       }
     });
+  } catch {
+    container.innerHTML = '<span style="color:var(--red);font-size:13px">Помилка завантаження</span>';
   }
+}
+
+async function _settingsDeleteModel(modelName, rowEl) {
+  if (!confirm(`Видалити модель ${modelName}?`)) return;
+  rowEl.innerHTML = '<span style="color:var(--text2)">⟳ Видалення...</span>';
+  try {
+    const resp = await fetch('/api/delete-model', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelName }),
+    });
+    const { ok, error } = await resp.json();
+    if (ok) { rowEl.remove(); toast(`Модель ${modelName} видалена`); }
+    else rowEl.innerHTML = `<span style="color:var(--red);font-size:13px">❌ ${error}</span>`;
+  } catch (e) {
+    rowEl.innerHTML = `<span style="color:var(--red);font-size:13px">❌ ${e.message}</span>`;
+  }
+}
+
+async function _settingsPullModel(modelId, cardEl, btn) {
+  btn.textContent = '⟳ Завантаження...';
+  btn.disabled = true;
+  try {
+    await fetch('/api/pull-model', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelId }),
+    });
+    const iv = setInterval(async () => {
+      try {
+        const { status, logs, message } = await (await fetch('/api/ollama-pull-progress')).json();
+        if (status === 'done') {
+          clearInterval(iv);
+          btn.textContent = '✅ Встановлена';
+          toast(`Модель ${modelId} завантажена! 🎉`);
+          _renderOllamaSettings();
+        } else if (status === 'error') {
+          clearInterval(iv);
+          btn.textContent = '❌ Помилка';
+          btn.disabled = false;
+          toast('Помилка: ' + message);
+        } else if (logs?.length) {
+          btn.textContent = ('⟳ ' + logs[logs.length - 1]).slice(0, 28);
+        }
+      } catch {}
+    }, 1500);
+  } catch (e) {
+    btn.textContent = '❌ ' + e.message.slice(0, 20);
+    btn.disabled = false;
+  }
+}
+
+function _settingsInstallOllama() {
+  const ctrl = document.getElementById('settings-ollama-controls');
+  if (!ctrl) return;
+  ctrl.innerHTML = `<div class="install-progress"><div class="progress-text" id="s-install-text">Встановлення Ollama...</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="s-install-bar" style="width:5%"></div></div></div>`;
+  startOllamaInstall(() => {
+    toast('Ollama встановлена! ✅');
+    _renderOllamaSettings();
+  });
+}
+
+function _settingsUninstallOllama() {
+  if (!confirm('Видалити Ollama? AI-ментор буде недоступний до повторного встановлення.')) return;
+  fetch('/api/uninstall-ollama', { method: 'POST' })
+    .then(() => { toast('Ollama видалена'); _renderOllamaSettings(); })
+    .catch(e => toast('Помилка: ' + e.message));
+}
+
+function _makeBtn(cls, text, onClick) {
+  const btn = document.createElement('button');
+  btn.className = 'btn ' + cls;
+  btn.textContent = text;
+  btn.onclick = onClick;
+  return btn;
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -434,6 +608,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-lesson-back')?.addEventListener('click', goBack);
+  document.getElementById('btn-sandbox-back')?.addEventListener('click', goBack);
+
+  document.getElementById('btn-uninstall-app')?.addEventListener('click', () => {
+    if (!confirm('Видалити Strucode? Всі файли програми будуть видалені. Прогрес збережений у браузері не постраждає.')) return;
+    fetch('/api/uninstall-app', { method: 'POST' })
+      .then(() => toast('Видалення... Додаток закриється'))
+      .catch(e => toast('Помилка: ' + e.message));
+  });
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
     if (confirm('Скинути весь прогрес? Цю дію не можна відмінити.')) {

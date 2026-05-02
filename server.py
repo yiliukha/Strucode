@@ -442,6 +442,31 @@ def _check_js(code: str, tests: list) -> dict:
         return {'output': '', 'results': [], 'passed': False, 'error': str(e)}
 
 
+def _check_java_task(code: str, tests: list) -> dict:
+    result = _run_java(code)
+    if result.get('jdk_missing'):
+        return result
+    output = result.get('output', '')
+    err = result.get('error')
+    if err and not output:
+        return {'output': output, 'results': [{'desc': 'Compilation/Runtime', 'passed': False, 'error': err}],
+                'passed': False, 'error': err}
+    results = []
+    for t in tests:
+        if t.get('type') == 'output_contains':
+            passed = t['expected'] in output
+            results.append({
+                'desc': t['desc'],
+                'passed': passed,
+                'got': output[:80] if not passed else None,
+                'expected': t['expected'],
+            })
+        else:
+            results.append({'desc': t.get('desc', ''), 'passed': False, 'error': 'Java підтримує лише output_contains тести'})
+    passed = bool(results) and all(r.get('passed') for r in results)
+    return {'output': output, 'results': results, 'passed': passed, 'runtime_ms': result.get('runtime_ms', 0)}
+
+
 def _check_python(code: str, tests: list) -> dict:
     python = sys.executable
     script = _PY_TEST_TEMPLATE % {
@@ -461,6 +486,63 @@ def _check_python(code: str, tests: list) -> dict:
         return {'output': '', 'results': [], 'passed': False, 'error': f'Timeout: {CODE_TIMEOUT}с'}
     except Exception as e:
         return {'output': '', 'results': [], 'passed': False, 'error': str(e)}
+
+
+# ── Java execution ───────────────────────────────────────────────────────────
+
+def _check_java() -> dict:
+    javac = shutil.which('javac')
+    java = shutil.which('java')
+    version = None
+    if java:
+        try:
+            r = subprocess.run([java, '-version'], capture_output=True, text=True, **_W)
+            version = (r.stderr or r.stdout).splitlines()[0] if (r.stderr or r.stdout) else None
+        except Exception:
+            pass
+    return {'javac': bool(javac), 'java': bool(java), 'version': version}
+
+
+def _run_java(code: str) -> dict:
+    info = _check_java()
+    if not info['javac'] or not info['java']:
+        plat = sys.platform
+        if plat == 'darwin':
+            guide = 'brew install openjdk  (macOS)'
+        elif plat == 'win32':
+            guide = 'winget install -e --id EclipseAdoptium.Temurin.21.JDK  (Windows)'
+        else:
+            guide = 'sudo apt install default-jdk  (Ubuntu/Debian)\nsudo dnf install java-21-openjdk-devel  (Fedora)'
+        return {'output': '', 'error': 'JDK не встановлено.',
+                'runtime_ms': 0, 'jdk_missing': True, 'install_guide': guide}
+    tmpdir = tempfile.mkdtemp()
+    try:
+        # Extract public class name from code (default Main)
+        import re
+        m = re.search(r'public\s+class\s+(\w+)', code)
+        class_name = m.group(1) if m else 'Main'
+        src = os.path.join(tmpdir, f'{class_name}.java')
+        with open(src, 'w', encoding='utf-8') as f:
+            f.write(code)
+        t0 = time.time()
+        compile_r = subprocess.run(
+            [shutil.which('javac'), src],
+            capture_output=True, text=True, timeout=15, cwd=tmpdir, **_W
+        )
+        if compile_r.returncode != 0:
+            return {'output': '', 'error': compile_r.stderr or compile_r.stdout, 'runtime_ms': 0}
+        run_r = subprocess.run(
+            [shutil.which('java'), '-cp', tmpdir, class_name],
+            capture_output=True, text=True, timeout=CODE_TIMEOUT, cwd=tmpdir, **_W
+        )
+        ms = int((time.time() - t0) * 1000)
+        return {'output': run_r.stdout, 'error': run_r.stderr.strip() or None, 'runtime_ms': ms}
+    except subprocess.TimeoutExpired:
+        return {'output': '', 'error': f'Timeout: {CODE_TIMEOUT}с', 'runtime_ms': CODE_TIMEOUT * 1000}
+    except Exception as e:
+        return {'output': '', 'error': str(e), 'runtime_ms': 0}
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 # ── HTTP server ───────────────────────────────────────────────────────────────
@@ -496,6 +578,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._ollama_pull_progress_ep()
         elif path == '/api/system-info':
             self._system_info()
+        elif path == '/api/check-java':
+            self._json(_check_java())
         else:
             super().do_GET()
 
@@ -511,8 +595,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._install_ollama()
         elif path == '/api/pull-model':
             self._pull_model()
+        elif path == '/api/delete-model':
+            self._delete_model()
         elif path == '/api/uninstall-ollama':
             self._uninstall_ollama()
+        elif path == '/api/uninstall-app':
+            self._uninstall_app()
         else:
             self.send_error(404)
 
@@ -537,8 +625,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 result = _run_js(code)
             elif lang in ('python', 'py'):
                 result = _run_python(code)
+            elif lang in ('java',):
+                result = _run_java(code)
             else:
-                result = {'output': '', 'error': f'Мова "{lang}" не підтримується в sandbox поки що.', 'runtime_ms': 0}
+                result = {'output': '', 'error': f'Мова "{lang}" поки не підтримується.', 'runtime_ms': 0}
             self._json(result)
         except Exception as e:
             self._json({'output': '', 'error': str(e), 'runtime_ms': 0})
@@ -555,6 +645,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 result = _check_js(code, tests)
             elif lang in ('python', 'py'):
                 result = _check_python(code, tests)
+            elif lang in ('java',):
+                result = _check_java_task(code, tests)
             else:
                 result = {'output': '', 'results': [], 'passed': False, 'error': f'Мова "{lang}" не підтримується'}
             if result.get('passed'):
@@ -650,6 +742,71 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             _ollama_pull_progress = None
             return self._json({'status': 'error', 'message': msg, 'logs': logs})
         return self._json({'status': last, 'logs': logs})
+
+    # ── /api/delete-model  POST {model} ─────────────────────────────────────
+    def _delete_model(self):
+        try:
+            body = self._read_body()
+            model = body.get('model', '')
+            if not model:
+                return self._json({'ok': False, 'error': 'no model specified'})
+            ollama_bin = shutil.which('ollama')
+            if not ollama_bin:
+                return self._json({'ok': False, 'error': 'ollama not found'})
+            r = subprocess.run([ollama_bin, 'rm', model],
+                               capture_output=True, text=True, timeout=30, **_W)
+            self._json({'ok': r.returncode == 0,
+                        'error': r.stderr.strip() if r.returncode != 0 else None})
+        except Exception as e:
+            self._json({'ok': False, 'error': str(e)})
+
+    # ── /api/uninstall-app  POST ─────────────────────────────────────────────
+    def _uninstall_app(self):
+        try:
+            if getattr(sys, 'frozen', False):
+                if sys.platform == 'darwin':
+                    p = Path(sys.executable)
+                    app_dir = p
+                    for parent in p.parents:
+                        if parent.suffix == '.app':
+                            app_dir = parent
+                            break
+                else:
+                    app_dir = Path(sys.executable).parent
+            else:
+                app_dir = Path(__file__).parent
+            log_path = _get_log_path().parent
+
+            self._json({'ok': True})
+
+            def _do_uninstall():
+                time.sleep(0.5)
+                try:
+                    shutil.rmtree(log_path, ignore_errors=True)
+                except Exception:
+                    pass
+                if sys.platform == 'win32':
+                    script = (
+                        f'@echo off\r\n'
+                        f'timeout /t 2 /nobreak >nul\r\n'
+                        f'rmdir /s /q "{app_dir}"\r\n'
+                    )
+                    bat = Path(os.environ.get('TEMP', app_dir.parent)) / '_sc_uninstall.bat'
+                    bat.write_text(script, encoding='utf-8')
+                    subprocess.Popen(['cmd.exe', '/c', str(bat)],
+                                     creationflags=0x00000008,
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    sh = Path('/tmp/_sc_uninstall.sh')
+                    sh.write_text(f'#!/bin/sh\nsleep 2\nrm -rf "{app_dir}"\nrm -f "{sh}"\n')
+                    sh.chmod(0o755)
+                    subprocess.Popen(['/bin/sh', str(sh)],
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                os._exit(0)
+
+            threading.Thread(target=_do_uninstall, daemon=True).start()
+        except Exception as e:
+            self._json({'ok': False, 'error': str(e)})
 
     def _uninstall_ollama(self):
         try:
