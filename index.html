@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strucode</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    if (!/Mac|iPhone|iPad|iPod/.test(navigator.platform) && !/Mac OS X/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('noto-emoji');
+      const l1 = document.createElement('link'); l1.rel = 'preconnect'; l1.href = 'https://fonts.googleapis.com';
+      const l2 = document.createElement('link'); l2.rel = 'preconnect'; l2.href = 'https://fonts.gstatic.com'; l2.crossOrigin = '';
+      const l3 = document.createElement('link'); l3.rel = 'stylesheet';
+      l3.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+      document.head.append(l1, l2, l3);
+    }
+  </script>
+</head>
+<body>
+
+<!-- ══ SPLASH ══════════════════════════════════════════════════════════════ -->
+<div id="splash-overlay" style="position:fixed;inset:0;z-index:9999;background:#0d1117;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s ease;">
+  <div style="display:flex;flex-direction:column;align-items:center;opacity:0;transform:scale(.85);animation:splashIn .8s cubic-bezier(.34,1.4,.64,1) .2s forwards;">
+    <div style="font-size:72px;margin-bottom:16px;">💻</div>
+    <div style="font-size:28px;font-weight:800;color:#58c8ff;letter-spacing:-1px;">Strucode</div>
+    <div style="font-size:14px;color:#7a9ab8;margin-top:8px;">AI Coding School</div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: HOME ════════════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+  <div class="app-header">
+    <span class="logo-text">💻 Strucode</span>
+    <div class="header-right">
+      <div class="streak-badge" id="home-streak"><span id="streak-count">0</span>🔥</div>
+      <div class="xp-display" id="home-xp">0 XP</div>
+    </div>
+  </div>
+  <div class="screen-body">
+    <div class="home-greeting" id="home-greeting">Привіт! Готовий кодити?</div>
+
+    <div class="xp-card">
+      <div class="xp-card-top">
+        <span class="level-badge" id="level-badge">Новачок</span>
+        <span class="xp-number" id="xp-number">0 / 100 XP</span>
+      </div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar" id="xp-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="home-continue-wrap" style="display:none">
+      <div class="section-title">Продовжити</div>
+      <div class="continue-card" id="home-continue"></div>
+    </div>
+
+    <div class="section-title">Daily задача</div>
+    <div class="daily-card" id="daily-card">
+      <div class="daily-icon">⚡</div>
+      <div class="daily-info">
+        <div class="daily-title" id="daily-title">Завантаження...</div>
+        <div class="daily-meta" id="daily-meta"></div>
+      </div>
+      <button class="btn btn-primary" id="btn-daily-start">Почати</button>
+    </div>
+
+    <div class="section-title">Курси</div>
+    <div class="course-grid" id="home-course-grid"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: COURSES ════════════════════════════════════════════════════ -->
+<div id="screen-courses" class="screen">
+  <div class="app-header">
+    <span class="logo-text">📚 Курси</span>
+  </div>
+  <div class="screen-body">
+    <div class="course-list" id="course-list"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: LESSON ═════════════════════════════════════════════════════ -->
+<div id="screen-lesson" class="screen">
+  <div class="app-header">
+    <button class="btn-back" id="btn-lesson-back">← Назад</button>
+    <span class="screen-title" id="lesson-title">Урок</span>
+    <div class="hearts-display" id="hearts-display">❤️❤️❤️</div>
+  </div>
+  <div class="screen-body lesson-body">
+    <div class="lesson-theory" id="lesson-theory"></div>
+    <div class="lesson-challenges">
+      <div class="section-title">Задачі</div>
+      <div id="challenge-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: CHALLENGE ══════════════════════════════════════════════════ -->
+<div id="screen-challenge" class="screen">
+  <div class="challenge-header">
+    <button class="btn-back" id="btn-challenge-back">←</button>
+    <div class="challenge-meta">
+      <span class="challenge-title" id="challenge-title">Задача</span>
+      <span class="challenge-xp" id="challenge-xp-badge">+10 XP</span>
+    </div>
+    <div class="challenge-controls">
+      <select class="lang-select" id="challenge-lang-select">
+        <option value="javascript">JS</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="sql">SQL</option>
+      </select>
+      <button class="btn btn-run" id="btn-run">▶ Run</button>
+      <button class="btn btn-check" id="btn-check">✓ Check</button>
+      <button class="btn btn-hint" id="btn-ai-hint">🤖 Hint</button>
+    </div>
+  </div>
+  <div class="challenge-layout">
+    <div class="challenge-left">
+      <div class="task-description" id="task-description"></div>
+      <div id="editor" class="editor-wrap"></div>
+    </div>
+    <div class="challenge-right">
+      <div class="output-header">
+        <span>Output</span>
+        <span class="runtime-badge" id="runtime-badge"></span>
+      </div>
+      <div class="output-panel" id="output-panel"></div>
+      <div class="test-results" id="test-results"></div>
+      <div class="ai-hint-area" id="ai-hint-area" style="display:none">
+        <div class="ai-hint-header">🤖 AI Підказка</div>
+        <div class="ai-hint-bubble" id="ai-hint-bubble">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SANDBOX ════════════════════════════════════════════════════ -->
+<div id="screen-sandbox" class="screen">
+  <div class="challenge-header">
+    <span class="logo-text">🔬 Sandbox</span>
+    <div class="challenge-controls">
+      <select class="lang-select" id="sandbox-lang-select">
+        <option value="javascript">🟨 JavaScript</option>
+        <option value="python">🐍 Python</option>
+        <option value="java">☕ Java</option>
+        <option value="sql">🗃️ SQL</option>
+      </select>
+      <button class="btn btn-run" id="btn-sandbox-run">▶ Run</button>
+      <button class="btn btn-hint" id="btn-sandbox-ai">🤖 Ask AI</button>
+      <button class="btn btn-icon-sm" id="btn-sandbox-clear" title="Clear">🗑</button>
+    </div>
+  </div>
+  <div class="challenge-layout">
+    <div class="challenge-left">
+      <div id="sandbox-editor" class="editor-wrap" style="height:100%"></div>
+    </div>
+    <div class="challenge-right">
+      <div class="output-header">
+        <span>Output</span>
+        <span class="runtime-badge" id="sandbox-runtime-badge"></span>
+      </div>
+      <div class="output-panel" id="sandbox-output-panel"><span class="output-placeholder">// Натисни ▶ Run щоб виконати код</span></div>
+      <div class="ai-hint-area" id="sandbox-ai-area" style="display:none">
+        <div class="ai-hint-header">🤖 AI Відповідь</div>
+        <div class="ai-hint-bubble" id="sandbox-ai-bubble">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: AI CHAT ════════════════════════════════════════════════════ -->
+<div id="screen-ai-chat" class="screen">
+  <div class="app-header">
+    <span class="logo-text">🤖 AI Ментор</span>
+    <div class="ai-status" id="ai-status-badge">●</div>
+  </div>
+  <div class="screen-body">
+    <div class="ai-setup" id="ai-setup">
+      <div class="ai-setup-icon">🤖</div>
+      <h2>AI Ментор</h2>
+      <p>Для AI-ментора потрібен <strong>Ollama</strong> — локальний AI на твоїй машині.</p>
+      <div class="ai-system-info" id="ai-system-info"></div>
+      <div id="ai-ollama-section">
+        <button class="btn btn-primary" id="btn-install-ollama">Встановити Ollama</button>
+        <div class="install-progress" id="install-progress" style="display:none">
+          <div class="progress-text" id="install-progress-text">Встановлення...</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="install-progress-bar"></div></div>
+        </div>
+      </div>
+      <div id="ai-model-section" style="display:none">
+        <div class="model-list" id="model-list"></div>
+        <button class="btn btn-secondary" id="btn-pull-model">Завантажити llama3.2:3b (2GB)</button>
+        <div class="install-progress" id="pull-progress" style="display:none">
+          <div class="progress-text" id="pull-progress-text">Завантаження моделі...</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-chat-wrap" id="ai-chat-wrap" style="display:none">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-scenarios">
+        <button class="scenario-btn" data-scenario="explain">Поясни концепцію</button>
+        <button class="scenario-btn" data-scenario="review">Перевір мій код</button>
+        <button class="scenario-btn" data-scenario="interview">Режим співбесіди</button>
+        <button class="scenario-btn" data-scenario="debug">Допоможи з багом</button>
+      </div>
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chat-input" placeholder="Запитай AI-ментора..." rows="3"></textarea>
+        <button class="btn btn-primary chat-send" id="btn-chat-send">Надіслати</button>
+      </div>
+    </div>
+    <div class="model-select-bar" id="model-select-bar" style="display:none">
+      <label>Модель:</label>
+      <select id="chat-model-select" class="lang-select"></select>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SETTINGS ══════════════════════════════════════════════════ -->
+<div id="screen-settings" class="screen">
+  <div class="app-header">
+    <span class="logo-text">⚙️ Налаштування</span>
+  </div>
+  <div class="screen-body">
+    <div class="settings-section">
+      <div class="settings-label">Тема</div>
+      <div class="theme-grid">
+        <button class="theme-btn" data-theme="dark">🌙 Темна</button>
+        <button class="theme-btn" data-theme="light">☀️ Світла</button>
+        <button class="theme-btn" data-theme="aurora">🌌 Aurora</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">Прогрес</div>
+      <div class="settings-info" id="settings-progress-info"></div>
+      <button class="btn btn-danger" id="btn-reset-progress">Скинути прогрес</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">AI Mentor (Ollama)</div>
+      <div class="settings-info" id="settings-ollama-info">Перевірка...</div>
+      <div id="settings-ollama-controls"></div>
+    </div>
+    <div class="settings-footer">
+      <div>Strucode v1.0</div>
+      <div>AI Coding School · Python + HTML/JS</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ═════════════════════════════════════════════════════════ -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn active" data-screen="home">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Головна</span>
+  </button>
+  <button class="nav-btn" data-screen="courses">
+    <span class="nav-icon">📚</span>
+    <span class="nav-label">Курси</span>
+  </button>
+  <button class="nav-btn" data-screen="sandbox">
+    <span class="nav-icon">🔬</span>
+    <span class="nav-label">Sandbox</span>
+  </button>
+  <button class="nav-btn" data-screen="ai-chat">
+    <span class="nav-icon">🤖</span>
+    <span class="nav-label">AI</span>
+  </button>
+  <button class="nav-btn" data-screen="settings">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">Меню</span>
+  </button>
+</nav>
+
+<!-- ══ TOAST ══════════════════════════════════════════════════════════════ -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<!-- ══ MODALS ═════════════════════════════════════════════════════════════ -->
+<div id="modal-xp-gain" class="modal-overlay" style="display:none">
+  <div class="modal-box xp-modal">
+    <div class="xp-modal-icon">⭐</div>
+    <div class="xp-modal-text" id="xp-modal-text">+10 XP</div>
+    <div class="xp-modal-sub" id="xp-modal-sub">Задачу виконано!</div>
+    <button class="btn btn-primary" id="btn-xp-modal-close">Далі</button>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════════════════════ -->
+<script src="js/content.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/sandbox.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js');
+  }
+</script>
+</body>
+</html>

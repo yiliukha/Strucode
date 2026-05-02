@@ -1,0 +1,148 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - linux
+          - macos
+          - windows
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          PLATFORM="${{ inputs.platform || 'all' }}"
+          LINUX='{"os":"ubuntu-latest","artifact":"Strucode-linux","pyinstaller_args":"--onedir --noconsole"}'
+          MACOS='{"os":"macos-latest","artifact":"Strucode-mac","pyinstaller_args":"--onedir --windowed"}'
+          WIN='{"os":"windows-latest","artifact":"Strucode-windows","pyinstaller_args":"--onedir --noconsole"}'
+          case "$PLATFORM" in
+            linux)   echo "matrix={\"include\":[$LINUX]}" >> $GITHUB_OUTPUT ;;
+            macos)   echo "matrix={\"include\":[$MACOS]}" >> $GITHUB_OUTPUT ;;
+            windows) echo "matrix={\"include\":[$WIN]}" >> $GITHUB_OUTPUT ;;
+            *)       echo "matrix={\"include\":[$LINUX,$MACOS,$WIN]}" >> $GITHUB_OUTPUT ;;
+          esac
+
+  build:
+    needs: setup
+    strategy:
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyinstaller pywebview pystray pillow certifi
+
+      - name: Install Linux WebView deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Create macOS icon (.icns)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p AppIcon.iconset
+          sips -z 16 16     icons/icon-512.png --out AppIcon.iconset/icon_16x16.png
+          sips -z 32 32     icons/icon-512.png --out AppIcon.iconset/icon_16x16@2x.png
+          sips -z 32 32     icons/icon-512.png --out AppIcon.iconset/icon_32x32.png
+          sips -z 64 64     icons/icon-512.png --out AppIcon.iconset/icon_32x32@2x.png
+          sips -z 128 128   icons/icon-512.png --out AppIcon.iconset/icon_128x128.png
+          sips -z 256 256   icons/icon-512.png --out AppIcon.iconset/icon_128x128@2x.png
+          sips -z 256 256   icons/icon-512.png --out AppIcon.iconset/icon_256x256.png
+          sips -z 512 512   icons/icon-512.png --out AppIcon.iconset/icon_256x256@2x.png
+          cp icons/icon-512.png AppIcon.iconset/icon_512x512.png
+          iconutil -c icns AppIcon.iconset -o app.icns
+
+      - name: Create Windows icon (.ico)
+        if: runner.os == 'Windows'
+        run: |
+          python -c "
+          from PIL import Image
+          img = Image.open('icons/icon-512.png')
+          img.save('app.ico', format='ICO', sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          "
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            ICON="--icon app.icns"
+            WEBVIEW="--hidden-import webview.platforms.cocoa --collect-all webview"
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            ICON="--icon app.ico"
+            WEBVIEW="--hidden-import webview.platforms.edgechromium --collect-all webview"
+          else
+            ICON="--icon icons/icon-512.png"
+            WEBVIEW="--hidden-import webview.platforms.gtk --collect-all webview"
+          fi
+          pyinstaller ${{ matrix.pyinstaller_args }} $ICON $WEBVIEW \
+            --hidden-import pystray \
+            --collect-all pystray \
+            --hidden-import PIL \
+            --collect-all PIL \
+            --hidden-import certifi \
+            --collect-all certifi \
+            --name Strucode \
+            server.py
+        shell: bash
+
+      - name: Copy web files (Linux/Windows)
+        if: runner.os != 'macOS'
+        run: cp -r index.html manifest.json service-worker.js css js icons dist/Strucode/
+        shell: bash
+
+      - name: Copy web files (macOS .app)
+        if: runner.os == 'macOS'
+        run: cp -r index.html manifest.json service-worker.js css js icons dist/Strucode.app/Contents/MacOS/
+        shell: bash
+
+      - name: Sign macOS app (ad-hoc)
+        if: runner.os == 'macOS'
+        run: codesign --sign - --force --deep dist/Strucode.app
+
+      - name: Package macOS app
+        if: runner.os == 'macOS'
+        run: cd dist && zip -r Strucode-mac.zip Strucode.app
+
+      - name: Package Windows app
+        if: runner.os == 'Windows'
+        run: cd dist && powershell Compress-Archive -Path Strucode -DestinationPath Strucode-windows.zip
+
+      - name: Create Linux .desktop and package
+        if: runner.os == 'Linux'
+        run: |
+          cp icons/icon-512.png dist/Strucode/icon.png
+          cat > dist/Strucode/Strucode.desktop << 'EOF'
+          [Desktop Entry]
+          Name=Strucode
+          Exec=./Strucode
+          Icon=./icon.png
+          Type=Application
+          Categories=Education;Development;
+          EOF
+          cd dist && zip -r Strucode-linux.zip Strucode
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/Strucode-*.zip
+          retention-days: 30

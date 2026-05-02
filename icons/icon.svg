@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#0d1117"/>
+  <rect x="60" y="140" width="392" height="260" rx="20" fill="#161b22" stroke="#2a3444" stroke-width="4"/>
+  <rect x="60" y="140" width="392" height="44" rx="20" fill="#1c2128"/>
+  <rect x="62" y="162" width="388" height="22" fill="#1c2128"/>
+  <circle cx="96" cy="162" r="8" fill="#ff5f57"/>
+  <circle cx="120" cy="162" r="8" fill="#ffbd2e"/>
+  <circle cx="144" cy="162" r="8" fill="#28c840"/>
+  <!-- Code lines -->
+  <text x="88" y="230" font-family="monospace" font-size="28" fill="#58c8ff">&lt;</text>
+  <text x="110" y="230" font-family="monospace" font-size="28" fill="#3ddb60">/</text>
+  <text x="126" y="230" font-family="monospace" font-size="28" fill="#58c8ff">&gt;</text>
+  <rect x="168" y="208" width="120" height="14" rx="7" fill="#2a3444"/>
+  <rect x="168" y="232" width="80" height="14" rx="7" fill="#2a3444"/>
+  <!-- Second code block -->
+  <rect x="88" y="268" width="60" height="14" rx="7" fill="#ce82ff"/>
+  <rect x="158" y="268" width="100" height="14" rx="7" fill="#2a3444"/>
+  <rect x="88" y="292" width="140" height="14" rx="7" fill="#2a3444"/>
+  <!-- AI spark -->
+  <circle cx="380" cy="340" r="50" fill="#0d1117" opacity="0.9"/>
+  <text x="355" y="356" font-family="Arial" font-size="44">🤖</text>
+</svg>
