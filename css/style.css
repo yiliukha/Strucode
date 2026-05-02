@@ -99,6 +99,21 @@ body {
 }
 
 .logo-text { font-size: 17px; font-weight: 700; color: var(--text); }
+
+/* Home header: logo centered, larger */
+#screen-home .app-header { position: relative; }
+#screen-home .logo-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#screen-home .logo-icon-mini svg { width: 22px; height: 22px; }
 .screen-title { font-size: 16px; font-weight: 600; color: var(--text); }
 .header-right { display: flex; align-items: center; gap: 10px; }
 

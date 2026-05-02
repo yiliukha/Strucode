@@ -545,20 +545,33 @@ def _run_java(code: str) -> dict:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-# ── AI News (RSS) ────────────────────────────────────────────────────────────
+# ── AI News ───────────────────────────────────────────────────────────────────
 
-_NEWS_SOURCES = [
-    ('TechCrunch AI', 'https://techcrunch.com/category/artificial-intelligence/feed/'),
-    ('The Verge AI',  'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'),
-    ('VentureBeat',   'https://venturebeat.com/category/ai/feed/'),
-]
 _NEWS_CACHE_TTL = 600  # 10 minutes
 _news_cache: dict = {'data': [], 'fetched_at': 0.0, 'fetching': False}
 
+_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (compatible; Strucode/1.0)',
+    'Accept': 'application/json, text/html, */*',
+}
 
-def _et_text(el, tag):
-    child = el.find(tag)
-    return child.text if child is not None else None
+
+def _ssl_ctx():
+    import ssl
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
+
+
+def _http_get(url, timeout=12):
+    req = urllib.request.Request(url, headers=_HEADERS)
+    with urllib.request.urlopen(req, context=_ssl_ctx(), timeout=timeout) as r:
+        return r.read()
 
 
 def _parse_date_ts(date_str):
@@ -570,67 +583,115 @@ def _parse_date_ts(date_str):
     except Exception:
         pass
     try:
-        from datetime import datetime, timezone
+        from datetime import datetime
         return datetime.fromisoformat(date_str.replace('Z', '+00:00')).timestamp()
     except Exception:
         return 0
 
 
-def _parse_rss(xml_bytes, source_name):
+def _fetch_hn():
+    """Hacker News Algolia search — JSON, very reliable."""
+    import re as _re
+    url = ('https://hn.algolia.com/api/v1/search'
+           '?tags=story&query=AI+LLM+machine+learning+OpenAI+Anthropic'
+           '&hitsPerPage=20&numericFilters=points%3E5')
+    data = json.loads(_http_get(url))
+    items = []
+    for h in data.get('hits', []):
+        title = (h.get('title') or '').strip()
+        link = h.get('url') or f"https://news.ycombinator.com/item?id={h.get('objectID','')}"
+        desc = _re.sub(r'<[^>]+>', '', h.get('story_text') or '')[:250].strip()
+        ts = h.get('created_at_i', 0)
+        if title and link:
+            items.append({'title': title, 'link': link, 'desc': desc,
+                          'source': 'Hacker News', 'timestamp': ts})
+    return items
+
+
+def _fetch_devto():
+    """Dev.to public API — JSON, no auth needed."""
+    import re as _re
+    url = 'https://dev.to/api/articles?tags=ai,machinelearning&per_page=15&top=3'
+    data = json.loads(_http_get(url))
+    items = []
+    for a in data:
+        title = (a.get('title') or '').strip()
+        link = a.get('url', '')
+        desc = (a.get('description') or '')[:250].strip()
+        ts = _parse_date_ts(a.get('published_at', ''))
+        if title and link:
+            items.append({'title': title, 'link': link, 'desc': desc,
+                          'source': 'Dev.to', 'timestamp': ts})
+    return items
+
+
+def _et_text(el, tag):
+    child = el.find(tag)
+    return child.text if child is not None else None
+
+
+def _fetch_rss(url, source_name):
+    """Generic RSS/Atom fallback."""
     import xml.etree.ElementTree as ET
     import re as _re
+    data = _http_get(url)
     items = []
     try:
-        root = ET.fromstring(xml_bytes)
+        root = ET.fromstring(data)
         channel = root.find('channel')
-        entries = []
         if channel is not None:
-            entries = channel.findall('item')
-            for item in entries:
-                title = _et_text(item, 'title') or ''
-                link = _et_text(item, 'link') or ''
-                desc = _et_text(item, 'description') or ''
-                desc = _re.sub(r'<[^>]+>', '', desc).strip()[:280]
-                pub = _et_text(item, 'pubDate') or ''
+            for item in channel.findall('item'):
+                title = (_et_text(item, 'title') or '').strip()
+                link  = (_et_text(item, 'link') or '').strip()
+                desc  = _re.sub(r'<[^>]+>', '', _et_text(item, 'description') or '')[:250].strip()
+                ts    = _parse_date_ts(_et_text(item, 'pubDate') or '')
                 if title and link:
-                    items.append({'title': title.strip(), 'link': link.strip(),
-                                  'desc': desc, 'source': source_name,
-                                  'timestamp': _parse_date_ts(pub), 'pub_date': pub})
+                    items.append({'title': title, 'link': link, 'desc': desc,
+                                  'source': source_name, 'timestamp': ts})
         else:
-            # Atom feed
             ns = 'http://www.w3.org/2005/Atom'
             for entry in root.findall(f'{{{ns}}}entry') or root.findall('entry'):
-                title_el = entry.find(f'{{{ns}}}title') or entry.find('title')
-                link_el  = entry.find(f'{{{ns}}}link')  or entry.find('link')
-                summ_el  = entry.find(f'{{{ns}}}summary') or entry.find('summary')
-                upd_el   = entry.find(f'{{{ns}}}updated') or entry.find('updated')
-                title = (title_el.text or '') if title_el is not None else ''
-                link  = (link_el.get('href', '') if link_el is not None else '')
-                desc  = (summ_el.text or '') if summ_el is not None else ''
-                desc  = _re.sub(r'<[^>]+>', '', desc).strip()[:280]
-                pub   = (upd_el.text or '') if upd_el is not None else ''
+                t_el = entry.find(f'{{{ns}}}title') or entry.find('title')
+                l_el = entry.find(f'{{{ns}}}link')  or entry.find('link')
+                s_el = entry.find(f'{{{ns}}}summary') or entry.find('summary')
+                u_el = entry.find(f'{{{ns}}}updated') or entry.find('updated')
+                title = (t_el.text or '').strip() if t_el is not None else ''
+                link  = (l_el.get('href', '') if l_el is not None else '').strip()
+                desc  = _re.sub(r'<[^>]+>', '', (s_el.text or '') if s_el is not None else '')[:250].strip()
+                ts    = _parse_date_ts((u_el.text or '') if u_el is not None else '')
                 if title and link:
-                    items.append({'title': title.strip(), 'link': link.strip(),
-                                  'desc': desc, 'source': source_name,
-                                  'timestamp': _parse_date_ts(pub), 'pub_date': pub})
+                    items.append({'title': title, 'link': link, 'desc': desc,
+                                  'source': source_name, 'timestamp': ts})
     except Exception as exc:
-        log.error('RSS parse error %s: %s', source_name, exc)
+        log.error('RSS parse %s: %s', source_name, exc)
     return items
 
 
 def _fetch_news_bg():
     global _news_cache
     all_items = []
-    for name, url in _NEWS_SOURCES:
+    sources = [
+        ('hn',     _fetch_hn,    None),
+        ('devto',  _fetch_devto, None),
+        ('rss',    _fetch_rss,   ('The Verge AI', 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml')),
+        ('rss',    _fetch_rss,   ('MIT Tech Review', 'https://www.technologyreview.com/feed/')),
+    ]
+    for kind, fn, args in sources:
         try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = resp.read()
-            all_items.extend(_parse_rss(data, name))
+            items = fn(*args) if args else fn()
+            all_items.extend(items)
+            log.error('News OK %s: %d items', kind, len(items))  # use error level so it always logs
         except Exception as exc:
-            log.error('News fetch %s: %s', name, exc)
+            log.error('News fetch %s: %s', kind, exc)
     all_items.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
-    _news_cache['data'] = all_items[:30]
+    seen = set()
+    deduped = []
+    for item in all_items:
+        key = item['link']
+        if key not in seen:
+            seen.add(key)
+            deduped.append(item)
+    _news_cache['data'] = deduped[:30]
     _news_cache['fetched_at'] = time.time()
     _news_cache['fetching'] = False
 
