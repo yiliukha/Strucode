@@ -609,20 +609,8 @@ def _fetch_hn():
 
 
 def _fetch_devto():
-    """Dev.to public API — JSON, no auth needed."""
-    import re as _re
-    url = 'https://dev.to/api/articles?tags=ai,machinelearning&per_page=15&top=3'
-    data = json.loads(_http_get(url))
-    items = []
-    for a in data:
-        title = (a.get('title') or '').strip()
-        link = a.get('url', '')
-        desc = (a.get('description') or '')[:250].strip()
-        ts = _parse_date_ts(a.get('published_at', ''))
-        if title and link:
-            items.append({'title': title, 'link': link, 'desc': desc,
-                          'source': 'Dev.to', 'timestamp': ts})
-    return items
+    """TechCrunch AI RSS feed."""
+    return _fetch_rss('https://techcrunch.com/category/artificial-intelligence/feed/', 'TechCrunch AI')
 
 
 def _et_text(el, tag):
@@ -673,8 +661,8 @@ def _fetch_news_bg():
     sources = [
         ('hn',     _fetch_hn,    None),
         ('devto',  _fetch_devto, None),
-        ('rss',    _fetch_rss,   ('The Verge AI', 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml')),
-        ('rss',    _fetch_rss,   ('MIT Tech Review', 'https://www.technologyreview.com/feed/')),
+        ('rss',    _fetch_rss,   ('VentureBeat AI', 'https://venturebeat.com/category/ai/feed/')),
+        ('rss',    _fetch_rss,   ('Ars Technica',   'https://feeds.arstechnica.com/arstechnica/technology-lab')),
     ]
     for kind, fn, args in sources:
         try:
