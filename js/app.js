@@ -121,7 +121,7 @@ function renderHome() {
         card.className = 'continue-course-card';
         card.innerHTML = `
           <div class="ccc-top">
-            <span class="ccc-icon">${course.icon}</span>
+            <span class="ccc-icon">${course.logo ? `<img class="lang-logo" src="${course.logo}" width="32" height="32" alt="${course.name}">` : course.icon}</span>
             <div class="ccc-info">
               <div class="ccc-name">${course.name}</div>
               <div class="ccc-meta">
@@ -223,7 +223,7 @@ function renderCourses() {
     item.className = 'course-item fade-in';
     item.innerHTML = `
       <div class="course-item-header">
-        <div class="course-item-icon">${course.icon}</div>
+        <div class="course-item-icon">${course.logo ? `<img class="lang-logo" src="${course.logo}" width="48" height="48" alt="${course.name}">` : course.icon}</div>
         <div class="course-item-info">
           <div class="course-item-name">${course.name}</div>
           <div class="course-item-desc">${course.desc}</div>
@@ -352,7 +352,7 @@ function _updateCourseXpStrip(courseId) {
 
   strip.style.display = 'block';
   strip.innerHTML = `
-    <span class="cxs-course">${course.icon} ${course.name}</span>
+    <span class="cxs-course">${course.logo ? `<img class="lang-logo" src="${course.logo}" width="18" height="18" alt="${course.name}">` : course.icon} ${course.name}</span>
     <div class="cxs-right">
       <span class="level-badge-sm">${level.icon} ${levelName}</span>
       <span class="cxs-xp">${nextLabel}</span>

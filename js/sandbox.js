@@ -94,6 +94,17 @@ function getEditorCode(editorInstance, containerId) {
 
 // ── Challenge Screen ──────────────────────────────────────────────────────────
 
+function getActiveLang(pillGroupId) {
+  const active = document.querySelector(`#${pillGroupId} .lang-pill.active`);
+  return active ? active.dataset.lang : 'javascript';
+}
+
+function setActiveLang(pillGroupId, lang) {
+  document.querySelectorAll(`#${pillGroupId} .lang-pill`).forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+
 function initChallengeScreen(challenge) {
   _currentChallenge = challenge;
 
@@ -101,10 +112,7 @@ function initChallengeScreen(challenge) {
   document.getElementById('challenge-xp-badge').textContent = `+${challenge.xp} XP`;
   document.getElementById('task-description').innerHTML = challenge.prompt;
 
-  const langSelect = document.getElementById('challenge-lang-select');
-  if (langSelect) {
-    langSelect.value = challenge.language || 'javascript';
-  }
+  setActiveLang('challenge-lang-pills', challenge.language || 'javascript');
 
   document.getElementById('output-panel').innerHTML = '<span class="output-placeholder">// Натисни ▶ Run або ✓ Check</span>';
   document.getElementById('test-results').innerHTML = '';
@@ -124,9 +132,12 @@ function setupChallengeHandlers() {
   document.getElementById('btn-run')?.addEventListener('click', runChallengeCode);
   document.getElementById('btn-check')?.addEventListener('click', checkChallengeTask);
   document.getElementById('btn-ai-hint')?.addEventListener('click', showChallengeHint);
-  document.getElementById('challenge-lang-select')?.addEventListener('change', e => {
+  document.getElementById('challenge-lang-pills')?.addEventListener('click', e => {
+    const pill = e.target.closest('.lang-pill');
+    if (!pill) return;
+    setActiveLang('challenge-lang-pills', pill.dataset.lang);
     if (_challengeEditor) {
-      monaco.editor.setModelLanguage(_challengeEditor.getModel(), LANG_MAP[e.target.value] || 'javascript');
+      monaco.editor.setModelLanguage(_challengeEditor.getModel(), LANG_MAP[pill.dataset.lang] || 'javascript');
     }
   });
   document.getElementById('btn-challenge-back')?.addEventListener('click', () => {
@@ -136,7 +147,7 @@ function setupChallengeHandlers() {
 
 async function runChallengeCode() {
   const code = getEditorCode(_challengeEditor, 'editor');
-  const lang = document.getElementById('challenge-lang-select')?.value || 'javascript';
+  const lang = getActiveLang('challenge-lang-pills');
   await executeCode(code, lang, 'output-panel', 'runtime-badge');
 }
 
@@ -198,7 +209,7 @@ async function showChallengeHint() {
 function initSandboxScreen() {
   loadMonaco(() => {
     if (_sandboxEditor) return;
-    const lang = document.getElementById('sandbox-lang-select')?.value || 'javascript';
+    const lang = getActiveLang('sandbox-lang-pills');
     _sandboxEditor = createEditor('sandbox-editor', lang, STARTER_CODE[lang]);
   });
 }
@@ -206,13 +217,16 @@ function initSandboxScreen() {
 function setupSandboxHandlers() {
   document.getElementById('btn-sandbox-run')?.addEventListener('click', runSandboxCode);
   document.getElementById('btn-sandbox-clear')?.addEventListener('click', () => {
-    const lang = document.getElementById('sandbox-lang-select')?.value || 'javascript';
+    const lang = getActiveLang('sandbox-lang-pills');
     if (_sandboxEditor) _sandboxEditor.setValue(STARTER_CODE[lang] || '');
     document.getElementById('sandbox-output-panel').innerHTML = '<span class="output-placeholder">// Натисни ▶ Run щоб виконати код</span>';
     document.getElementById('sandbox-ai-area').style.display = 'none';
   });
-  document.getElementById('sandbox-lang-select')?.addEventListener('change', e => {
-    const lang = e.target.value;
+  document.getElementById('sandbox-lang-pills')?.addEventListener('click', e => {
+    const pill = e.target.closest('.lang-pill');
+    if (!pill) return;
+    const lang = pill.dataset.lang;
+    setActiveLang('sandbox-lang-pills', lang);
     if (_sandboxEditor) {
       monaco.editor.setModelLanguage(_sandboxEditor.getModel(), LANG_MAP[lang] || 'javascript');
       if (!_sandboxEditor.getValue().trim()) {
@@ -225,7 +239,7 @@ function setupSandboxHandlers() {
 
 async function runSandboxCode() {
   const code = getEditorCode(_sandboxEditor, 'sandbox-editor');
-  const lang = document.getElementById('sandbox-lang-select')?.value || 'javascript';
+  const lang = getActiveLang('sandbox-lang-pills');
   await executeCode(code, lang, 'sandbox-output-panel', 'sandbox-runtime-badge');
 }
 

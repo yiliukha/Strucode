@@ -113,12 +113,12 @@
       <span class="challenge-xp" id="challenge-xp-badge">+10 XP</span>
     </div>
     <div class="challenge-controls">
-      <select class="lang-select" id="challenge-lang-select">
-        <option value="javascript">JS</option>
-        <option value="python">Python</option>
-        <option value="java">Java</option>
-        <option value="sql">SQL</option>
-      </select>
+      <div class="lang-pill-group" id="challenge-lang-pills">
+        <button class="lang-pill active" data-lang="javascript"><img src="icons/langs/javascript.svg" width="16" height="16" alt="JS">JS</button>
+        <button class="lang-pill" data-lang="python"><img src="icons/langs/python.svg" width="16" height="16" alt="Python">Python</button>
+        <button class="lang-pill" data-lang="java"><img src="icons/langs/java.svg" width="16" height="16" alt="Java">Java</button>
+        <button class="lang-pill" data-lang="sql"><img src="icons/langs/sql.svg" width="16" height="16" alt="SQL">SQL</button>
+      </div>
       <button class="btn btn-run" id="btn-run" data-i18n="challenge_run">▶ Run</button>
       <button class="btn btn-check" id="btn-check" data-i18n="challenge_check">✓ Check</button>
       <button class="btn btn-hint" id="btn-ai-hint" data-i18n="challenge_hint">🤖 Hint</button>
@@ -149,12 +149,12 @@
   <div class="challenge-header">
     <button class="btn-back" id="btn-sandbox-back" data-i18n="sandbox_back">← Головна</button>
     <div class="challenge-controls">
-      <select class="lang-select" id="sandbox-lang-select">
-        <option value="javascript">🟨 JavaScript</option>
-        <option value="python">🐍 Python</option>
-        <option value="java">☕ Java</option>
-        <option value="sql">🗃️ SQL</option>
-      </select>
+      <div class="lang-pill-group" id="sandbox-lang-pills">
+        <button class="lang-pill active" data-lang="javascript"><img src="icons/langs/javascript.svg" width="16" height="16" alt="JS">JS</button>
+        <button class="lang-pill" data-lang="python"><img src="icons/langs/python.svg" width="16" height="16" alt="Python">Python</button>
+        <button class="lang-pill" data-lang="java"><img src="icons/langs/java.svg" width="16" height="16" alt="Java">Java</button>
+        <button class="lang-pill" data-lang="sql"><img src="icons/langs/sql.svg" width="16" height="16" alt="SQL">SQL</button>
+      </div>
       <button class="btn btn-run" id="btn-sandbox-run" data-i18n="sandbox_run">▶ Run</button>
       <button class="btn btn-hint" id="btn-sandbox-ai" data-i18n="sandbox_ask_ai">🤖 Ask AI</button>
       <button class="btn btn-icon-sm" id="btn-sandbox-clear" title="Clear">🗑</button>

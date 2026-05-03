@@ -452,7 +452,8 @@ body {
   gap: 14px;
   padding: 16px;
 }
-.course-item-icon { font-size: 36px; }
+.course-item-icon { font-size: 36px; display: flex; align-items: center; justify-content: center; }
+.lang-logo { display: block; object-fit: contain; }
 .course-item-info { flex: 1; }
 .course-item-name { font-size: 16px; font-weight: 700; color: var(--text); }
 .course-item-desc { font-size: 13px; color: var(--text2); margin-top: 3px; }
@@ -581,17 +582,34 @@ body {
 .challenge-xp { font-size: 12px; font-weight: 700; color: var(--gold); background: color-mix(in srgb, var(--gold) 15%, transparent); padding: 2px 8px; border-radius: 10px; }
 .challenge-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
-.lang-select {
-  background: var(--bg3);
-  color: var(--text);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  cursor: pointer;
-  outline: none;
+/* Language pill selector (replaces <select>) */
+.lang-pill-group {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
 }
-.lang-select:focus { border-color: var(--primary); }
+.lang-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg3);
+  color: var(--text2);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--trans);
+  white-space: nowrap;
+}
+.lang-pill:hover { border-color: var(--primary); color: var(--text); }
+.lang-pill.active {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.lang-pill img { display: block; flex-shrink: 0; }
 
 /* Two-column layout */
 .challenge-layout {

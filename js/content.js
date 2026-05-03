@@ -5,6 +5,7 @@ const COURSES = {
     id: 'javascript',
     name: 'JavaScript',
     icon: '🟨',
+    logo: 'icons/langs/javascript.svg',
     color: '#f7df1e',
     desc: 'Основа веб-розробки. З нуля до async/await.',
     language: 'javascript',
@@ -382,6 +383,7 @@ promise.then(result => console.log(result)); // Готово!</code></pre>
     id: 'java',
     name: 'Java',
     icon: '☕',
+    logo: 'icons/langs/java.svg',
     color: '#f89820',
     desc: 'Мова для Android, enterprise та backend. Строга типізація, ООП.',
     language: 'java',
@@ -602,6 +604,7 @@ static double add(double a, double b) { return a + b; }
     id: 'python',
     name: 'Python',
     icon: '🐍',
+    logo: 'icons/langs/python.svg',
     color: '#3572A5',
     desc: 'Мова №1 для AI, data science і автоматизації.',
     language: 'python',
@@ -748,6 +751,7 @@ print(total(1, 2, 3, 4))  # 10</code></pre>`,
     id: 'ai_basics',
     name: 'AI Basics',
     icon: '🧠',
+    logo: 'icons/langs/ai_basics.svg',
     color: '#a855f7',
     desc: 'Як працюють LLM, як писати промпти і перевіряти відповіді AI.',
     language: 'javascript',
@@ -892,6 +896,7 @@ curl http://localhost:11434/api/chat -d '{
     id: 'sql',
     name: 'SQL',
     icon: '🗃️',
+    logo: 'icons/langs/sql.svg',
     color: '#e97316',
     desc: 'Мова запитів до баз даних. Must-have для будь-якого розробника.',
     language: 'sql',
@@ -997,4 +1002,20 @@ const DAILY_POOL = [
 function getDailyChallenge() {
   const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % DAILY_POOL.length;
   return DAILY_POOL[dayIndex];
+}
+
+// ── Language logos ────────────────────────────────────────────────────────────
+
+const LANG_LOGOS = {
+  javascript: 'icons/langs/javascript.svg',
+  python:     'icons/langs/python.svg',
+  java:       'icons/langs/java.svg',
+  sql:        'icons/langs/sql.svg',
+  typescript: 'icons/langs/typescript.svg',
+};
+
+function langLogoHtml(lang, size = 20) {
+  const src = LANG_LOGOS[lang];
+  if (!src) return '';
+  return `<img class="lang-logo" src="${src}" width="${size}" height="${size}" alt="${lang}">`;
 }
