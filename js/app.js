@@ -99,21 +99,50 @@ function renderHome() {
   document.getElementById('btn-daily-start')?.addEventListener('click', () => navigate('courses'));
 
   const continueWrap = document.getElementById('home-continue-wrap');
-  const continueCard = document.getElementById('home-continue');
+  const continueList = document.getElementById('home-continue-list');
   const continueTitleEl = document.getElementById('home-continue-title');
   if (continueTitleEl) continueTitleEl.textContent = t('home_continue_title');
-  if (_state.lastCourse && continueWrap && continueCard) {
-    const course = COURSES[_state.lastCourse];
-    if (course) {
+  if (continueWrap && continueList) {
+    const started = Object.values(COURSES).filter(c => countCompleted(c) > 0);
+    if (started.length) {
       continueWrap.style.display = 'block';
-      continueCard.innerHTML = `
-        <span style="font-size:28px">${course.icon}</span>
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:600">${course.name}</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">${t('home_continue_sub')}</div>
-        </div>
-        <span style="color:var(--primary);font-size:18px">→</span>`;
-      continueCard.onclick = () => navigate('courses');
+      continueList.innerHTML = '';
+      started.forEach(course => {
+        const completed = countCompleted(course);
+        const total = countTotal(course);
+        const cxp = getCourseXp(course.id);
+        const ctxp = getCourseTotalXp(course.id);
+        const level = getLevel(cxp);
+        const next = getNextLevel(cxp);
+        const progress = getXpProgress(cxp);
+        const levelName = t('level_' + level.name) || level.name;
+
+        const card = document.createElement('div');
+        card.className = 'continue-course-card';
+        card.innerHTML = `
+          <div class="ccc-top">
+            <span class="ccc-icon">${course.icon}</span>
+            <div class="ccc-info">
+              <div class="ccc-name">${course.name}</div>
+              <div class="ccc-meta">
+                <span class="level-badge-sm">${level.icon} ${levelName}</span>
+                <span class="ccc-tasks">${completed}/${total} ${t('home_continue_tasks')}</span>
+              </div>
+            </div>
+            <span class="ccc-arrow">→</span>
+          </div>
+          <div class="ccc-bar-wrap">
+            <div class="ccc-bar" style="width:${progress}%"></div>
+          </div>
+          <div class="ccc-xp-row">
+            <span>${cxp} XP</span>
+            <span>${next ? next.min + ' XP → ' + (t('level_' + next.name) || next.name) : t('xp_max')}</span>
+          </div>`;
+        card.addEventListener('click', () => navigate('courses'));
+        continueList.appendChild(card);
+      });
+    } else {
+      continueWrap.style.display = 'none';
     }
   }
 
@@ -131,22 +160,8 @@ function renderHome() {
 
 function updateXpDisplay() {
   const xp = _state.xp;
-  const level = getLevel(xp);
-  const next = getNextLevel(xp);
-  const progress = getXpProgress(xp);
-
-  const badge = document.getElementById('level-badge');
-  if (badge) badge.textContent = level.icon + ' ' + (t('level_' + level.name) || level.name);
-
-  const xpNum = document.getElementById('xp-number');
-  if (xpNum) xpNum.textContent = next ? `${xp} / ${next.min} XP` : `${xp} ${t('xp_max')}`;
-
-  const bar = document.getElementById('xp-bar');
-  if (bar) bar.style.width = progress + '%';
-
   const homeXp = document.getElementById('home-xp');
   if (homeXp) homeXp.textContent = xp + ' XP';
-
   const streakCount = document.getElementById('streak-count');
   if (streakCount) streakCount.textContent = _state.streak;
 }
@@ -168,12 +183,17 @@ function checkStreak() {
 }
 
 function addXp(amount) {
-  const oldLevel = getLevel(_state.xp);
+  const courseId = _state.lastCourse;
+  const newCourseXp = getCourseXp(courseId);
+  const oldLevel = getLevel(newCourseXp - amount);
+  const newLevel = getLevel(newCourseXp);
+
   _state.xp += amount;
   _state.lastActivity = new Date().toISOString().slice(0, 10);
   saveState();
-  const newLevel = getLevel(_state.xp);
+
   updateXpDisplay();
+  if (courseId) _updateCourseXpStrip(courseId);
 
   showXpModal(amount, newLevel.name !== oldLevel.name ? `🎉 ${newLevel.icon} ${t('level_' + newLevel.name) || newLevel.name}!` : null);
 }
@@ -289,6 +309,7 @@ function openLesson(course, lesson) {
   document.getElementById('lesson-title').textContent = lesson.title;
   document.getElementById('lesson-theory').innerHTML = lesson.theory || '';
   updateHeartsDisplay();
+  _updateCourseXpStrip(course.id);
 
   const challengeList = document.getElementById('challenge-list');
   challengeList.innerHTML = '';
@@ -314,6 +335,31 @@ function updateHeartsDisplay() {
   const el = document.getElementById('hearts-display');
   if (!el) return;
   el.textContent = '❤️'.repeat(Math.max(0, _state.hearts)) + '🖤'.repeat(Math.max(0, 3 - _state.hearts));
+}
+
+function _updateCourseXpStrip(courseId) {
+  const strip = document.getElementById('course-xp-strip');
+  if (!strip) return;
+  const course = COURSES[courseId];
+  if (!course) { strip.style.display = 'none'; return; }
+
+  const cxp = getCourseXp(courseId);
+  const level = getLevel(cxp);
+  const next = getNextLevel(cxp);
+  const progress = getXpProgress(cxp);
+  const levelName = t('level_' + level.name) || level.name;
+  const nextLabel = next ? `${cxp} / ${next.min} XP` : `${cxp} ${t('xp_max')}`;
+
+  strip.style.display = 'block';
+  strip.innerHTML = `
+    <span class="cxs-course">${course.icon} ${course.name}</span>
+    <div class="cxs-right">
+      <span class="level-badge-sm">${level.icon} ${levelName}</span>
+      <span class="cxs-xp">${nextLabel}</span>
+    </div>
+    <div class="cxs-bar-wrap">
+      <div class="cxs-bar" style="width:${progress}%"></div>
+    </div>`;
 }
 
 // ── Challenge screen ──────────────────────────────────────────────────────────
@@ -595,6 +641,29 @@ function showXpModal(xp, levelUpMsg) {
   text.textContent = `+${xp} XP`;
   sub.textContent = levelUpMsg || t('modal_xp_done');
   modal.style.display = 'flex';
+}
+
+// ── Per-course XP ─────────────────────────────────────────────────────────────
+
+function getCourseXp(courseId) {
+  const course = COURSES[courseId];
+  if (!course) return 0;
+  let xp = 0;
+  for (const mod of course.modules)
+    for (const lesson of mod.lessons)
+      for (const ch of (lesson.challenges || []))
+        if (_state.completedChallenges.includes(ch.id)) xp += (ch.xp || 0);
+  return xp;
+}
+
+function getCourseTotalXp(courseId) {
+  const course = COURSES[courseId];
+  if (!course) return 0;
+  let xp = 0;
+  for (const mod of course.modules)
+    for (const lesson of mod.lessons)
+      for (const ch of (lesson.challenges || [])) xp += (ch.xp || 0);
+  return xp;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
