@@ -43,9 +43,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -120,7 +120,7 @@ jobs:
 
       - name: Package macOS app
         if: runner.os == 'macOS'
-        run: cd dist && zip -r Strucode-mac.zip Strucode.app
+        run: ditto -c -k --rsrc --sequestAcls --keepParent dist/Strucode.app dist/Strucode-mac.zip
 
       - name: Package Windows app
         if: runner.os == 'Windows'
@@ -141,7 +141,7 @@ jobs:
           cd dist && zip -r Strucode-linux.zip Strucode
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: dist/Strucode-*.zip
