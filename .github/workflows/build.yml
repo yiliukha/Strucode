@@ -120,7 +120,7 @@ jobs:
 
       - name: Package macOS app
         if: runner.os == 'macOS'
-        run: ditto -c -k --rsrc --sequestAcls --keepParent dist/Strucode.app dist/Strucode-mac.zip
+        run: ditto -c -k --rsrc --keepParent dist/Strucode.app dist/Strucode-mac.zip
 
       - name: Package Windows app
         if: runner.os == 'Windows'
