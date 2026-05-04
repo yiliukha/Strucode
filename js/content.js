@@ -418,7 +418,34 @@ Number(undefined);   // NaN</code></pre>
 <h3>BigInt</h3>
 <pre><code>const big = 9007199254740991n; // суфікс n
 const sum = big + 1n;          // BigInt + BigInt</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l09-c1',
+                title: 'Математичні операції',
+                prompt: 'Оголоси функцію <strong>clamp(value, min, max)</strong> що повертає <code>value</code> обмежене між <code>min</code> та <code>max</code>. Використай Math.min та Math.max.',
+                starterCode: 'function clamp(value, min, max) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'clamp(5, 1, 10)', expected: '5', desc: 'clamp(5,1,10) = 5' },
+                  { expression: 'clamp(-3, 0, 10)', expected: '0', desc: 'clamp(-3,0,10) = 0' },
+                  { expression: 'clamp(15, 0, 10)', expected: '10', desc: 'clamp(15,0,10) = 10' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l09-c2',
+                title: 'Випадкове ціле число',
+                prompt: 'Оголоси функцію <strong>randInt(min, max)</strong> що повертає випадкове ціле число від <code>min</code> до <code>max</code> включно. Використай Math.random та Math.floor.',
+                starterCode: 'function randInt(min, max) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'typeof randInt(1, 10)', expected: 'number', desc: 'повертає число' },
+                  { expression: 'Number.isInteger(randInt(1, 10))', expected: 'true', desc: 'ціле число' },
+                  { expression: '(() => { const r = randInt(5, 5); return r === 5; })()', expected: 'true', desc: 'randInt(5,5) = 5' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l10',
@@ -460,7 +487,33 @@ str.replaceAll('l', 'L'); // 'HeLLo, WorLd!'
 str.split(', ');          // ['Hello', 'World!']
 'abc'.repeat(3);          // 'abcabcabc'
 '5'.padStart(3, '0');     // '005'</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l10-c1',
+                title: 'Обробка рядка',
+                prompt: 'Оголоси функцію <strong>capitalize(str)</strong> що робить першу літеру великою, а решту — маленькими. Наприклад: <code>"hELLO"</code> → <code>"Hello"</code>.',
+                starterCode: 'function capitalize(str) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'capitalize("hello")', expected: 'Hello', desc: '"hello" → "Hello"' },
+                  { expression: 'capitalize("hELLO")', expected: 'Hello', desc: '"hELLO" → "Hello"' },
+                  { expression: 'capitalize("WORLD")', expected: 'World', desc: '"WORLD" → "World"' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l10-c2',
+                title: 'Шаблонний рядок',
+                prompt: 'Оголоси функцію <strong>greet(name, age)</strong> що повертає рядок виду: <code>"Привіт, Alice! Тобі 25 років."</code>. Використай шаблонний літерал.',
+                starterCode: 'function greet(name, age) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'greet("Alice", 25)', expected: 'Привіт, Alice! Тобі 25 років.', desc: 'правильний формат' },
+                  { expression: 'greet("Bob", 30)', expected: 'Привіт, Bob! Тобі 30 років.', desc: 'інше ім\'я' },
+                ],
+                xp: 15,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l11',
@@ -493,7 +546,33 @@ arr.slice(1, 3);         // [2, 3] — копія без мутації
 <pre><code>Array.from('hello');       // ['h','e','l','l','o']
 Array.from({length: 3}, (_, i) => i); // [0,1,2]
 Array.of(1, 2, 3);         // [1,2,3]</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l11-c1',
+                title: 'reduce — сума об\'єктів',
+                prompt: 'Оголоси функцію <strong>totalPrice(items)</strong> що приймає масив об\'єктів <code>{name, price, qty}</code> і повертає загальну суму (price * qty для кожного). Використай reduce.',
+                starterCode: 'function totalPrice(items) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'totalPrice([{name:"a",price:10,qty:2},{name:"b",price:5,qty:3}])', expected: '35', desc: '10*2 + 5*3 = 35' },
+                  { expression: 'totalPrice([])', expected: '0', desc: 'порожній масив = 0' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l11-c2',
+                title: 'flatMap та фільтрація',
+                prompt: 'Оголоси функцію <strong>getWords(sentences)</strong> що приймає масив рядків і повертає масив усіх слів (розбити по пробілу) довжиною > 3 символи. Використай flatMap та filter.',
+                starterCode: 'function getWords(sentences) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'getWords(["hi there", "how are you"]).includes("there")', expected: 'true', desc: '"there" є в результаті' },
+                  { expression: 'getWords(["hi there"]).includes("hi")', expected: 'false', desc: '"hi" (2 символи) відфільтрований' },
+                  { expression: 'Array.isArray(getWords([]))', expected: 'true', desc: 'повертає масив' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l12',
@@ -532,7 +611,34 @@ const wm = new WeakMap();
 let obj = {};
 wm.set(obj, 'дані');
 obj = null; // obj видалиться з пам'яті разом із wm-записом</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l12-c1',
+                title: 'Дедублікація через Set',
+                prompt: 'Оголоси функцію <strong>unique(arr)</strong> що повертає новий масив без дублікатів. Використай Set.',
+                starterCode: 'function unique(arr) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'unique([1,2,2,3,3,3]).length', expected: '3', desc: '3 унікальні елементи' },
+                  { expression: 'unique([1,2,2,3]).includes(2)', expected: 'true', desc: '2 є' },
+                  { expression: 'unique([]).length', expected: '0', desc: 'порожній масив' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l12-c2',
+                title: 'Підрахунок слів через Map',
+                prompt: 'Оголоси функцію <strong>wordCount(str)</strong> що повертає Map де ключ — слово, значення — кількість його входжень у рядку.',
+                starterCode: 'function wordCount(str) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'wordCount("a b a c a").get("a")', expected: '3', desc: '"a" зустрічається 3 рази' },
+                  { expression: 'wordCount("a b a c a").get("b")', expected: '1', desc: '"b" зустрічається 1 раз' },
+                  { expression: 'wordCount("a b a c a") instanceof Map', expected: 'true', desc: 'результат — Map' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l13',
@@ -564,7 +670,33 @@ d.toLocaleString('uk-UA');     // '15.01.2024, 10:30:00'</code></pre>
 const d2 = new Date('2024-06-01');
 d2 > d1;  // true
 d2 - d1;  // різниця у мілісекундах</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l13-c1',
+                title: 'Вік за датою народження',
+                prompt: 'Оголоси функцію <strong>getAge(birthYear)</strong> що повертає поточний вік людини (currentYear - birthYear). Використай <code>new Date().getFullYear()</code>.',
+                starterCode: 'function getAge(birthYear) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'typeof getAge(2000)', expected: 'number', desc: 'повертає число' },
+                  { expression: 'getAge(new Date().getFullYear()) === 0', expected: 'true', desc: 'народжений цього року = 0' },
+                  { expression: 'getAge(new Date().getFullYear() - 10) === 10', expected: 'true', desc: '10 років тому = 10' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l13-c2',
+                title: 'Форматування дати',
+                prompt: 'Оголоси функцію <strong>formatDate(date)</strong> що приймає об\'єкт Date і повертає рядок у форматі <code>"DD.MM.YYYY"</code>. Наприклад: <code>"05.01.2026"</code>.',
+                starterCode: 'function formatDate(date) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'formatDate(new Date(2026, 0, 5))', expected: '05.01.2026', desc: '5 января 2026' },
+                  { expression: 'formatDate(new Date(2000, 11, 31))', expected: '31.12.2000', desc: '31 грудня 2000' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -616,7 +748,33 @@ for (var i = 0; i < 3; i++) {
 for (let i = 0; i < 3; i++) {
   setTimeout(() => console.log(i), 0); // 0 1 2
 }</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l14-c1',
+                title: 'Фабрика лічильника',
+                prompt: 'Оголоси функцію <strong>makeCounter(start = 0)</strong> що повертає об\'єкт з методами <code>increment()</code>, <code>decrement()</code> та <code>value()</code>. Використай замикання.',
+                starterCode: 'function makeCounter(start = 0) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const c = makeCounter(10); c.increment(); return c.value(); })()', expected: '11', desc: 'increment від 10 = 11' },
+                  { expression: '(() => { const c = makeCounter(); c.decrement(); return c.value(); })()', expected: '-1', desc: 'decrement від 0 = -1' },
+                  { expression: '(() => { const c = makeCounter(5); return c.value(); })()', expected: '5', desc: 'початкове значення 5' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l14-c2',
+                title: 'Once — виклик лише раз',
+                prompt: 'Оголоси функцію <strong>once(fn)</strong> що повертає нову функцію яка викликає <code>fn</code> лише один раз. Після першого виклику завжди повертає перший результат.',
+                starterCode: 'function once(fn) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { let n = 0; const f = once(() => ++n); f(); f(); f(); return n; })()', expected: '1', desc: 'fn викликана лише 1 раз' },
+                  { expression: '(() => { const f = once(() => 42); f(); return f(); })()', expected: '42', desc: 'повторний виклик = перший результат' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l15',
@@ -657,7 +815,34 @@ function sumTree(node) {
   return node.value + node.children.reduce((s, c) => s + sumTree(c), 0);
 }
 sumTree(tree); // 10</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l15-c1',
+                title: 'Факторіал',
+                prompt: 'Оголоси рекурсивну функцію <strong>factorial(n)</strong> що повертає n! (0! = 1).',
+                starterCode: 'function factorial(n) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'factorial(0)', expected: '1', desc: '0! = 1' },
+                  { expression: 'factorial(5)', expected: '120', desc: '5! = 120' },
+                  { expression: 'factorial(10)', expected: '3628800', desc: '10! = 3628800' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l15-c2',
+                title: 'Рекурсивне сплощення масиву',
+                prompt: 'Оголоси функцію <strong>deepFlatten(arr)</strong> що рекурсивно сплощує масив будь-якої глибини вкладеності.',
+                starterCode: 'function deepFlatten(arr) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'deepFlatten([1,[2,[3,[4]]]]).length', expected: '4', desc: '4 елементи' },
+                  { expression: 'deepFlatten([1,[2,[3]]]).join(",")', expected: '1,2,3', desc: '[1,2,3]' },
+                  { expression: 'deepFlatten([]).length', expected: '0', desc: 'порожній масив' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l16',
@@ -695,7 +880,34 @@ const c = { ...a, ...b }; // { x: 1, y: 2 }</code></pre>
   // НЕ працює в стрілкових функціях!
 }
 // Краще використовувати rest параметри</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l16-c1',
+                title: 'Rest параметри',
+                prompt: 'Оголоси функцію <strong>sum(...nums)</strong> що приймає будь-яку кількість чисел і повертає їх суму. Використай rest параметри та reduce.',
+                starterCode: 'function sum(...nums) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'sum(1, 2, 3)', expected: '6', desc: 'sum(1,2,3) = 6' },
+                  { expression: 'sum(10, 20)', expected: '30', desc: 'sum(10,20) = 30' },
+                  { expression: 'sum()', expected: '0', desc: 'sum() = 0' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l16-c2',
+                title: 'Merge об\'єктів через spread',
+                prompt: 'Оголоси функцію <strong>mergeAll(...objects)</strong> що приймає довільну кількість об\'єктів і повертає новий об\'єкт з усіма їхніми властивостями (пізніші перезаписують ранні). Використай spread.',
+                starterCode: 'function mergeAll(...objects) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'mergeAll({a:1},{b:2}).a', expected: '1', desc: 'a = 1' },
+                  { expression: 'mergeAll({a:1},{b:2}).b', expected: '2', desc: 'b = 2' },
+                  { expression: 'mergeAll({a:1},{a:2}).a', expected: '2', desc: 'пізній перезаписує ранній' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l17',
@@ -730,7 +942,31 @@ helloAlice('...'); // "Hello, Alice..."</code></pre>
 };
 obj.regular(); // 'Bob'
 obj.arrow();   // undefined</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l17-c1',
+                title: 'call — позичити метод',
+                prompt: 'Є об\'єкт <code>calculator</code> з методом <code>add(a, b)</code> що повертає <code>this.base + a + b</code>. Оголоси змінну <strong>result</strong> = виклик цього методу через <code>call</code> з об\'єктом <code>{base: 10}</code> і аргументами 3 та 7.',
+                starterCode: 'const calculator = {\n  add(a, b) { return this.base + a + b; }\n};\nconst result = calculator.add.call(/* твій код */);\n',
+                tests: [
+                  { expression: 'result', expected: '20', desc: '10 + 3 + 7 = 20' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l17-c2',
+                title: 'bind — часткове застосування',
+                prompt: 'Оголоси функцію <strong>multiply(a, b)</strong> що повертає a * b. Потім створи <strong>double</strong> = версія multiply де перший аргумент зафіксований як 2 (через bind).',
+                starterCode: 'function multiply(a, b) {\n  return a * b;\n}\nconst double = multiply.bind(/* твій код */);\n',
+                tests: [
+                  { expression: 'double(5)', expected: '10', desc: 'double(5) = 10' },
+                  { expression: 'double(7)', expected: '14', desc: 'double(7) = 14' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l18',
@@ -774,7 +1010,32 @@ window.addEventListener('scroll', throttle(onScroll, 200));</code></pre>
   };
 }
 input.addEventListener('input', debounce(onSearch, 300));</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l18-c1',
+                title: 'Мемоізація',
+                prompt: 'Оголоси функцію <strong>memoize(fn)</strong> що повертає мемоізовану версію <code>fn</code>. При повторному виклику з тими ж аргументами — повертає кешований результат без виклику fn.',
+                starterCode: 'function memoize(fn) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { let calls = 0; const f = memoize(x => { calls++; return x * 2; }); f(5); f(5); return calls; })()', expected: '1', desc: 'fn викликана лише 1 раз' },
+                  { expression: '(() => { const f = memoize(x => x * 3); return f(4); })()', expected: '12', desc: 'результат правильний' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l18-c2',
+                title: 'Compose',
+                prompt: 'Оголоси функцію <strong>compose(f, g)</strong> що повертає нову функцію яка застосовує спочатку <code>g</code>, потім <code>f</code> до аргументу (f(g(x))).',
+                starterCode: 'function compose(f, g) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'compose(x => x * 2, x => x + 1)(5)', expected: '12', desc: '(5+1)*2 = 12' },
+                  { expression: 'compose(x => x + "!", x => x.toUpperCase())("hello")', expected: 'HELLO!', desc: '"hello" → "HELLO!"' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -821,7 +1082,31 @@ fn(); // undefined — this втрачено
 // Рішення: bind
 const boundFn = user.greet.bind(user);
 boundFn(); // 'Alice'</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l19-c1',
+                title: 'Метод і this',
+                prompt: 'Оголоси об\'єкт <strong>timer</strong> з властивостями <code>seconds: 0</code> та методом <code>tick()</code> що збільшує seconds на 1 і повертає this. Стрілкова функція тут НЕ підходить — використай звичайну.',
+                starterCode: 'const timer = {\n  seconds: 0,\n  tick() {\n    // твій код\n  }\n};\n',
+                tests: [
+                  { expression: 'timer.tick().seconds', expected: '1', desc: 'після tick() seconds = 1' },
+                  { expression: '(timer.tick(), timer.tick(), timer.seconds)', expected: '3', desc: 'після ще двох tick() — 3' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l19-c2',
+                title: 'Збереження контексту',
+                prompt: 'Є об\'єкт <strong>greetObj</strong> з властивістю <code>name: "World"</code> та методом <code>getGreeter()</code> що повертає стрілкову функцію яка повертає рядок <code>"Hello, " + this.name</code>.',
+                starterCode: 'const greetObj = {\n  name: "World",\n  getGreeter() {\n    // поверни стрілкову функцію\n  }\n};\n',
+                tests: [
+                  { expression: 'greetObj.getGreeter()()', expected: 'Hello, World', desc: '"Hello, World"' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l20',
@@ -856,7 +1141,32 @@ cat instanceof Animal; // true</code></pre>
 const obj = Object.create(proto);
 obj.name = 'Світ';
 obj.greet(); // 'Привіт, Світ'</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l20-c1',
+                title: 'Прототипний метод',
+                prompt: 'Додай метод <strong>describe()</strong> до <code>Animal.prototype</code> що повертає рядок <code>"[name] is a [type]"</code>. Потім створи <strong>dog</strong> через конструктор Animal з name="Rex", type="dog".',
+                starterCode: 'function Animal(name, type) {\n  this.name = name;\n  this.type = type;\n}\n// додай describe до прототипу\nconst dog = new Animal("Rex", "dog");\n',
+                tests: [
+                  { expression: 'dog.describe()', expected: 'Rex is a dog', desc: '"Rex is a dog"' },
+                  { expression: 'typeof Animal.prototype.describe', expected: 'function', desc: 'describe на прототипі' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l20-c2',
+                title: 'Object.create',
+                prompt: 'Оголоси об\'єкт <strong>personProto</strong> з методом <code>greet()</code> що повертає <code>"Hi, I am " + this.name</code>. Потім створи <strong>alice</strong> через Object.create(personProto) і встанови alice.name = "Alice".',
+                starterCode: 'const personProto = {\n  greet() {\n    // твій код\n  }\n};\nconst alice = Object.create(personProto);\nalice.name = "Alice";\n',
+                tests: [
+                  { expression: 'alice.greet()', expected: 'Hi, I am Alice', desc: '"Hi, I am Alice"' },
+                  { expression: 'Object.getPrototypeOf(alice) === personProto', expected: 'true', desc: 'прототип — personProto' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l21',
@@ -900,7 +1210,33 @@ const c = new Circle(5);
 c.area;     // 78.54...
 c.radius = 10;
 c.radius;   // 10</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l21-c1',
+                title: 'Клас Rectangle',
+                prompt: 'Оголоси клас <strong>Rectangle</strong> з конструктором <code>(width, height)</code>, методом <code>area()</code> (width * height) та методом <code>perimeter()</code> (2 * (width + height)).',
+                starterCode: 'class Rectangle {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new Rectangle(4, 5).area()', expected: '20', desc: 'area 4*5 = 20' },
+                  { expression: 'new Rectangle(4, 5).perimeter()', expected: '18', desc: 'perimeter = 18' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l21-c2',
+                title: 'Getter та Setter',
+                prompt: 'Оголоси клас <strong>Temperature</strong> що зберігає температуру в Цельсіях. Додай getter <code>fahrenheit</code> що конвертує (C * 9/5 + 32) та setter <code>fahrenheit</code> що приймає °F і зберігає в Цельсіях.',
+                starterCode: 'class Temperature {\n  constructor(celsius) {\n    this._celsius = celsius;\n  }\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new Temperature(0).fahrenheit', expected: '32', desc: '0°C = 32°F' },
+                  { expression: 'new Temperature(100).fahrenheit', expected: '212', desc: '100°C = 212°F' },
+                  { expression: '(() => { const t = new Temperature(0); t.fahrenheit = 32; return t._celsius; })()', expected: '0', desc: 'setter: 32°F = 0°C' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l22',
@@ -943,7 +1279,34 @@ class Rectangle extends Shape {
 }
 
 new Rectangle(3, 4).area(); // 12</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l22-c1',
+                title: 'Наслідування класу',
+                prompt: 'Є клас <code>Shape</code> з методом <code>type()</code>. Оголоси клас <strong>Circle</strong> що наслідує Shape, приймає <code>radius</code>, і додає метод <code>area()</code> = π * r². Метод type() повертає "circle".',
+                starterCode: 'class Shape {\n  type() { return "shape"; }\n}\nclass Circle extends Shape {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new Circle(5).type()', expected: 'circle', desc: 'type() = "circle"' },
+                  { expression: 'Math.abs(new Circle(5).area() - Math.PI * 25) < 0.001', expected: 'true', desc: 'area = π*25' },
+                  { expression: 'new Circle(3) instanceof Shape', expected: 'true', desc: 'instanceof Shape' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l22-c2',
+                title: 'super — розширення конструктора',
+                prompt: 'Є клас <code>Vehicle</code> з конструктором <code>(brand, speed)</code> і методом <code>describe()</code>. Оголоси клас <strong>Car</strong> що наслідує Vehicle, додає <code>doors</code> і перевизначає describe() щоб включити кількість дверей.',
+                starterCode: 'class Vehicle {\n  constructor(brand, speed) {\n    this.brand = brand;\n    this.speed = speed;\n  }\n  describe() { return `${this.brand} — ${this.speed}km/h`; }\n}\nclass Car extends Vehicle {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new Car("Toyota", 180, 4).brand', expected: 'Toyota', desc: 'brand збережено' },
+                  { expression: 'new Car("Toyota", 180, 4).doors', expected: '4', desc: 'doors = 4' },
+                  { expression: 'new Car("BMW", 200, 2).describe().includes("2")', expected: 'true', desc: 'describe містить кількість дверей' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l23',
@@ -984,7 +1347,33 @@ const acc = new BankAccount();
 acc.deposit(100);
 acc.balance; // 100
 acc.#balance; // ❌ SyntaxError — приватне поле</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l23-c1',
+                title: 'Статичний лічильник екземплярів',
+                prompt: 'Оголоси клас <strong>Counter</strong> зі статичною властивістю <code>count = 0</code>. У конструкторі збільшуй Counter.count на 1. Додай статичний метод <code>reset()</code> що обнуляє count.',
+                starterCode: 'class Counter {\n  static count = 0;\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { Counter.reset(); new Counter(); new Counter(); return Counter.count; })()', expected: '2', desc: 'після двох new Counter.count = 2' },
+                  { expression: '(() => { Counter.reset(); return Counter.count; })()', expected: '0', desc: 'після reset = 0' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l23-c2',
+                title: 'Приватне поле',
+                prompt: 'Оголоси клас <strong>BankAccount</strong> з приватним полем <code>#balance = 0</code>. Додай методи <code>deposit(amount)</code>, <code>withdraw(amount)</code> (не може бути від\'ємним) та <code>getBalance()</code>.',
+                starterCode: 'class BankAccount {\n  #balance = 0;\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const a = new BankAccount(); a.deposit(100); return a.getBalance(); })()', expected: '100', desc: 'deposit 100' },
+                  { expression: '(() => { const a = new BankAccount(); a.deposit(50); a.withdraw(30); return a.getBalance(); })()', expected: '20', desc: 'deposit 50, withdraw 30 = 20' },
+                  { expression: '(() => { const a = new BankAccount(); a.withdraw(100); return a.getBalance(); })()', expected: '0', desc: 'withdraw більше ніж є — залишок 0' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -1032,7 +1421,34 @@ new URIError('помилка URI');
 // Перевірка типу
 try { null.x; }
 catch(e) { e instanceof TypeError; } // true</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l24-c1',
+                title: 'try/catch — безпечний JSON.parse',
+                prompt: 'Оголоси функцію <strong>safeParseJSON(str)</strong> що намагається парсити JSON рядок. Якщо успішно — повертає об\'єкт, якщо помилка — повертає <code>null</code>.',
+                starterCode: 'function safeParseJSON(str) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'safeParseJSON(\'{"a":1}\').a', expected: '1', desc: 'валідний JSON парситься' },
+                  { expression: 'safeParseJSON("invalid json")', expected: 'null', desc: 'невалідний → null' },
+                  { expression: 'safeParseJSON(null)', expected: 'null', desc: 'null → null' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l24-c2',
+                title: 'finally — очищення ресурсів',
+                prompt: 'Оголоси функцію <strong>withLog(fn)</strong> що виконує <code>fn()</code> та повертає її результат. Незалежно від успіху чи помилки — додає до масиву <code>log</code> рядок <code>"done"</code>. Масив <code>log</code> має бути оголошений всередині withLog та повертається як <code>{ result, log }</code>.',
+                starterCode: 'function withLog(fn) {\n  const log = [];\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'withLog(() => 42).result', expected: '42', desc: 'результат fn' },
+                  { expression: 'withLog(() => 42).log.includes("done")', expected: 'true', desc: 'log містить "done"' },
+                  { expression: '(() => { try { withLog(() => { throw new Error(); }); } catch(e) {} return true; })()', expected: 'true', desc: 'не крашається при помилці' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l25',
@@ -1087,7 +1503,35 @@ try {
 } catch (e) {
   throw new AppError('Не вдалося завантажити конфіг', e);
 }</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l25-c1',
+                title: 'Власний клас помилки',
+                prompt: 'Оголоси клас <strong>ValidationError</strong> що наслідує Error. Конструктор приймає <code>message</code> та <code>field</code>. Встанови <code>this.name = "ValidationError"</code> і <code>this.field = field</code>.',
+                starterCode: 'class ValidationError extends Error {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new ValidationError("required", "email").message', expected: 'required', desc: 'message збережено' },
+                  { expression: 'new ValidationError("required", "email").field', expected: 'email', desc: 'field = "email"' },
+                  { expression: 'new ValidationError("x", "y").name', expected: 'ValidationError', desc: 'name = "ValidationError"' },
+                  { expression: 'new ValidationError("x", "y") instanceof Error', expected: 'true', desc: 'instanceof Error' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l25-c2',
+                title: 'Розрізнення типів помилок',
+                prompt: 'Оголоси функцію <strong>divide(a, b)</strong>: якщо b === 0 — кидає <code>new RangeError("Division by zero")</code>, якщо аргументи не числа — кидає <code>new TypeError("Not a number")</code>, інакше — повертає a / b.',
+                starterCode: 'function divide(a, b) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'divide(10, 2)', expected: '5', desc: '10/2 = 5' },
+                  { expression: '(() => { try { divide(1, 0); } catch(e) { return e instanceof RangeError; } })()', expected: 'true', desc: 'b=0 → RangeError' },
+                  { expression: '(() => { try { divide("a", 2); } catch(e) { return e instanceof TypeError; } })()', expected: 'true', desc: 'не число → TypeError' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -1129,7 +1573,33 @@ setTimeout(() => console.log(2), 0);
 Promise.resolve().then(() => console.log(3));
 console.log(4);
 // Вивід: 1 4 3 2</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l26-c1',
+                title: 'Власний forEach',
+                prompt: 'Оголоси функцію <strong>myForEach(arr, callback)</strong> що проходить по масиву і викликає <code>callback(element, index, arr)</code> для кожного елементу. НЕ використовуй вбудований forEach.',
+                starterCode: 'function myForEach(arr, callback) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const r = []; myForEach([1,2,3], x => r.push(x*2)); return r.join(","); })()', expected: '2,4,6', desc: 'подвоює елементи' },
+                  { expression: '(() => { const i = []; myForEach(["a","b"], (el, idx) => i.push(idx)); return i.join(","); })()', expected: '0,1', desc: 'передає індекси' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l26-c2',
+                title: 'Власний map',
+                prompt: 'Оголоси функцію <strong>myMap(arr, transform)</strong> що повертає новий масив де кожен елемент трансформований через <code>transform(element, index)</code>. НЕ використовуй вбудований map.',
+                starterCode: 'function myMap(arr, transform) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'myMap([1,2,3], x => x * x).join(",")', expected: '1,4,9', desc: 'квадрати' },
+                  { expression: 'myMap([], x => x).length', expected: '0', desc: 'порожній масив' },
+                  { expression: 'Array.isArray(myMap([1,2], x => x))', expected: 'true', desc: 'повертає Array' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l27',
@@ -1172,7 +1642,31 @@ const fastest = await Promise.race([p1, p2]);
 
 // any — перший успішний
 const first = await Promise.any([p1, p2, p3]);</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l27-c1',
+                title: 'Створення Promise',
+                prompt: 'Оголоси функцію <strong>delay(ms)</strong> що повертає Promise який resolve-иться через ms мілісекунд. Використай setTimeout.',
+                starterCode: 'function delay(ms) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'delay(10) instanceof Promise', expected: 'true', desc: 'повертає Promise' },
+                  { expression: 'typeof delay(10).then', expected: 'function', desc: 'має метод .then' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l27-c2',
+                title: 'Promise.all — паралельне виконання',
+                prompt: 'Оголоси функцію <strong>fetchAll(urls)</strong> що приймає масив рядків і повертає Promise.all де кожен URL "завантажується" через <code>Promise.resolve(url + "_data")</code>. Тобто симулюй завантаження без реального fetch.',
+                starterCode: 'function fetchAll(urls) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'fetchAll(["a","b"]) instanceof Promise', expected: 'true', desc: 'повертає Promise' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l28',
@@ -1217,7 +1711,32 @@ const userPromise = fetchUser();
 const postsPromise = fetchPosts();
 const user2 = await userPromise;
 const posts2 = await postsPromise;</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l28-c1',
+                title: 'async/await — послідовне виконання',
+                prompt: 'Оголоси async функцію <strong>getUser(id)</strong> що повертає об\'єкт <code>{ id, name: "User_" + id }</code> через await Promise.resolve(...).',
+                starterCode: 'async function getUser(id) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'getUser(1) instanceof Promise', expected: 'true', desc: 'повертає Promise' },
+                  { expression: 'typeof getUser', expected: 'function', desc: 'getUser — функція' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l28-c2',
+                title: 'async з обробкою помилок',
+                prompt: 'Оголоси async функцію <strong>safeFetch(url)</strong> що через try/catch перехоплює помилки. Якщо url порожній — кидає Error("Empty URL"). Повертає <code>{ ok: true, url }</code> або <code>{ ok: false, error: e.message }</code>.',
+                starterCode: 'async function safeFetch(url) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'safeFetch("") instanceof Promise', expected: 'true', desc: 'повертає Promise' },
+                  { expression: 'typeof safeFetch', expected: 'function', desc: 'safeFetch — функція' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l29',
@@ -1260,7 +1779,33 @@ const gen = id();
 gen.next().value; // 1
 gen.next().value; // 2
 gen.next().value; // 3</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l29-c1',
+                title: 'Генератор діапазону',
+                prompt: 'Оголоси генераторну функцію <strong>range(start, end, step = 1)</strong> що yields числа від start до end (не включно) з кроком step.',
+                starterCode: 'function* range(start, end, step = 1) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '[...range(0, 5)].join(",")', expected: '0,1,2,3,4', desc: 'range(0,5) = [0,1,2,3,4]' },
+                  { expression: '[...range(0, 10, 2)].join(",")', expected: '0,2,4,6,8', desc: 'range(0,10,2) = [0,2,4,6,8]' },
+                  { expression: '[...range(3, 3)].length', expected: '0', desc: 'порожній діапазон' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l29-c2',
+                title: 'Нескінченний генератор',
+                prompt: 'Оголоси генераторну функцію <strong>counter(start = 0)</strong> що нескінченно yields зростаючі числа від start.',
+                starterCode: 'function* counter(start = 0) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const g = counter(5); return [g.next().value, g.next().value, g.next().value].join(","); })()', expected: '5,6,7', desc: 'counter(5) → 5,6,7...' },
+                  { expression: '(() => { const g = counter(); return g.next().value; })()', expected: '0', desc: 'counter() починає з 0' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -1300,7 +1845,31 @@ el.firstElementChild; // перший дочірній елемент
 el.lastElementChild;  // останній
 el.nextElementSibling;   // наступний сусід
 el.previousElementSibling; // попередній сусід</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l30-c1',
+                title: 'Навігація по DOM',
+                prompt: 'Оголоси функцію <strong>getFirstChild(parentId)</strong> що повертає <code>textContent</code> першого дочірнього елемента (element child, не text node) елементу з даним id. Якщо немає — повертає null.',
+                starterCode: '// HTML вже містить елементи в document.body\nfunction getFirstChild(parentId) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'typeof getFirstChild', expected: 'function', desc: 'getFirstChild — функція' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l30-c2',
+                title: 'Підрахунок нащадків',
+                prompt: 'Оголоси функцію <strong>countChildren(el)</strong> що приймає DOM елемент і повертає кількість його прямих дочірніх елементів (не текстових вузлів). Використай <code>el.children.length</code>.',
+                starterCode: 'function countChildren(el) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const div = document.createElement("div"); div.innerHTML = "<span></span><p></p>"; return countChildren(div); })()', expected: '2', desc: '2 дочірніх елементи' },
+                  { expression: '(() => { const div = document.createElement("div"); return countChildren(div); })()', expected: '0', desc: 'порожній — 0' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l31',
@@ -1329,7 +1898,32 @@ document.addEventListener('click', e => {
   const btn = e.target.closest('[data-action]');
   if (btn) handleAction(btn.dataset.action);
 });</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l31-c1',
+                title: 'querySelector',
+                prompt: 'Оголоси функцію <strong>findByClass(container, className)</strong> що повертає масив усіх елементів з даним класом всередині container. Використай querySelectorAll.',
+                starterCode: 'function findByClass(container, className) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const d = document.createElement("div"); d.innerHTML = `<p class="a"></p><span class="a"></span><div class="b"></div>`; return findByClass(d, "a").length; })()', expected: '2', desc: '2 елементи з класом "a"' },
+                  { expression: 'Array.isArray(findByClass(document.createElement("div"), "x"))', expected: 'true', desc: 'повертає Array' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l31-c2',
+                title: 'closest — пошук батька',
+                prompt: 'Оголоси функцію <strong>findAncestor(el, selector)</strong> що повертає найближчого батьківського предка що відповідає selector (використай closest). Якщо не знайдено — null.',
+                starterCode: 'function findAncestor(el, selector) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const wrap = document.createElement("div"); wrap.className = "wrap"; const inner = document.createElement("span"); wrap.appendChild(inner); return findAncestor(inner, ".wrap") === wrap; })()', expected: 'true', desc: 'знаходить батька з класом' },
+                  { expression: '(() => { const el = document.createElement("p"); return findAncestor(el, ".nonexistent"); })()', expected: 'null', desc: 'не знайдено → null' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l32',
@@ -1366,7 +1960,33 @@ parent.before(div);           // перед батьком
 parent.after(div);            // після батька
 parent.replaceWith(div);      // замінити
 div.remove();                 // видалити</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l32-c1',
+                title: 'Створення елемента',
+                prompt: 'Оголоси функцію <strong>createCard(title, text)</strong> що створює і повертає div з класом <code>"card"</code>, всередині якого h3 з title і p з text.',
+                starterCode: 'function createCard(title, text) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'createCard("Hi", "World").className', expected: 'card', desc: 'має клас "card"' },
+                  { expression: 'createCard("Hi", "World").querySelector("h3").textContent', expected: 'Hi', desc: 'h3 містить title' },
+                  { expression: 'createCard("Hi", "World").querySelector("p").textContent', expected: 'World', desc: 'p містить text' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l32-c2',
+                title: 'Маніпуляція classList',
+                prompt: 'Оголоси функцію <strong>toggleActive(el)</strong> що: якщо el має клас <code>"active"</code> — видаляє його; якщо не має — додає. Повертає true якщо клас додано, false якщо видалено.',
+                starterCode: 'function toggleActive(el) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const el = document.createElement("div"); return toggleActive(el); })()', expected: 'true', desc: 'немає active → додається → true' },
+                  { expression: '(() => { const el = document.createElement("div"); el.classList.add("active"); return toggleActive(el); })()', expected: 'false', desc: 'є active → видаляється → false' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l33',
@@ -1414,7 +2034,32 @@ e.key; // 'Enter', 'Escape', 'a', ...
 
 // Документ
 'DOMContentLoaded', 'load', 'resize', 'scroll'</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l33-c1',
+                title: 'addEventListener та removeEventListener',
+                prompt: 'Оголоси функцію <strong>trackClicks(el)</strong> що повертає об\'єкт <code>{ count, stop }</code>. <code>count</code> — геттер що повертає поточну кількість кліків. <code>stop()</code> — знімає обробник.',
+                starterCode: 'function trackClicks(el) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const el = document.createElement("button"); const t = trackClicks(el); el.click(); el.click(); return t.count; })()', expected: '2', desc: '2 кліки = count 2' },
+                  { expression: '(() => { const el = document.createElement("button"); const t = trackClicks(el); t.stop(); el.click(); return t.count; })()', expected: '0', desc: 'після stop() кліки не рахуються' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l33-c2',
+                title: 'Спливання подій',
+                prompt: 'Оголоси функцію <strong>setupBubble(parent, child)</strong> що додає click listener на обидва елементи. Повертає масив <code>log</code> в який записуються рядки "parent" і "child" в порядку спрацювання (спочатку child, потім parent — bubbling).',
+                starterCode: 'function setupBubble(parent, child) {\n  const log = [];\n  // додай listeners що пишуть в log\n  return log;\n}\n',
+                tests: [
+                  { expression: '(() => { const p = document.createElement("div"); const c = document.createElement("button"); p.appendChild(c); const log = setupBubble(p, c); c.click(); return log[0]; })()', expected: 'child', desc: 'спочатку child' },
+                  { expression: '(() => { const p = document.createElement("div"); const c = document.createElement("button"); p.appendChild(c); const log = setupBubble(p, c); c.click(); return log[1]; })()', expected: 'parent', desc: 'потім parent (bubbling)' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l34',
@@ -1449,7 +2094,31 @@ list.addEventListener('click', e => {
     e.target.closest('li').classList.toggle('done');
   }
 });</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l34-c1',
+                title: 'Делегування подій',
+                prompt: 'Оголоси функцію <strong>setupList(ul)</strong> що додає ОДИН click listener на <code>ul</code>. При кліку на <code>li</code> — додає до нього клас <code>"selected"</code> і знімає з усіх інших li. Повертає ul.',
+                starterCode: 'function setupList(ul) {\n  // твій код (один listener)\n  return ul;\n}\n',
+                tests: [
+                  { expression: '(() => { const ul = document.createElement("ul"); ul.innerHTML = "<li>A</li><li>B</li><li>C</li>"; setupList(ul); ul.children[1].click(); return ul.children[1].classList.contains("selected"); })()', expected: 'true', desc: 'клікнутий li отримує "selected"' },
+                  { expression: '(() => { const ul = document.createElement("ul"); ul.innerHTML = "<li>A</li><li>B</li>"; setupList(ul); ul.children[0].click(); ul.children[1].click(); return ul.children[0].classList.contains("selected"); })()', expected: 'false', desc: 'попередній li втрачає "selected"' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l34-c2',
+                title: 'closest в делегуванні',
+                prompt: 'Оголоси функцію <strong>setupDeleteBtns(container)</strong> що додає один click listener на container. При кліку на кнопку з класом <code>"delete-btn"</code> — видаляє її батьківський <code>li</code>. Повертає container.',
+                starterCode: 'function setupDeleteBtns(container) {\n  // твій код\n  return container;\n}\n',
+                tests: [
+                  { expression: '(() => { const ul = document.createElement("ul"); ul.innerHTML = `<li>Item <button class="delete-btn">X</button></li><li>Item2</li>`; setupDeleteBtns(ul); ul.querySelector(".delete-btn").click(); return ul.children.length; })()', expected: '1', desc: 'після кліку delete-btn — li видалено' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l35',
@@ -1487,7 +2156,33 @@ emailInput.select(); // виділити текст</code></pre>
 // Вбудована валідація HTML5
 // &lt;input type="email" required minlength="3"&gt;
 form.checkValidity(); // true/false</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l35-c1',
+                title: 'Валідація форми',
+                prompt: 'Оголоси функцію <strong>validateEmail(email)</strong> що повертає true якщо рядок містить символ <code>@</code> і хоча б одну крапку після нього, інакше false.',
+                starterCode: 'function validateEmail(email) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'validateEmail("user@example.com")', expected: 'true', desc: 'валідний email' },
+                  { expression: 'validateEmail("notanemail")', expected: 'false', desc: 'немає @' },
+                  { expression: 'validateEmail("user@nodot")', expected: 'false', desc: 'немає крапки після @' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l35-c2',
+                title: 'FormData — збір даних',
+                prompt: 'Оголоси функцію <strong>getFormData(form)</strong> що повертає простий об\'єкт з усіма полями форми (через FormData та Object.fromEntries).',
+                starterCode: 'function getFormData(form) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const f = document.createElement("form"); f.innerHTML = `<input name="user" value="Alice"><input name="age" value="25">`; return getFormData(f).user; })()', expected: 'Alice', desc: 'user = "Alice"' },
+                  { expression: '(() => { const f = document.createElement("form"); f.innerHTML = `<input name="x" value="42">`; return getFormData(f).x; })()', expected: '42', desc: 'x = "42"' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -1529,7 +2224,33 @@ export * from './utils.js';</code></pre>
 <pre><code>&lt;script type="module" src="main.js"&gt;&lt;/script&gt;
 // type="module" — файл завантажується як ESM модуль
 // defer за замовчуванням, strict mode увімкнено</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l36-c1',
+                title: 'Named export та import',
+                prompt: 'Оголоси функцію <strong>createModule()</strong> що повертає об\'єкт із трьома методами: <code>add(a,b)</code>, <code>sub(a,b)</code>, <code>mul(a,b)</code>. Це симулює публічний API модуля.',
+                starterCode: 'function createModule() {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'createModule().add(3, 4)', expected: '7', desc: 'add(3,4) = 7' },
+                  { expression: 'createModule().sub(10, 3)', expected: '7', desc: 'sub(10,3) = 7' },
+                  { expression: 'createModule().mul(3, 4)', expected: '12', desc: 'mul(3,4) = 12' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l36-c2',
+                title: 'Default export патерн',
+                prompt: 'Оголоси клас <strong>Logger</strong> з методами <code>log(msg)</code> та <code>error(msg)</code>. log() повертає <code>"[LOG] " + msg</code>, error() повертає <code>"[ERROR] " + msg</code>.',
+                starterCode: 'class Logger {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'new Logger().log("hello")', expected: '[LOG] hello', desc: 'log формат' },
+                  { expression: 'new Logger().error("oops")', expected: '[ERROR] oops', desc: 'error формат' },
+                ],
+                xp: 20,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l37',
@@ -1565,7 +2286,33 @@ const { messages } = await import(\`./i18n/\${lang}.js\`);</code></pre>
 
 // Визначення шляху відносно модуля
 const workerUrl = new URL('./worker.js', import.meta.url);</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l37-c1',
+                title: 'Динамічне завантаження',
+                prompt: 'Оголоси функцію <strong>lazyLoad(condition, factory)</strong> що: якщо condition = true — викликає factory() і повертає результат, якщо false — повертає null. Це патерн lazy initialization.',
+                starterCode: 'function lazyLoad(condition, factory) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'lazyLoad(true, () => ({loaded: true})).loaded', expected: 'true', desc: 'condition=true → викликає factory' },
+                  { expression: 'lazyLoad(false, () => ({loaded: true}))', expected: 'null', desc: 'condition=false → null' },
+                  { expression: '(() => { let calls = 0; lazyLoad(true, () => { calls++; return {}; }); return calls; })()', expected: '1', desc: 'factory викликана 1 раз' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l37-c2',
+                title: 'Кешоване ліниве завантаження',
+                prompt: 'Оголоси функцію <strong>createLazy(factory)</strong> що повертає функцію-геттер. При першому виклику геттер запускає factory() і кешує результат. При повторних — повертає кеш без виклику factory.',
+                starterCode: 'function createLazy(factory) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { let n = 0; const get = createLazy(() => ++n); get(); get(); return n; })()', expected: '1', desc: 'factory викликана лише 1 раз' },
+                  { expression: '(() => { const get = createLazy(() => 99); return get(); })()', expected: '99', desc: 'повертає результат factory' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
@@ -1623,7 +2370,32 @@ class Money {
   }
 }
 +new Money(100, 'UAH'); // 100</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l38-c1',
+                title: 'Symbol як унікальний ключ',
+                prompt: 'Оголоси два символи <strong>sym1 = Symbol("id")</strong> і <strong>sym2 = Symbol("id")</strong>. Оголоси змінну <strong>equal</strong> = результат порівняння sym1 === sym2.',
+                starterCode: 'const sym1 = Symbol("id");\nconst sym2 = Symbol("id");\nconst equal = sym1 === sym2;\n',
+                tests: [
+                  { expression: 'equal', expected: 'false', desc: 'символи завжди унікальні' },
+                  { expression: 'typeof sym1', expected: 'symbol', desc: 'тип — symbol' },
+                ],
+                xp: 15,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l38-c2',
+                title: 'Ітерований об\'єкт',
+                prompt: 'Оголоси функцію <strong>makeRange(from, to)</strong> що повертає об\'єкт з [Symbol.iterator] який дозволяє ітерувати числа від from до to включно.',
+                starterCode: 'function makeRange(from, to) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '[...makeRange(1, 4)].join(",")', expected: '1,2,3,4', desc: '[1,2,3,4]' },
+                  { expression: '[...makeRange(5, 5)].join(",")', expected: '5', desc: 'один елемент' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l39',
@@ -1674,7 +2446,32 @@ const user = createValidated({
 });
 user.age = 25;    // OK
 user.age = -5;    // Error</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l39-c1',
+                title: 'Proxy — валідація типу',
+                prompt: 'Оголоси функцію <strong>typedObject(schema)</strong> що повертає Proxy. При спробі встановити властивість — перевіряє тип через schema (об\'єкт <code>{propName: "typename"}</code>). Якщо тип не відповідає — кидає TypeError.',
+                starterCode: 'function typedObject(schema) {\n  const obj = {};\n  return new Proxy(obj, {\n    set(target, key, value) {\n      // твій код\n    }\n  });\n}\n',
+                tests: [
+                  { expression: '(() => { const o = typedObject({age: "number"}); o.age = 25; return o.age; })()', expected: '25', desc: 'правильний тип — встановлюється' },
+                  { expression: '(() => { try { const o = typedObject({age: "number"}); o.age = "str"; return false; } catch(e) { return e instanceof TypeError; } })()', expected: 'true', desc: 'невірний тип → TypeError' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l39-c2',
+                title: 'Proxy — логування доступу',
+                prompt: 'Оголоси функцію <strong>logAccess(obj)</strong> що повертає Proxy який логує кожен get у масив <code>log</code>. Повертай <code>{ proxy, log }</code>.',
+                starterCode: 'function logAccess(obj) {\n  const log = [];\n  const proxy = new Proxy(obj, {\n    // твій код\n  });\n  return { proxy, log };\n}\n',
+                tests: [
+                  { expression: '(() => { const { proxy, log } = logAccess({x: 1, y: 2}); proxy.x; proxy.y; return log.length; })()', expected: '2', desc: '2 доступи в log' },
+                  { expression: '(() => { const { proxy, log } = logAccess({a: 42}); proxy.a; return log[0]; })()', expected: 'a', desc: 'log[0] = "a"' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l40',
@@ -1723,7 +2520,34 @@ const { year, month, day } = '2024-01-15'.match(namedRe).groups;</code></pre>
 'hello world'.replace(/\s+/g, '-'); // 'hello-world'
 'a,b,,c'.split(/,+/);               // ['a','b','c']
 /\d/.test('abc');                   // false</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l40-c1',
+                title: 'RegExp — валідація',
+                prompt: 'Оголоси функцію <strong>isValidPhone(phone)</strong> що повертає true якщо рядок відповідає шаблону українського номеру: починається з +38, потім 10 цифр (наприклад +380501234567).',
+                starterCode: 'function isValidPhone(phone) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'isValidPhone("+380501234567")', expected: 'true', desc: 'валідний номер' },
+                  { expression: 'isValidPhone("0501234567")', expected: 'false', desc: 'без +38' },
+                  { expression: 'isValidPhone("+38050123456")', expected: 'false', desc: '9 цифр замість 10' },
+                ],
+                xp: 25,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l40-c2',
+                title: 'RegExp — витяг даних',
+                prompt: 'Оголоси функцію <strong>extractEmails(text)</strong> що повертає масив усіх email-адрес знайдених у тексті (використай RegExp з /g флагом та match).',
+                starterCode: 'function extractEmails(text) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: 'extractEmails("Send to foo@bar.com and baz@qux.io").length', expected: '2', desc: '2 email знайдено' },
+                  { expression: 'extractEmails("Send to foo@bar.com and baz@qux.io").includes("foo@bar.com")', expected: 'true', desc: '"foo@bar.com" знайдено' },
+                  { expression: 'extractEmails("no emails here").length', expected: '0', desc: 'нема email → []' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+            ],
           },
           {
             id: 'js-l41',
@@ -1763,7 +2587,33 @@ const registry = new FinalizationRegistry(value => {
 });
 let target = {};
 registry.register(target, 'мій-об\'єкт');</code></pre>`,
-            challenges: [],
+                        challenges: [
+              {
+                id: 'js-l41-c1',
+                title: 'Виявлення витоку пам\'яті',
+                prompt: 'Оголоси функцію <strong>createLeakyTimer()</strong> що повертає об\'єкт з методами <code>start()</code> (запускає setInterval) та <code>stop()</code> (зупиняє його). Без виклику stop() — timer продовжує тікати (витік).',
+                starterCode: 'function createLeakyTimer() {\n  let intervalId = null;\n  let ticks = 0;\n  return {\n    start() {\n      // запусти setInterval що збільшує ticks\n    },\n    stop() {\n      // зупини interval\n    },\n    getTicks() { return ticks; }\n  };\n}\n',
+                tests: [
+                  { expression: '(() => { const t = createLeakyTimer(); t.stop(); return typeof t.getTicks(); })()', expected: 'number', desc: 'getTicks повертає число' },
+                  { expression: '(() => { const t = createLeakyTimer(); return typeof t.start; })()', expected: 'function', desc: 'start — функція' },
+                  { expression: '(() => { const t = createLeakyTimer(); return typeof t.stop; })()', expected: 'function', desc: 'stop — функція' },
+                ],
+                xp: 30,
+                language: 'javascript',
+              },
+              {
+                id: 'js-l41-c2',
+                title: 'WeakRef — слабке посилання',
+                prompt: 'Оголоси функцію <strong>createWeakCache(value)</strong> що повертає об\'єкт з методом <code>get()</code> який повертає значення через WeakRef (або undefined якщо зібрано GC).',
+                starterCode: 'function createWeakCache(value) {\n  // твій код\n}\n',
+                tests: [
+                  { expression: '(() => { const obj = {data: 42}; const cache = createWeakCache(obj); return cache.get().data; })()', expected: '42', desc: 'get() повертає об\'єкт' },
+                  { expression: '(() => { const cache = createWeakCache({x: 1}); return typeof cache.get; })()', expected: 'function', desc: 'get — функція' },
+                ],
+                xp: 35,
+                language: 'javascript',
+              },
+            ],
           },
         ],
       },
