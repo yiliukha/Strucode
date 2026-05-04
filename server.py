@@ -19,7 +19,9 @@ import sys
 import tempfile
 import threading
 import time
+import base64
 import urllib.request
+import uuid
 import webbrowser
 from pathlib import Path
 
@@ -547,6 +549,216 @@ def _run_java(code: str) -> dict:
 
 # ── AI News ───────────────────────────────────────────────────────────────────
 
+# ── Lesson screenshot verification ───────────────────────────────────────────
+
+_verify_jobs: dict = {}                    # job_id -> {status, message, ts}
+_verify_lock = threading.Lock()
+_verify_config = {'model': 'moondream2'}   # dedicated vision model for AI courses
+
+# Per-lesson prompts: what "completion" looks like on a screenshot
+_LESSON_VERIFY_PROMPTS = {
+
+    # ── Topic 1: Google Gemini & AI Infrastructure ────────────────────────────
+    'gemini-academy': (
+        'Look at this screenshot. Does it show a completed Google Cloud Skills Boost '
+        'course or learning path about Gemini or Generative AI? '
+        'Valid evidence: an earned digital badge, "Completed" or "Earned" label, '
+        '"Learning path complete" banner, or 100% progress on Google Cloud branding. '
+        'Answer only YES or NO.'
+    ),
+    'generative-ai-developers': (
+        'Look at this screenshot. Does it show a completed Google Cloud Skills Boost '
+        'course for "Generative AI for Developers" or a similar Generative AI path? '
+        'Valid evidence: earned badge, "Course complete" or "Path complete" banner, '
+        '100% progress bar, on Google Cloud or Google Developers branding. '
+        'Answer only YES or NO.'
+    ),
+    'google-ai-essentials': (
+        'Look at this screenshot. Does it show a Coursera certificate or completion page '
+        'for "Google AI Essentials" or a similar Google AI course? '
+        'Valid evidence: a Coursera certificate with a name on it, "Congratulations" message, '
+        'a green checkmark on the course card, or 100% course progress. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Topic 2: Coding & AI Editors ─────────────────────────────────────────
+    'cursor-docs': (
+        'Look at this screenshot. Does it show the Cursor IDE with an active AI feature? '
+        'Valid evidence: the Composer panel open (right panel with AI chat), '
+        'an "Applied" status on a code block, an inline Tab autocomplete suggestion, '
+        'or a Cursor AI code diff/edit applied in the editor. '
+        'Answer only YES or NO.'
+    ),
+    'github-copilot-skills': (
+        'Look at this screenshot. Does it show GitHub Skills or GitHub Learning Lab '
+        'with a completed exercise or step? '
+        'Valid evidence: a green checkmark on a step, "Pull request merged" success page, '
+        '"You completed this course!" banner, or a finished GitHub Actions workflow on Skills. '
+        'Answer only YES or NO.'
+    ),
+    'copilot-microsoft-learn': (
+        'Look at this screenshot. Does it show Microsoft Learn with a completed module '
+        'or achievement about GitHub Copilot? '
+        'Valid evidence: a "Module complete" or "Unit complete" banner, XP awarded badge, '
+        'a trophy icon, or 100% progress bar on Microsoft Learn branding. '
+        'Answer only YES or NO.'
+    ),
+    'windsurf-guide': (
+        'Look at this screenshot. Does it show the Windsurf IDE (by Codeium) with an active '
+        'AI feature in use? '
+        'Valid evidence: the Cascade panel open with an AI response, an AI-generated code diff '
+        'highlighted in the editor, Windsurf or Codeium logo visible, or an "Accept" button '
+        'on an AI suggestion. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Topic 3: Video Generation ─────────────────────────────────────────────
+    'runway-academy': (
+        'Look at this screenshot. Does it show Runway Academy or RunwayML with a completed '
+        'lesson or module? '
+        'Valid evidence: a blue checkmark or "Completed" label next to a lesson, '
+        '"Lesson complete" banner, a finished video in the Runway Gen-3 editor, '
+        'or a Download button on a generated video. '
+        'Answer only YES or NO.'
+    ),
+    'luma-dream-machine': (
+        'Look at this screenshot. Does it show Luma AI Dream Machine with a finished '
+        'video generation? '
+        'Valid evidence: a generated video thumbnail with a "Download" or "Extend" button, '
+        '100% generation progress, Luma AI branding visible, or a completed video in the gallery. '
+        'Answer only YES or NO.'
+    ),
+    'sora-prep-course': (
+        'Look at this screenshot. Does it show a completed course or certificate about Sora '
+        'or AI video generation on any learning platform (Great Learning, Coursera, Udemy, etc.)? '
+        'Valid evidence: a certificate with a name, "Course complete" banner, badge, '
+        'or 100% progress on a Sora/AI video course. '
+        'Answer only YES or NO.'
+    ),
+    'heygen-learning': (
+        'Look at this screenshot. Does it show HeyGen with a completed AI avatar video '
+        'or a finished tutorial? '
+        'Valid evidence: a generated avatar video ready to download, HeyGen branding, '
+        '"Export" or "Download" button on a finished video, or a "Video ready" notification. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Topic 4: Design & Images ─────────────────────────────────────────────
+    'midjourney-guide': (
+        'Look at this screenshot. Does it show Midjourney with a successfully generated image? '
+        'Valid evidence: a 2x2 grid of 4 images with U1 U2 U3 U4 and V1 V2 V3 V4 buttons below, '
+        'or a single upscaled image on midjourney.com or in Discord with Midjourney bot branding. '
+        'Answer only YES or NO.'
+    ),
+    'adobe-firefly': (
+        'Look at this screenshot. Does it show Adobe Firefly or Adobe Photoshop Generative Fill '
+        'with a successfully generated image or a completed Adobe tutorial? '
+        'Valid evidence: a Firefly-generated image in the interface, Adobe branding, '
+        'a "Generate" result, Generative Fill layers panel, or a completed Adobe Learn tutorial. '
+        'Answer only YES or NO.'
+    ),
+    'canva-design-school': (
+        'Look at this screenshot. Does it show Canva with an AI-generated design or a completed '
+        'Canva Design School lesson? '
+        'Valid evidence: Magic Studio panel with a generated result, Canva branding, '
+        '"Text to Image" or "Magic Media" result, or a completed lesson checkmark in Canva Design School. '
+        'Answer only YES or NO.'
+    ),
+    'stable-diffusion': (
+        'Look at this screenshot. Does it show a Stable Diffusion interface (AUTOMATIC1111, ComfyUI, '
+        'or Civitai) with a successfully generated image? '
+        'Valid evidence: a generated image in txt2img or img2img result area, '
+        'a ComfyUI node graph with completed output, or a Civitai tutorial page at the end. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Topic 5: AI Agents & Bots ─────────────────────────────────────────────
+    'deeplearning-ai': (
+        'Look at this screenshot. Does it show a DeepLearning.AI course certificate '
+        'or completion page on Coursera? '
+        'Valid evidence: a Coursera certificate with "DeepLearning.AI" and a name, '
+        '"Congratulations" message, a green checkmark on a course card, '
+        'or 100% progress on a DeepLearning.AI short course. '
+        'Answer only YES or NO.'
+    ),
+    'langchain-academy': (
+        'Look at this screenshot. Does it show LangChain Academy with a completed module '
+        'or course? '
+        'Valid evidence: a "Module complete" indicator, LangChain Academy branding with progress, '
+        'a certificate page, or a completed lesson list with checkmarks. '
+        'Answer only YES or NO.'
+    ),
+    'crewai-examples': (
+        'Look at this screenshot. Does it show a terminal or code editor with CrewAI '
+        'agent execution output? '
+        'Valid evidence: terminal output showing "Crew execution complete", agent task results, '
+        'Python code with crewai import running successfully, or a CrewAI workflow result in terminal. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Topic 6: Search & Research ────────────────────────────────────────────
+    'anthropic-cookbooks': (
+        'Look at this screenshot. Does it show a Jupyter Notebook or Google Colab with '
+        'an Anthropic Claude API response? '
+        'Valid evidence: a notebook output cell containing Claude API JSON response, '
+        'an "anthropic" import at the top, a completed code cell with AI-generated text output, '
+        'or a Colab/Jupyter interface with Claude response visible. '
+        'Answer only YES or NO.'
+    ),
+    'perplexity-guides': (
+        'Look at this screenshot. Does it show Perplexity AI with a completed Pro Search result? '
+        'Valid evidence: a Perplexity answer page with multiple cited sources listed, '
+        'a "Pro Search" indicator, an in-depth research answer with numbered references, '
+        'or Perplexity branding with a detailed multi-paragraph AI response. '
+        'Answer only YES or NO.'
+    ),
+
+    # ── Fallback ──────────────────────────────────────────────────────────────
+    '_default': (
+        'Look at this screenshot. Does it show that the user completed an online AI course, '
+        'tutorial, or successfully used an AI tool? '
+        'Valid evidence: a certificate, badge, "Completed" or "Congratulations" message, '
+        '100% progress bar, a generated AI result, or a "Course complete" indicator. '
+        'Answer only YES or NO.'
+    ),
+}
+
+
+def _run_vision_verify(job_id: str, image_bytes: bytes, lesson_id: str):
+    prompt = _LESSON_VERIFY_PROMPTS.get(lesson_id, _LESSON_VERIFY_PROMPTS['_default'])
+    model = _verify_config['model']
+    try:
+        img_b64 = base64.b64encode(image_bytes).decode('utf-8')
+        payload = json.dumps({
+            'model': model,
+            'messages': [{'role': 'user', 'content': prompt, 'images': [img_b64]}],
+            'stream': False,
+        }).encode()
+        req = urllib.request.Request(
+            'http://localhost:11434/api/chat',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read())
+        reply = data.get('message', {}).get('content', '').upper()
+        confirmed = 'YES' in reply
+        result = {
+            'status': 'confirmed' if confirmed else 'rejected',
+            'message': 'Урок підтверджено! +XP нараховано.' if confirmed
+                       else 'Скріншот не підтверджує завершення. Завантаж інший і спробуй ще раз.',
+            'ts': time.time(),
+        }
+    except Exception as e:
+        log.error('verify job %s failed: %s', job_id, e)
+        result = {'status': 'error', 'message': f'Помилка перевірки: {e}', 'ts': time.time()}
+    with _verify_lock:
+        _verify_jobs[job_id] = result
+
+
+# ── AI News ───────────────────────────────────────────────────────────────────
+
 _NEWS_CACHE_TTL = 300          # 5 minutes
 _NEWS_MAX_AGE   = 2 * 86400    # drop articles older than 2 days
 _news_cache: dict = {'data': [], 'fetched_at': 0.0, 'fetching': False}
@@ -757,6 +969,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._json(_check_java())
         elif path == '/api/ai-news':
             self._ai_news()
+        elif path == '/api/verify-status':
+            self._verify_status()
+        elif path == '/api/verify-model':
+            self._verify_model_get()
         else:
             super().do_GET()
 
@@ -778,6 +994,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._uninstall_ollama()
         elif path == '/api/uninstall-app':
             self._uninstall_app()
+        elif path == '/api/verify-lesson':
+            self._verify_lesson()
+        elif path == '/api/verify-model':
+            self._verify_model_set()
         else:
             self.send_error(404)
 
@@ -831,6 +1051,70 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._json(result)
         except Exception as e:
             self._json({'output': '', 'results': [], 'passed': False, 'error': str(e)})
+
+    # ── /api/verify-lesson  POST {image_base64, lesson_id} ───────────────────
+    def _verify_lesson(self):
+        try:
+            body = self._read_body()
+            img_b64 = body.get('image_base64', '')
+            lesson_id = body.get('lesson_id', '_default')
+            if not img_b64:
+                return self._json({'error': 'image_base64 required'})
+            try:
+                image_bytes = base64.b64decode(img_b64)
+            except Exception:
+                return self._json({'error': 'invalid base64'})
+
+            # clean up jobs older than 30 min
+            now = time.time()
+            with _verify_lock:
+                stale = [k for k, v in _verify_jobs.items() if now - v.get('ts', 0) > 1800]
+                for k in stale:
+                    del _verify_jobs[k]
+
+            job_id = str(uuid.uuid4())
+            with _verify_lock:
+                _verify_jobs[job_id] = {'status': 'pending', 'message': 'Аналізую скріншот…', 'ts': now}
+
+            threading.Thread(
+                target=_run_vision_verify,
+                args=(job_id, image_bytes, lesson_id),
+                daemon=True,
+            ).start()
+            self._json({'job_id': job_id, 'status': 'pending'})
+        except Exception as e:
+            self._json({'error': str(e)})
+
+    # ── /api/verify-status  GET ?job_id=xxx ──────────────────────────────────
+    def _verify_status(self):
+        qs = self.path.split('?', 1)[1] if '?' in self.path else ''
+        job_id = ''
+        for part in qs.split('&'):
+            if part.startswith('job_id='):
+                job_id = part[7:]
+                break
+        if not job_id:
+            return self._json({'error': 'job_id required'})
+        with _verify_lock:
+            job = _verify_jobs.get(job_id)
+        if not job:
+            return self._json({'error': 'job not found'})
+        self._json(job)
+
+    # ── /api/verify-model  GET / POST {model} ────────────────────────────────
+    def _verify_model_get(self):
+        self._json({'model': _verify_config['model']})
+
+    def _verify_model_set(self):
+        try:
+            body = self._read_body()
+            model = body.get('model', '').strip()
+            if not model:
+                return self._json({'ok': False, 'error': 'model required'})
+            _verify_config['model'] = model
+            self._json({'ok': True, 'model': model})
+        except Exception as e:
+            self._json({'ok': False, 'error': str(e)})
 
     # ── Ollama endpoints ─────────────────────────────────────────────────────
 

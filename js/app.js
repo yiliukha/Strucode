@@ -646,6 +646,52 @@ async function _renderOllamaSettings() {
   ctrl.appendChild(popGrid);
 
   _loadInstalledModels(modelList, popGrid);
+
+  // ── AI Course verify model ──────────────────────────────────────────────
+  const verifyLabel = document.createElement('div');
+  verifyLabel.className = 'settings-label';
+  verifyLabel.style.marginTop = '20px';
+  verifyLabel.textContent = t('settings_verify_model_label') || 'Модель для перевірки AI курсів';
+  ctrl.appendChild(verifyLabel);
+
+  const verifyHint = document.createElement('div');
+  verifyHint.style.cssText = 'font-size:12px;color:var(--text2);margin-bottom:8px';
+  verifyHint.textContent = t('settings_verify_model_hint') || 'Використовується для аналізу скріншотів при проходженні AI Basic курсів. Рекомендовано: moondream2';
+  ctrl.appendChild(verifyHint);
+
+  const verifyRow = document.createElement('div');
+  verifyRow.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+
+  const verifyInput = document.createElement('input');
+  verifyInput.type = 'text';
+  verifyInput.style.cssText = 'flex:1;min-width:160px;max-width:260px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px';
+  verifyInput.placeholder = 'moondream2';
+
+  const verifySaveBtn = _makeBtn('btn-secondary', t('settings_verify_model_save') || 'Зберегти', async () => {
+    const m = verifyInput.value.trim();
+    if (!m) return;
+    verifySaveBtn.textContent = '⟳';
+    verifySaveBtn.disabled = true;
+    try {
+      const resp = await fetch('/api/verify-model', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: m }),
+      });
+      const { ok, error } = await resp.json();
+      if (ok) toast(`AI-верифікація: модель змінено на «${m}»`);
+      else toast('Помилка: ' + error);
+    } catch (e) { toast('Помилка: ' + e.message); }
+    verifySaveBtn.textContent = t('settings_verify_model_save') || 'Зберегти';
+    verifySaveBtn.disabled = false;
+  });
+
+  verifyRow.append(verifyInput, verifySaveBtn);
+  ctrl.appendChild(verifyRow);
+
+  // load current model
+  fetch('/api/verify-model').then(r => r.json()).then(({ model }) => {
+    if (model) verifyInput.value = model;
+  }).catch(() => {});
 }
 
 async function _loadInstalledModels(container, popGrid) {
