@@ -7642,17 +7642,17 @@ def _private_func(): pass  # не потрапить у __all__</code></pre>`,
 
   ai_basics: {
     id: 'ai_basics',
-    name: 'AI Basics',
+    name: 'AI Foundation',
     icon: '🧠',
     logo: 'icons/langs/ai_basics.svg',
     color: '#a855f7',
-    desc: 'Як працюють LLM, як писати промпти і перевіряти відповіді AI.',
+    desc: 'Від основ LLM до реальних AI-інструментів: редактори, відео, дизайн, агенти.',
     language: 'javascript',
     locked: false,
     modules: [
       {
         id: 'ai-intro',
-        title: 'Розуміння AI',
+        title: 'Основи AI',
         icon: '🤔',
         lessons: [
           {
@@ -7779,6 +7779,420 @@ curl http://localhost:11434/api/chat -d \'{
                 language: 'javascript',
               },
             ],
+          },
+        ],
+      },
+
+      // ── Module 2: Google Gemini & AI-інфраструктура ─────────────────────────
+      {
+        id: 'ai-gemini',
+        title: 'Google Gemini & AI-інфраструктура',
+        icon: '🔷',
+        lessons: [
+          {
+            id: 'ai-f-gemini-academy',
+            title: 'Gemini Academy — Google Developers',
+            theory: `<h2>Gemini Academy (Google Developers)</h2>
+<p>Офіційний навчальний портал Google для вивчення Gemini API, Vertex AI та інтеграції моделей у застосунки.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Gemini API: генерація тексту, multimodal (текст + зображення)</li>
+  <li>Vertex AI Studio — хмарна платформа для дослідження та деплою моделей</li>
+  <li>Function calling та структуровані відповіді від Gemini</li>
+  <li>Безпечне використання AI (safety filters, responsible AI)</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://ai.google.dev/learn" target="_blank">ai.google.dev/learn</a> — Google AI for Developers</p>
+<h3>Підтвердження</h3>
+<p>Після завершення навчального шляху отримай бейдж або скріншот 100% прогресу та завантаж нижче.</p>`,
+            screenshotVerify: { lessonId: 'gemini-academy', xp: 100 },
+          },
+          {
+            id: 'ai-f-gen-ai-dev',
+            title: 'Generative AI for Developers — Google Cloud',
+            theory: `<h2>Generative AI for Developers (Google Cloud Skills Boost)</h2>
+<p>Поглиблений навчальний шлях на Google Cloud Skills Boost про роботу з великими мовними моделями (LLM) в хмарному середовищі.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Архітектура LLM: трансформери, attention, токенізація</li>
+  <li>Prompt design для Gemini та PaLM моделей</li>
+  <li>Encoder-Decoder та Encoder-only моделі</li>
+  <li>Туніровка моделей (fine-tuning) на власних даних</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://cloudskillsboost.google/paths/183" target="_blank">cloudskillsboost.google</a> — Generative AI Learning Path</p>
+<h3>Підтвердження</h3>
+<p>Завантаж скріншот заробленого бейджа або сторінки "Learning path complete".</p>`,
+            screenshotVerify: { lessonId: 'generative-ai-developers', xp: 100 },
+          },
+          {
+            id: 'ai-f-google-essentials',
+            title: 'Google AI Essentials — Coursera',
+            theory: `<h2>Google AI Essentials (Coursera)</h2>
+<p>Практичний курс від Google: як використовувати Gemini та AI-інструменти в щоденній роботі без технічних знань.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Використання Gemini для автоматизації рутинних задач</li>
+  <li>Написання ефективних промптів (prompt engineering basics)</li>
+  <li>AI у Google Workspace (Docs, Sheets, Gmail)</li>
+  <li>Відповідальне використання AI на робочому місці</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.coursera.org/learn/google-ai-essentials" target="_blank">coursera.org — Google AI Essentials</a></p>
+<h3>Підтвердження</h3>
+<p>Завантаж сертифікат Coursera або скріншот сторінки з "Congratulations".</p>`,
+            screenshotVerify: { lessonId: 'google-ai-essentials', xp: 100 },
+          },
+        ],
+      },
+
+      // ── Module 3: Кодинг та AI-редактори ───────────────────────────────────
+      {
+        id: 'ai-coding-tools',
+        title: 'Кодинг та AI-редактори',
+        icon: '⌨️',
+        lessons: [
+          {
+            id: 'ai-f-cursor',
+            title: 'Cursor — AI-редактор коду',
+            theory: `<h2>Cursor (cursor.com)</h2>
+<p>Cursor — IDE на основі VS Code, де AI вбудований у кожен аспект: автодоповнення, чат, Composer для великих правок.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li><strong>Tab-completion</strong> — AI передбачає наступний рядок коду</li>
+  <li><strong>Composer (Ctrl+I)</strong> — пишеш задачу природною мовою, AI редагує файли</li>
+  <li><strong>Chat (Ctrl+L)</strong> — задаєш питання про свій код</li>
+  <li><strong>Codebase indexing</strong> — AI "знає" весь твій проект</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://docs.cursor.com/get-started/migrate-from-vscode" target="_blank">docs.cursor.com</a> — офіційна документація</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот Cursor із відкритою панеллю Composer або з результатом "Applied" на AI-правці в коді.</p>`,
+            screenshotVerify: { lessonId: 'cursor-docs', xp: 80 },
+          },
+          {
+            id: 'ai-f-gh-copilot-skills',
+            title: 'GitHub Copilot Skills — Інтерактивні вправи',
+            theory: `<h2>GitHub Copilot Skills (skills.github.com)</h2>
+<p>Офіційні інтерактивні курси GitHub — ти форкаєш репозиторій і виконуєш завдання з Copilot прямо в GitHub.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Базові поради від Copilot в редакторі</li>
+  <li>GitHub Copilot Chat у VS Code та JetBrains</li>
+  <li>Slash-команди: /explain, /fix, /test</li>
+  <li>Copilot для написання тестів та документації</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://skills.github.com" target="_blank">skills.github.com</a> — GitHub Skills</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот успішно завершеного кроку або "Pull request merged" на GitHub Skills.</p>`,
+            screenshotVerify: { lessonId: 'github-copilot-skills', xp: 80 },
+          },
+          {
+            id: 'ai-f-copilot-ms-learn',
+            title: 'Copilot for Developers — Microsoft Learn',
+            theory: `<h2>GitHub Copilot — Microsoft Learn</h2>
+<p>Офіційний навчальний шлях від Microsoft з роботи з GitHub Copilot в VS Code та IDE-інтеграціях.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Налаштування Copilot у VS Code</li>
+  <li>Ефективні коментарі для кращих підказок</li>
+  <li>Copilot Chat: пояснення коду, рефакторинг</li>
+  <li>Безпека та конфіденційність при роботі з Copilot</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://learn.microsoft.com/training/paths/copilot/" target="_blank">learn.microsoft.com</a> — GitHub Copilot Learning Path</p>
+<h3>Підтвердження</h3>
+<p>Завантаж скріншот завершеного модуля з позначкою XP або Trophy на Microsoft Learn.</p>`,
+            screenshotVerify: { lessonId: 'copilot-microsoft-learn', xp: 80 },
+          },
+          {
+            id: 'ai-f-windsurf',
+            title: 'Windsurf Guide — Codeium',
+            theory: `<h2>Windsurf (Codeium)</h2>
+<p>Windsurf — конкурент Cursor від Codeium з унікальним агентом Cascade, що розуміє контекст всього проекту.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li><strong>Cascade</strong> — AI-агент що читає та редагує файли автономно</li>
+  <li>Supercomplete — розумне автодоповнення кількох рядків</li>
+  <li>Контекстне "розуміння" репозиторію (без явного вказування файлів)</li>
+  <li>Порівняння з Cursor: коли який інструмент кращий</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://codeium.com/windsurf" target="_blank">codeium.com/windsurf</a> — Windsurf офіційний сайт</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот Windsurf із відкритою панеллю Cascade або AI-підказкою в редакторі.</p>`,
+            screenshotVerify: { lessonId: 'windsurf-guide', xp: 80 },
+          },
+        ],
+      },
+
+      // ── Module 4: Відеогенерація ────────────────────────────────────────────
+      {
+        id: 'ai-video-gen',
+        title: 'Відеогенерація',
+        icon: '🎬',
+        lessons: [
+          {
+            id: 'ai-f-runway',
+            title: 'Runway Academy — Gen-3 Alpha',
+            theory: `<h2>Runway Academy (RunwayML)</h2>
+<p>Runway — лідер AI-відеогенерації. Gen-3 Alpha може створювати кінематографічні сцени з текстового опису.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Text-to-video: як писати промпти для відеогенерації</li>
+  <li>Image-to-video: оживлення статичних зображень</li>
+  <li>Motion Brush — ручне визначення траєкторій руху</li>
+  <li>Gen-3 Alpha Turbo — швидша і дешевша версія</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://academy.runwayml.com" target="_blank">academy.runwayml.com</a> — Runway Academy</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот завершеного уроку з checkmark або готового згенерованого відео з кнопкою Download.</p>`,
+            screenshotVerify: { lessonId: 'runway-academy', xp: 90 },
+          },
+          {
+            id: 'ai-f-luma',
+            title: 'Luma Dream Machine — Реалістичне відео',
+            theory: `<h2>Luma AI Dream Machine</h2>
+<p>Dream Machine від Luma AI — генерує фотореалістичні відео з тексту або зображення. Безкоштовний ліміт є.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Text-to-video з фізично коректними рухами</li>
+  <li>Image-to-video: додавання руху до фото</li>
+  <li>Extend Video — продовжити вже згенероване відео</li>
+  <li>Loop — створення безшовних петель для контенту</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://lumalabs.ai/dream-machine" target="_blank">lumalabs.ai/dream-machine</a></p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот галереї Dream Machine із готовим відео та кнопкою Download або Extend.</p>`,
+            screenshotVerify: { lessonId: 'luma-dream-machine', xp: 90 },
+          },
+          {
+            id: 'ai-f-sora',
+            title: 'Sora Prep Course — Відеогенерація від OpenAI',
+            theory: `<h2>Sora (OpenAI) — Вступний курс</h2>
+<p>Sora — модель OpenAI для відеогенерації до 60 секунд. Розуміє фізику реального світу та складні сцени.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Як Sora відрізняється від Runway та Luma</li>
+  <li>Структура промпту: сцена, камера, освітлення, настрій</li>
+  <li>Storyboard режим — кілька сцен в одному відео</li>
+  <li>Remix та Blend існуючих відео</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://openai.com/sora" target="_blank">openai.com/sora</a> — офіційний сайт Sora</p>
+<h3>Підтвердження</h3>
+<p>Завантаж сертифікат або скріншот завершення будь-якого Sora/AI-відео курсу (Great Learning, Coursera, тощо).</p>`,
+            screenshotVerify: { lessonId: 'sora-prep-course', xp: 90 },
+          },
+          {
+            id: 'ai-f-heygen',
+            title: 'HeyGen — AI-аватари та переклад відео',
+            theory: `<h2>HeyGen Learning Center</h2>
+<p>HeyGen дозволяє створювати відео з AI-аватарами, що говорять будь-якою мовою, а також перекладати існуючі відео зі збереженням голосу.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Створення персонального AI-аватара (свій клон)</li>
+  <li>Video Translate — переклад відео з lip-sync</li>
+  <li>Interactive Avatar — аватар що відповідає на запитання в реальному часі</li>
+  <li>Шаблони для маркетингових та навчальних відео</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.heygen.com" target="_blank">heygen.com</a> — HeyGen офіційний сайт</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот готового AI-відео в HeyGen із кнопкою Export або Download.</p>`,
+            screenshotVerify: { lessonId: 'heygen-learning', xp: 90 },
+          },
+        ],
+      },
+
+      // ── Module 5: Дизайн та Зображення ─────────────────────────────────────
+      {
+        id: 'ai-design',
+        title: 'Дизайн та Зображення',
+        icon: '🎨',
+        lessons: [
+          {
+            id: 'ai-f-midjourney',
+            title: 'Midjourney Guide — Генерація зображень',
+            theory: `<h2>Midjourney (офіційна документація)</h2>
+<p>Midjourney — найпопулярніший генератор зображень. Доступний через Discord або midjourney.com.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Структура промпту: тема, стиль, параметри</li>
+  <li><code>--ar 16:9</code> — співвідношення сторін, <code>--v 6.1</code> — версія моделі</li>
+  <li><code>--style raw</code> — менш стилізовані, реалістичніші результати</li>
+  <li>Upscale (U1-U4) та Variation (V1-V4) для ітерації</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://docs.midjourney.com" target="_blank">docs.midjourney.com</a> — офіційна документація</p>
+<h3>Підтвердження</h3>
+<p>Згенеруй зображення і зроби скріншот результату: сітка 2×2 із кнопками U1-U4 та V1-V4.</p>`,
+            screenshotVerify: { lessonId: 'midjourney-guide', xp: 80 },
+          },
+          {
+            id: 'ai-f-firefly',
+            title: 'Adobe Firefly — AI у Photoshop',
+            theory: `<h2>Adobe Firefly Tutorials (Adobe)</h2>
+<p>Adobe Firefly — AI-генерація вбудована в Photoshop (Generative Fill), Illustrator та окремий веб-сайт.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li><strong>Generative Fill</strong> — заміна/доповнення частин фото в Photoshop</li>
+  <li><strong>Text to Image</strong> — генерація з тексту прямо в Firefly.adobe.com</li>
+  <li><strong>Generative Expand</strong> — розширення меж зображення</li>
+  <li>Generative Recolor у Illustrator для векторної графіки</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://firefly.adobe.com" target="_blank">firefly.adobe.com</a> — Adobe Firefly</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот результату в Firefly або Photoshop з Generative Fill — має бути видно згенерований контент.</p>`,
+            screenshotVerify: { lessonId: 'adobe-firefly', xp: 80 },
+          },
+          {
+            id: 'ai-f-canva',
+            title: 'Canva Design School — Magic Studio',
+            theory: `<h2>Canva Design School (AI-функції)</h2>
+<p>Canva Magic Studio включає Text to Image, Magic Write, Background Remover та інші AI-функції прямо в редакторі.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li><strong>Magic Media</strong> — Text to Image та Text to Video в Canva</li>
+  <li><strong>Magic Write</strong> — AI для написання тексту до дизайну</li>
+  <li><strong>Background Remover</strong> — видалення фону одним кліком</li>
+  <li>Magic Resize — адаптація дизайну під різні формати</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.canva.com/designschool" target="_blank">canva.com/designschool</a> — Canva Design School</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот завершеного дизайну з AI-елементом або сторінки завершеного уроку в Design School.</p>`,
+            screenshotVerify: { lessonId: 'canva-design-school', xp: 80 },
+          },
+          {
+            id: 'ai-f-stable-diffusion',
+            title: 'Stable Diffusion — Локальна генерація (Civitai)',
+            theory: `<h2>Stable Diffusion Academy (Civitai Education)</h2>
+<p>Stable Diffusion — open-source модель, яку можна запускати локально через AUTOMATIC1111 або ComfyUI. Civitai — найбільша спільнота з навчанням.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Встановлення AUTOMATIC1111 або ComfyUI</li>
+  <li>txt2img, img2img — основні режими генерації</li>
+  <li>Negative prompt — що виключити із зображення</li>
+  <li>LoRA та ControlNet — тонке налаштування стилю та пози</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://education.civitai.com" target="_blank">education.civitai.com</a> — Civitai Education</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот згенерованого зображення в AUTOMATIC1111, ComfyUI або на civitai.com.</p>`,
+            screenshotVerify: { lessonId: 'stable-diffusion', xp: 80 },
+          },
+        ],
+      },
+
+      // ── Module 6: AI Агенти та Боти ─────────────────────────────────────────
+      {
+        id: 'ai-agents',
+        title: 'AI Агенти та Боти',
+        icon: '🤖',
+        lessons: [
+          {
+            id: 'ai-f-deeplearning',
+            title: 'DeepLearning.AI Short Courses',
+            theory: `<h2>DeepLearning.AI Short Courses</h2>
+<p>Мікрокурси (1-2 год) від Andrew Ng спільно з Anthropic, OpenAI та LangChain. Практичний код у Jupyter Notebook.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>AI Agents with LangGraph — побудова multi-step агентів</li>
+  <li>Multi AI Agent Systems with CrewAI</li>
+  <li>Building with Anthropic API (prompt caching, tools)</li>
+  <li>LangChain for LLM Application Development</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.deeplearning.ai/short-courses" target="_blank">deeplearning.ai/short-courses</a></p>
+<h3>Підтвердження</h3>
+<p>Завантаж сертифікат Coursera/DeepLearning.AI або скріншот 100% прогресу на будь-якому short course.</p>`,
+            screenshotVerify: { lessonId: 'deeplearning-ai', xp: 120 },
+          },
+          {
+            id: 'ai-f-langchain',
+            title: 'LangChain Academy — AI-ланцюжки',
+            theory: `<h2>LangChain Academy</h2>
+<p>Офіційна академія LangChain: від базових chains до складних multi-agent систем з LangGraph.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>LangChain Expression Language (LCEL) — декларативні chains</li>
+  <li>RAG (Retrieval Augmented Generation) — AI з пошуком по документах</li>
+  <li>LangGraph — stateful агенти з пам'яттю та розгалуженнями</li>
+  <li>LangSmith — debugging та моніторинг LLM-застосунків</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://academy.langchain.com" target="_blank">academy.langchain.com</a> — LangChain Academy</p>
+<h3>Підтвердження</h3>
+<p>Завантаж скріншот завершеного модуля або сертифікату з LangChain Academy.</p>`,
+            screenshotVerify: { lessonId: 'langchain-academy', xp: 120 },
+          },
+          {
+            id: 'ai-f-crewai',
+            title: 'CrewAI — Мультиагентні системи',
+            theory: `<h2>CrewAI Examples (GitHub)</h2>
+<p>CrewAI — фреймворк для побудови команд AI-агентів. Кожен агент має роль, інструменти та задачу.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Crew, Agent, Task — основні концепції CrewAI</li>
+  <li>Tools: WebSearch, CodeInterpreter, FileWrite</li>
+  <li>Sequential та Hierarchical процеси виконання</li>
+  <li>Готові приклади: Research Crew, Content Pipeline, Trip Planner</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://github.com/crewAIInc/crewAI-examples" target="_blank">github.com/crewAIInc/crewAI-examples</a></p>
+<h3>Підтвердження</h3>
+<p>Запусти будь-який CrewAI приклад і зроби скріншот виводу в терміналі з результатами виконання агентів.</p>`,
+            screenshotVerify: { lessonId: 'crewai-examples', xp: 120 },
+          },
+        ],
+      },
+
+      // ── Module 7: Пошук та Дослідження ─────────────────────────────────────
+      {
+        id: 'ai-research',
+        title: 'Пошук та Дослідження',
+        icon: '🔍',
+        lessons: [
+          {
+            id: 'ai-f-cookbooks',
+            title: 'Anthropic Cookbooks — Claude API',
+            theory: `<h2>Anthropic Cookbooks (GitHub)</h2>
+<p>Офіційна збірка практичних прикладів від Anthropic: як використовувати Claude API для реальних задач.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Basic API usage: messages, system prompt, temperature</li>
+  <li>Tool use (function calling) — Claude викликає зовнішні функції</li>
+  <li>Prompt caching — економія токенів та прискорення відповідей</li>
+  <li>Vision (зображення), PDF-аналіз, batch processing</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://github.com/anthropics/anthropic-cookbook" target="_blank">github.com/anthropics/anthropic-cookbook</a></p>
+<h3>Підтвердження</h3>
+<p>Запусти будь-який notebook з Anthropic Cookbooks у Colab/Jupyter та зроби скріншот Output-блоку з відповіддю Claude API.</p>`,
+            screenshotVerify: { lessonId: 'anthropic-cookbooks', xp: 100 },
+          },
+          {
+            id: 'ai-f-perplexity',
+            title: 'Perplexity — AI-дослідження',
+            theory: `<h2>Perplexity AI — Pro Search</h2>
+<p>Perplexity — AI-пошуковик що дає відповіді з посиланнями на джерела. Pro Search розкладає складні запити на кілька кроків.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Pro Search — пошук з плануванням і підзапитами</li>
+  <li>Spaces — персональні AI-сховища знань з RAG</li>
+  <li>Focus: Academic, YouTube, Reddit — пошук по специфічних джерелах</li>
+  <li>Porcelain prompting — як формулювати дослідницькі запити</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.perplexity.ai" target="_blank">perplexity.ai</a> — Perplexity AI</p>
+<h3>Підтвердження</h3>
+<p>Зроби складний дослідницький запит через Pro Search і зроби скріншот відповіді з кількома пронумерованими джерелами.</p>`,
+            screenshotVerify: { lessonId: 'perplexity-guides', xp: 100 },
           },
         ],
       },

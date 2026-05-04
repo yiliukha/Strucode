@@ -7,6 +7,7 @@ let _state = {
   streak: 0,
   lastActivity: null,
   completedChallenges: [],
+  verifiedLessons: [],
   hearts: 3,
   theme: 'dark',
   aiModel: 'llama3.2:3b',
@@ -94,9 +95,13 @@ function _showContinuePopup(course, onYes, onNo) {
   if (!lastLesson) {
     for (const mod of course.modules) {
       for (const l of mod.lessons) {
-        const total = l.challenges ? l.challenges.length : 0;
-        const done  = l.challenges ? l.challenges.filter(c => _state.completedChallenges.includes(c.id)).length : 0;
-        if (total > 0 && done < total) { lastLesson = l; break; }
+        if (l.screenshotVerify) {
+          if (!_state.verifiedLessons.includes(l.id)) { lastLesson = l; break; }
+        } else {
+          const total = l.challenges ? l.challenges.length : 0;
+          const done  = l.challenges ? l.challenges.filter(c => _state.completedChallenges.includes(c.id)).length : 0;
+          if (total > 0 && done < total) { lastLesson = l; break; }
+        }
       }
       if (lastLesson) break;
     }
@@ -452,19 +457,26 @@ function renderModules(course, container) {
 
 function renderLessons(course, mod, container) {
   mod.lessons.forEach(lesson => {
-    const totalChallenges = lesson.challenges ? lesson.challenges.length : 0;
-    const doneChallenges = lesson.challenges
-      ? lesson.challenges.filter(c => _state.completedChallenges.includes(c.id)).length
-      : 0;
-    const isDone = totalChallenges > 0 && doneChallenges === totalChallenges;
-    const xpTotal = lesson.challenges ? lesson.challenges.reduce((s, c) => s + (c.xp || 0), 0) : 0;
+    let isDone, xpTotal, progressLabel;
+    if (lesson.screenshotVerify) {
+      isDone = _state.verifiedLessons.includes(lesson.id);
+      xpTotal = lesson.screenshotVerify.xp || 0;
+      progressLabel = isDone ? '✅' : '📸';
+    } else {
+      const totalChallenges = lesson.challenges ? lesson.challenges.length : 0;
+      const doneChallenges = lesson.challenges
+        ? lesson.challenges.filter(c => _state.completedChallenges.includes(c.id)).length
+        : 0;
+      isDone = totalChallenges > 0 && doneChallenges === totalChallenges;
+      xpTotal = lesson.challenges ? lesson.challenges.reduce((s, c) => s + (c.xp || 0), 0) : 0;
+      progressLabel = isDone ? '✅' : '📖';
+    }
 
     const item = document.createElement('div');
     item.className = 'lesson-item' + (isDone ? ' completed' : '');
     item.innerHTML = `
-      <span class="lesson-status">${isDone ? '✅' : '📖'}</span>
+      <span class="lesson-status">${progressLabel}</span>
       <span class="lesson-name">${lesson.title}</span>
-      <span style="font-size:11px;color:var(--text2)">${doneChallenges}/${totalChallenges}</span>
       <span class="lesson-xp">+${xpTotal} XP</span>`;
     item.addEventListener('click', () => openLesson(course, lesson));
     container.appendChild(item);
@@ -484,24 +496,110 @@ function openLesson(course, lesson) {
   updateHeartsDisplay();
   _updateCourseXpStrip(course.id);
 
-  const challengeList = document.getElementById('challenge-list');
-  challengeList.innerHTML = '';
-  (lesson.challenges || []).forEach(challenge => {
-    const done = _state.completedChallenges.includes(challenge.id);
-    const item = document.createElement('div');
-    item.className = 'challenge-list-item' + (done ? ' done' : '');
-    item.innerHTML = `
-      <span class="cli-icon">${done ? '✅' : '💻'}</span>
-      <div class="cli-info">
-        <div class="cli-name">${challenge.title}</div>
-        <div class="cli-meta">${challenge.language || course.language} · ${challenge.tests ? challenge.tests.length + ' тест(ів)' : ''}</div>
-      </div>
-      <span class="cli-xp">+${challenge.xp} XP</span>`;
-    item.addEventListener('click', () => openChallenge(challenge));
-    challengeList.appendChild(item);
-  });
+  const challengesBlock = document.getElementById('lesson-challenges-block');
+  const screenshotSection = document.getElementById('screenshot-verify-section');
+
+  if (lesson.screenshotVerify) {
+    challengesBlock.style.display = 'none';
+    screenshotSection.style.display = 'block';
+    _renderScreenshotVerify(lesson, document.getElementById('screenshot-verify-body'));
+  } else {
+    challengesBlock.style.display = '';
+    screenshotSection.style.display = 'none';
+    const challengeList = document.getElementById('challenge-list');
+    challengeList.innerHTML = '';
+    (lesson.challenges || []).forEach(challenge => {
+      const done = _state.completedChallenges.includes(challenge.id);
+      const item = document.createElement('div');
+      item.className = 'challenge-list-item' + (done ? ' done' : '');
+      item.innerHTML = `
+        <span class="cli-icon">${done ? '✅' : '💻'}</span>
+        <div class="cli-info">
+          <div class="cli-name">${challenge.title}</div>
+          <div class="cli-meta">${challenge.language || course.language} · ${challenge.tests ? challenge.tests.length + ' тест(ів)' : ''}</div>
+        </div>
+        <span class="cli-xp">+${challenge.xp} XP</span>`;
+      item.addEventListener('click', () => openChallenge(challenge));
+      challengeList.appendChild(item);
+    });
+  }
 
   show('lesson');
+}
+
+function _renderScreenshotVerify(lesson, container) {
+  const sv = lesson.screenshotVerify;
+  const alreadyDone = _state.verifiedLessons.includes(lesson.id);
+
+  if (alreadyDone) {
+    container.innerHTML = `<div style="background:var(--green,#22c55e)1a;border:1px solid var(--green,#22c55e);border-radius:10px;padding:14px 16px;color:var(--green,#22c55e);font-size:14px">
+      ✅ Урок підтверджено! +${sv.xp} XP нараховано.
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
+      Пройди курс на зовнішній платформі, зроби скріншот підтвердження (сертифікат, бейдж, або 100% прогрес) і завантаж його нижче. AI перевірить у фоні — можеш перейти на іншу сторінку.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input type="file" id="verify-file-input" accept="image/*"
+        style="font-size:13px;color:var(--text);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px">
+      <button class="btn btn-primary" id="verify-submit-btn">Надіслати скріншот</button>
+      <div id="verify-status-msg" style="display:none;font-size:13px;color:var(--text2);padding:8px 0"></div>
+    </div>`;
+
+  document.getElementById('verify-submit-btn').addEventListener('click', async () => {
+    const file = document.getElementById('verify-file-input').files[0];
+    if (!file) { toast('Спочатку обери файл скріншоту'); return; }
+
+    const btn = document.getElementById('verify-submit-btn');
+    const statusEl = document.getElementById('verify-status-msg');
+    btn.disabled = true;
+    btn.textContent = 'Відправляю…';
+    statusEl.style.display = 'block';
+    statusEl.textContent = '⟳ Аналізую скріншот…';
+
+    try {
+      const b64 = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result.split(',')[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+
+      const { job_id } = await fetch('/api/verify-lesson', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64: b64, lesson_id: sv.lessonId }),
+      }).then(r => r.json());
+
+      const poll = setInterval(async () => {
+        try {
+          const s = await fetch(`/api/verify-status?job_id=${job_id}`).then(r => r.json());
+          statusEl.textContent = s.message || s.status;
+          if (s.status === 'confirmed') {
+            clearInterval(poll);
+            if (!_state.verifiedLessons.includes(lesson.id)) {
+              _state.verifiedLessons.push(lesson.id);
+              _state.xp += sv.xp;
+              saveState();
+              showXpModal(sv.xp);
+            }
+            _renderScreenshotVerify(lesson, container);
+          } else if (s.status === 'rejected' || s.status === 'error') {
+            clearInterval(poll);
+            btn.disabled = false;
+            btn.textContent = 'Спробувати знову';
+          }
+        } catch {}
+      }, 3000);
+    } catch (e) {
+      statusEl.textContent = '❌ Помилка: ' + e.message;
+      btn.disabled = false;
+      btn.textContent = 'Спробувати знову';
+    }
+  });
 }
 
 function updateHeartsDisplay() {
@@ -869,9 +967,12 @@ function getCourseXp(courseId) {
   if (!course) return 0;
   let xp = 0;
   for (const mod of course.modules)
-    for (const lesson of mod.lessons)
+    for (const lesson of mod.lessons) {
+      if (lesson.screenshotVerify && _state.verifiedLessons.includes(lesson.id))
+        xp += (lesson.screenshotVerify.xp || 0);
       for (const ch of (lesson.challenges || []))
         if (_state.completedChallenges.includes(ch.id)) xp += (ch.xp || 0);
+    }
   return xp;
 }
 
@@ -880,8 +981,10 @@ function getCourseTotalXp(courseId) {
   if (!course) return 0;
   let xp = 0;
   for (const mod of course.modules)
-    for (const lesson of mod.lessons)
+    for (const lesson of mod.lessons) {
+      if (lesson.screenshotVerify) xp += (lesson.screenshotVerify.xp || 0);
       for (const ch of (lesson.challenges || [])) xp += (ch.xp || 0);
+    }
   return xp;
 }
 
@@ -889,23 +992,25 @@ function getCourseTotalXp(courseId) {
 
 function countCompleted(course) {
   let n = 0;
-  for (const mod of course.modules) {
+  for (const mod of course.modules)
     for (const lesson of mod.lessons) {
-      for (const ch of (lesson.challenges || [])) {
-        if (_state.completedChallenges.includes(ch.id)) n++;
+      if (lesson.screenshotVerify) {
+        if (_state.verifiedLessons.includes(lesson.id)) n++;
+      } else {
+        for (const ch of (lesson.challenges || []))
+          if (_state.completedChallenges.includes(ch.id)) n++;
       }
     }
-  }
   return n;
 }
 
 function countTotal(course) {
   let n = 0;
-  for (const mod of course.modules) {
+  for (const mod of course.modules)
     for (const lesson of mod.lessons) {
-      n += (lesson.challenges || []).length;
+      if (lesson.screenshotVerify) n++;
+      else n += (lesson.challenges || []).length;
     }
-  }
   return n;
 }
 
@@ -1095,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
     if (confirm(t('settings_reset_confirm'))) {
-      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], hearts: 3, theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang };
+      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], verifiedLessons: [], hearts: 3, theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang };
       saveState();
       renderSettings();
       toast(t('settings_reset_done'));
