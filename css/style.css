@@ -1363,6 +1363,25 @@ body {
 }
 .news-read-link:hover { text-decoration: underline; }
 
+.news-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0 8px;
+}
+.news-page-info {
+  font-size: 13px;
+  color: var(--text2);
+  min-width: 60px;
+  text-align: center;
+}
+.news-pagination .btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ══ LANG TOGGLE ════════════════════════════════════════════════════════════ */
 .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .lang-toggle-btn {

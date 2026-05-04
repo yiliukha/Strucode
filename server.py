@@ -547,12 +547,17 @@ def _run_java(code: str) -> dict:
 
 # ── AI News ───────────────────────────────────────────────────────────────────
 
-_NEWS_CACHE_TTL = 600  # 10 minutes
+_NEWS_CACHE_TTL = 300          # 5 minutes
+_NEWS_MAX_AGE   = 2 * 86400    # drop articles older than 2 days
 _news_cache: dict = {'data': [], 'fetched_at': 0.0, 'fetching': False}
 
 _HEADERS = {
     'User-Agent': 'Mozilla/5.0 (compatible; Strucode/1.0)',
     'Accept': 'application/json, text/html, */*',
+}
+_REDDIT_HEADERS = {
+    'User-Agent': 'Strucode/1.0 (AI news aggregator; contact strucode@example.com)',
+    'Accept': 'application/json',
 }
 
 
@@ -608,9 +613,30 @@ def _fetch_hn():
     return items
 
 
-def _fetch_devto():
-    """TechCrunch AI RSS feed."""
+def _fetch_techcrunch():
     return _fetch_rss('https://techcrunch.com/category/artificial-intelligence/feed/', 'TechCrunch AI')
+
+
+def _fetch_reddit(subreddit):
+    """Fetch hot posts from a subreddit via JSON API."""
+    import re as _re
+    url = f'https://www.reddit.com/r/{subreddit}/hot.json?limit=30'
+    req = urllib.request.Request(url, headers=_REDDIT_HEADERS)
+    data = json.loads(urllib.request.urlopen(req, context=_ssl_ctx(), timeout=12).read())
+    items = []
+    for post in data.get('data', {}).get('children', []):
+        d = post.get('data', {})
+        if d.get('is_self') or not d.get('url'):
+            continue
+        title = (d.get('title') or '').strip()
+        link  = (d.get('url') or '').strip()
+        score = d.get('score', 0)
+        ts    = d.get('created_utc', 0)
+        if score < 20 or not title or not link:
+            continue
+        items.append({'title': title, 'link': link, 'desc': '',
+                      'source': f'r/{subreddit}', 'timestamp': ts})
+    return items
 
 
 def _et_text(el, tag):
@@ -659,27 +685,37 @@ def _fetch_news_bg():
     global _news_cache
     all_items = []
     sources = [
-        ('hn',     _fetch_hn,    None),
-        ('devto',  _fetch_devto, None),
-        ('rss',    _fetch_rss,   ('VentureBeat AI', 'https://venturebeat.com/category/ai/feed/')),
-        ('rss',    _fetch_rss,   ('Ars Technica',   'https://feeds.arstechnica.com/arstechnica/technology-lab')),
+        ('hn',      _fetch_hn,       None),
+        ('tc',      _fetch_techcrunch, None),
+        ('rss', _fetch_rss, ('VentureBeat AI',  'https://venturebeat.com/category/ai/feed/')),
+        ('rss', _fetch_rss, ('The Verge AI',    'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml')),
+        ('rss', _fetch_rss, ('Wired AI',        'https://www.wired.com/feed/tag/ai/latest/rss')),
+        ('rss', _fetch_rss, ('Google AI Blog',  'https://blog.google/technology/ai/rss/')),
+        ('rss', _fetch_rss, ('MIT Tech Review', 'https://www.technologyreview.com/topic/artificial-intelligence/feed')),
+        ('rss', _fetch_rss, ('Ars Technica',    'https://feeds.arstechnica.com/arstechnica/technology-lab')),
+        ('rss', _fetch_rss, ('Dev.to AI',       'https://dev.to/feed/tag/ai')),
+        ('reddit', _fetch_reddit, ('MachineLearning',)),
+        ('reddit', _fetch_reddit, ('artificial',)),
     ]
     for kind, fn, args in sources:
         try:
             items = fn(*args) if args else fn()
             all_items.extend(items)
-            log.error('News OK %s: %d items', kind, len(items))  # use error level so it always logs
+            log.error('News OK %s: %d items', kind, len(items))
         except Exception as exc:
             log.error('News fetch %s: %s', kind, exc)
-    all_items.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+
+    cutoff = time.time() - _NEWS_MAX_AGE
+    fresh = [a for a in all_items if not a.get('timestamp') or a['timestamp'] > cutoff]
+    fresh.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
     seen = set()
     deduped = []
-    for item in all_items:
+    for item in fresh:
         key = item['link']
         if key not in seen:
             seen.add(key)
             deduped.append(item)
-    _news_cache['data'] = deduped[:30]
+    _news_cache['data'] = deduped[:100]
     _news_cache['fetched_at'] = time.time()
     _news_cache['fetching'] = False
 

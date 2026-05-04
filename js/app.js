@@ -875,7 +875,27 @@ function applyTheme(theme) {
 
 // ── News ──────────────────────────────────────────────────────────────────────
 
+const _NEWS_STORAGE_KEY  = 'strucode_news_v3';
+const _NEWS_PAGE_SIZE    = 15;
+const _NEWS_MAX_AGE_SECS = 2 * 86400;
+
 let _newsCache = null;
+let _newsPage  = 0;
+
+function _newsStorageSave(articles) {
+  try { localStorage.setItem(_NEWS_STORAGE_KEY, JSON.stringify({ articles, savedAt: Date.now() })); } catch {}
+}
+
+function _newsStorageLoad() {
+  try {
+    const raw = localStorage.getItem(_NEWS_STORAGE_KEY);
+    if (!raw) return null;
+    const { articles, savedAt } = JSON.parse(raw);
+    if (Date.now() - savedAt > 5 * 60 * 1000) return null; // старіше 5хв — ігноруємо
+    const cutoff = Date.now() / 1000 - _NEWS_MAX_AGE_SECS;
+    return articles.filter(a => !a.timestamp || a.timestamp > cutoff);
+  } catch { return null; }
+}
 
 function _newsTimeAgo(ts) {
   if (!ts) return '';
@@ -900,18 +920,24 @@ function _buildNewsCard(a, compact) {
 }
 
 async function _fetchNews(forceRefresh) {
-  if (_newsCache && !forceRefresh) return _newsCache;
+  if (!forceRefresh) {
+    if (_newsCache) return _newsCache;
+    const stored = _newsStorageLoad();
+    if (stored?.length) { _newsCache = stored; return _newsCache; }
+  }
   try {
     const resp = await fetch('/api/ai-news');
     const data = await resp.json();
     if (data.articles?.length) {
-      _newsCache = data.articles;
+      const cutoff = Date.now() / 1000 - _NEWS_MAX_AGE_SECS;
+      _newsCache = data.articles.filter(a => !a.timestamp || a.timestamp > cutoff);
+      _newsStorageSave(_newsCache);
       return _newsCache;
     }
     if (data.fetching) return null;
     return [];
   } catch {
-    return [];
+    return _newsCache || [];
   }
 }
 
@@ -924,10 +950,7 @@ async function fetchHomeNews(forceRefresh) {
   if (!articles) {
     const iv = setInterval(async () => {
       articles = await _fetchNews(false);
-      if (articles !== null) {
-        clearInterval(iv);
-        _renderHomeNews(container, articles);
-      }
+      if (articles !== null) { clearInterval(iv); _renderHomeNews(container, articles); }
     }, 2000);
     return;
   }
@@ -948,7 +971,7 @@ function _startNewsAutoRefresh() {
   _newsAutoRefreshTimer = setInterval(() => {
     if (_activeScreen === 'home') fetchHomeNews(true);
     if (_activeScreen === 'news') fetchNewsScreen(true);
-  }, 600_000);
+  }, 300_000); // 5 хвилин
 }
 
 function _stopNewsAutoRefresh() {
@@ -956,6 +979,7 @@ function _stopNewsAutoRefresh() {
 }
 
 async function renderNewsScreen() {
+  _newsPage = 0;
   const container = document.getElementById('news-full-list');
   if (!container) return;
   container.innerHTML = `<div class="news-loading">${t('news_loading')}</div>`;
@@ -979,11 +1003,28 @@ async function fetchNewsScreen(forceRefresh) {
 
 function _renderFullNews(container, articles) {
   container.innerHTML = '';
+  const pagination = document.getElementById('news-pagination');
   if (!articles.length) {
     container.innerHTML = `<div class="news-loading">${t('news_error')}</div>`;
+    if (pagination) pagination.style.display = 'none';
     return;
   }
-  articles.forEach(a => container.appendChild(_buildNewsCard(a, false)));
+
+  const totalPages = Math.ceil(articles.length / _NEWS_PAGE_SIZE);
+  if (_newsPage >= totalPages) _newsPage = totalPages - 1;
+  const start = _newsPage * _NEWS_PAGE_SIZE;
+  articles.slice(start, start + _NEWS_PAGE_SIZE).forEach(a => container.appendChild(_buildNewsCard(a, false)));
+
+  if (pagination) {
+    pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+    const info = document.getElementById('news-page-info');
+    const prev = document.getElementById('btn-news-prev');
+    const next = document.getElementById('btn-news-next');
+    if (info) info.textContent = `${_newsPage + 1} / ${totalPages}`;
+    if (prev) prev.disabled = _newsPage === 0;
+    if (next) next.disabled = _newsPage >= totalPages - 1;
+  }
+  container.scrollTop = 0;
 }
 
 // ── Event listeners ───────────────────────────────────────────────────────────
@@ -1035,7 +1076,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-news-back')?.addEventListener('click', goBack);
-  document.getElementById('btn-news-refresh')?.addEventListener('click', () => fetchNewsScreen(true));
+  document.getElementById('btn-news-refresh')?.addEventListener('click', () => { _newsPage = 0; fetchNewsScreen(true); });
+  document.getElementById('btn-news-prev')?.addEventListener('click', () => {
+    if (_newsPage > 0) { _newsPage--; _renderFullNews(document.getElementById('news-full-list'), _newsCache || []); }
+  });
+  document.getElementById('btn-news-next')?.addEventListener('click', () => {
+    const total = Math.ceil((_newsCache || []).length / _NEWS_PAGE_SIZE);
+    if (_newsPage < total - 1) { _newsPage++; _renderFullNews(document.getElementById('news-full-list'), _newsCache || []); }
+  });
 
   setupChallengeHandlers();
   setupSandboxHandlers();
