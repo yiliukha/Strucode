@@ -8152,7 +8152,124 @@ curl http://localhost:11434/api/chat -d \'{
         ],
       },
 
-      // ── Module 7: Пошук та Дослідження ─────────────────────────────────────
+      // ── Module 7: Автоматизація ─────────────────────────────────────────────
+      {
+        id: 'ai-automation',
+        title: 'Автоматизація',
+        icon: '⚙️',
+        lessons: [
+          {
+            id: 'ai-f-make',
+            title: 'Make Academy — Візуальна автоматизація',
+            theory: `<h2>Make Academy (make.com)</h2>
+<p>Make (раніше Integromat) — найпотужніша no-code платформа для автоматизації. Drag-and-drop сценарії між тисячами сервісів.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Рівень 1 (Foundation) — базові сценарії: тригери, модулі, фільтри</li>
+  <li>Рівень 2 — Iterator, Aggregator, Error handling, Webhooks</li>
+  <li>Рівень 3 (Expert) — API calls, JSON/XML парсинг, складні роутери</li>
+  <li>Реальні кейси: CRM, e-commerce, маркетинг, Slack-боти</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.make.com/en/academy" target="_blank">make.com/en/academy</a> — Make Academy (безкоштовно)</p>
+<h3>Підтвердження</h3>
+<p>Завантаж сертифікат Foundation або Expert, або скріншот 100% завершення будь-якого рівня.</p>`,
+            screenshotVerify: { lessonId: 'make-academy', xp: 100 },
+          },
+          {
+            id: 'ai-f-zapier',
+            title: 'Zapier University — Автоматизація без коду',
+            theory: `<h2>Zapier University (zapier.com)</h2>
+<p>Zapier — найпопулярніша no-code платформа автоматизації. University пропонує структуровані курси від 101 до 301.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li><strong>Zapier 101</strong> — перший Zap, тригери, actions, filters</li>
+  <li><strong>Zapier 201</strong> — Multi-step Zaps, Paths (умовна логіка), Formatter</li>
+  <li><strong>Zapier 301</strong> — Webhooks, Code by Zapier (JS/Python), Sub-Zaps</li>
+  <li>Інтеграції: Gmail, Slack, Notion, Google Sheets, Airtable</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://zapier.com/learn" target="_blank">zapier.com/learn</a> — Zapier University</p>
+<h3>Підтвердження</h3>
+<p>Завантаж скріншот отриманого бейджа 101, 201 або 301 на платформі Zapier.</p>`,
+            screenshotVerify: { lessonId: 'zapier-university', xp: 100 },
+          },
+          {
+            id: 'ai-f-n8n',
+            title: 'n8n Courses — Технічна автоматизація',
+            theory: `<h2>n8n Hands-on Courses (n8n.io)</h2>
+<p>n8n — open-source альтернатива Make/Zapier, яку можна self-host. Ідеальна для розробників: підтримує JS-код та API.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Nodes, Connections, Workflows — основна концепція n8n</li>
+  <li>HTTP Request node — інтеграція з будь-яким API</li>
+  <li>Code node — JavaScript або Python прямо у воркфлоу</li>
+  <li>Self-hosting n8n на сервері або локально через Docker</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://n8n.io/courses" target="_blank">n8n.io/courses</a> — безкоштовні практичні курси</p>
+<h3>Підтвердження</h3>
+<p>Зроби скріншот успішно виконаного воркфлоу в n8n (зелені галочки на нодах або "Execution succeeded" у логах).</p>`,
+            screenshotVerify: { lessonId: 'n8n-courses', xp: 100 },
+          },
+          {
+            id: 'ai-f-hubspot',
+            title: 'HubSpot — Marketing Automation',
+            theory: `<h2>HubSpot Academy — Marketing Automation</h2>
+<p>HubSpot Academy видає міжнародно визнані сертифікати безкоштовно. Marketing Automation — один з найпопулярніших напрямків.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Workflows — автоматизація email, CRM та задач на основі тригерів</li>
+  <li>Lead nurturing — автоматичний прогрів потенційних клієнтів</li>
+  <li>Segmentation — розбивка аудиторії за поведінкою та властивостями</li>
+  <li>A/B тестування автоматизованих email-ланцюжків</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://academy.hubspot.com/courses/marketing-automation" target="_blank">academy.hubspot.com</a> — HubSpot Academy</p>
+<h3>Підтвердження</h3>
+<p>Завантаж офіційний сертифікат HubSpot Academy у форматі PDF або скріншот сторінки з дипломом.</p>`,
+            screenshotVerify: { lessonId: 'hubspot-automation', xp: 100 },
+          },
+          {
+            id: 'ai-f-activecampaign',
+            title: 'ActiveCampaign — Стратегія автоматизації',
+            theory: `<h2>ActiveCampaign Automation Strategy</h2>
+<p>ActiveCampaign — платформа email-маркетингу та CRM з потужною автоматизацією. Їх навчання фокусується на стратегії.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>Customer Journey побудова — від першого контакту до продажу</li>
+  <li>Automation recipes — готові шаблони для e-commerce, SaaS, сервісів</li>
+  <li>Lead scoring — автоматична оцінка "теплоти" ліда</li>
+  <li>CRM + автоматизація продажів: deal pipeline, задачі, нотифікації</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://www.activecampaign.com/learn" target="_blank">activecampaign.com/learn</a> — ActiveCampaign навчання</p>
+<h3>Підтвердження</h3>
+<p>Завантаж сертифікат або скріншот сторінки "Certified Specialist" від ActiveCampaign.</p>`,
+            screenshotVerify: { lessonId: 'activecampaign-automation', xp: 100 },
+          },
+          {
+            id: 'ai-f-uipath',
+            title: 'UiPath RPA Academy — Роботизація процесів',
+            theory: `<h2>UiPath Academy (uipath.com)</h2>
+<p>UiPath — лідер корпоративної RPA (Robotic Process Automation). Академія дає безкоштовний диплом розробника роботів.</p>
+<h3>Що вивчиш</h3>
+<ul>
+  <li>UiPath Studio — drag-and-drop розробка RPA ботів</li>
+  <li>Selectors — як робот "бачить" елементи інтерфейсу</li>
+  <li>Orchestrator — управління і моніторинг роботів у хмарі</li>
+  <li>Document Understanding — AI-обробка PDF, рахунків, форм</li>
+</ul>
+<h3>Посилання</h3>
+<p><a href="https://academy.uipath.com" target="_blank">academy.uipath.com</a> — UiPath Academy (безкоштовно)</p>
+<h3>Підтвердження</h3>
+<p>Завантаж диплом або сертифікат UiPath Academy (RPA Developer Foundation або вище).</p>`,
+            screenshotVerify: { lessonId: 'uipath-rpa', xp: 120 },
+          },
+        ],
+      },
+
+      // ── Module 8: Пошук та Дослідження ─────────────────────────────────────
       {
         id: 'ai-research',
         title: 'Пошук та Дослідження',

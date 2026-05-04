@@ -713,6 +713,51 @@ _LESSON_VERIFY_PROMPTS = {
         'Answer only YES or NO.'
     ),
 
+    # ── Topic 7: Automation ───────────────────────────────────────────────────
+    'make-academy': (
+        'Look at this screenshot. Does it show a Make (formerly Integromat) Academy '
+        'certificate or course completion? '
+        'Valid evidence: a Make Academy Foundation or Expert certificate with a name, '
+        '"Level 1", "Level 2", or "Level 3" completion badge, Make branding with a '
+        '"Congratulations" or "Certificate" message, or 100% progress on a Make Academy course. '
+        'Answer only YES or NO.'
+    ),
+    'zapier-university': (
+        'Look at this screenshot. Does it show a Zapier University course completion or badge? '
+        'Valid evidence: a Zapier badge for "101", "201", or "301" course, '
+        '"Zapier University" branding with a completion indicator, a certificate or badge '
+        'page on Zapier, or 100% progress on a Zapier course module. '
+        'Answer only YES or NO.'
+    ),
+    'n8n-courses': (
+        'Look at this screenshot. Does it show n8n with a completed workflow or course lesson? '
+        'Valid evidence: a working n8n workflow canvas with connected nodes and successful '
+        'execution (green checkmarks on nodes), a course completion page on n8n.io, '
+        'n8n branding with "Execution succeeded" status, or a finished workflow run log. '
+        'Answer only YES or NO.'
+    ),
+    'hubspot-automation': (
+        'Look at this screenshot. Does it show a HubSpot Academy certificate or course completion? '
+        'Valid evidence: a HubSpot certificate with a name and "Marketing Automation" or similar title, '
+        '"HubSpot Academy" branding with "Congratulations", a digital badge, '
+        'or 100% progress on a HubSpot course. '
+        'Answer only YES or NO.'
+    ),
+    'activecampaign-automation': (
+        'Look at this screenshot. Does it show an ActiveCampaign certification or course completion? '
+        'Valid evidence: an ActiveCampaign certificate with a name, "Certified Specialist" '
+        'or "Automation" title, ActiveCampaign branding with a completion badge, '
+        'or a passed exam result page on ActiveCampaign. '
+        'Answer only YES or NO.'
+    ),
+    'uipath-rpa': (
+        'Look at this screenshot. Does it show a UiPath Academy certificate or course completion? '
+        'Valid evidence: a UiPath diploma or certificate with a name, "RPA Developer" or '
+        '"Automation Developer" title, UiPath Academy branding with "Passed" or "Completed", '
+        'a digital badge, or 100% progress on a UiPath Academy course. '
+        'Answer only YES or NO.'
+    ),
+
     # ── Fallback ──────────────────────────────────────────────────────────────
     '_default': (
         'Look at this screenshot. Does it show that the user completed an online AI course, '
