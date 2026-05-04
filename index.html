@@ -42,7 +42,7 @@
 <!-- ══ SCREEN: HOME ════════════════════════════════════════════════════════ -->
 <div id="screen-home" class="screen">
   <div class="app-header">
-    <span class="logo-text"><span class="logo-icon-mini"><svg width="16" height="16" viewBox="0 0 72 72" fill="none"><path d="M24 14L16 14L16 58L24 58" stroke="#6366f1" stroke-width="6" stroke-linecap="round"/><path d="M48 14L56 14L56 58L48 58" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"/><rect x="28" y="20" width="16" height="7" rx="2" fill="#6366f1"/><rect x="28" y="33" width="20" height="7" rx="2" fill="#6366f1" opacity="0.5"/><rect x="28" y="46" width="12" height="7" rx="2" fill="#22d3ee"/></svg></span><span class="sp-s1">Stru</span><span class="sp-s2">co</span><span class="sp-s3">d</span><span class="sp-s4">e</span></span>
+    <span class="logo-text"><span class="logo-icon-mini"><svg width="15" height="15" viewBox="0 0 72 72" fill="none"><path d="M24 14L16 14L16 58L24 58" stroke="#6366f1" stroke-width="6" stroke-linecap="round"/><path d="M48 14L56 14L56 58L48 58" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"/><rect x="28" y="20" width="16" height="7" rx="2" fill="#6366f1"/><rect x="28" y="33" width="20" height="7" rx="2" fill="#6366f1" opacity="0.5"/><rect x="28" y="46" width="12" height="7" rx="2" fill="#22d3ee"/></svg></span><span class="sp-s1">Stru</span><span class="sp-s2">code</span></span>
     <div class="header-right">
       <div class="streak-badge" id="home-streak"><span id="streak-count">0</span>🔥</div>
       <div class="xp-display" id="home-xp">0 XP</div>
@@ -51,10 +51,7 @@
   <div class="screen-body">
     <div class="home-greeting" id="home-greeting"></div>
 
-    <div id="home-continue-wrap" style="display:none">
-      <div class="section-title" id="home-continue-title"></div>
-      <div id="home-continue-list"></div>
-    </div>
+    <div id="home-featured-wrap"></div>
 
     <div class="section-title" id="home-daily-title"></div>
     <div class="daily-card" id="daily-card">
@@ -74,6 +71,29 @@
       </div>
     </div>
     <div id="home-news-list"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: COURSE PAGE ════════════════════════════════════════════════ -->
+<div id="screen-course-page" class="screen">
+  <div class="app-header">
+    <button class="btn-back" id="btn-course-page-back">←</button>
+    <div class="course-page-header-info" id="course-page-header-info"></div>
+    <button class="btn-star" id="btn-course-star" title="Обрати для навчання">☆</button>
+  </div>
+  <div class="screen-body" id="course-page-body"></div>
+</div>
+
+<!-- ══ CONTINUE POPUP ════════════════════════════════════════════════════ -->
+<div id="continue-popup" class="continue-popup-overlay" style="display:none">
+  <div class="continue-popup-sheet">
+    <div class="continue-popup-icon" id="continue-popup-icon">📖</div>
+    <div class="continue-popup-title">Продовжити навчання?</div>
+    <div class="continue-popup-lesson" id="continue-popup-lesson"></div>
+    <div class="continue-popup-actions">
+      <button class="btn btn-primary" id="btn-continue-yes">▶ Продовжити</button>
+      <button class="btn btn-secondary" id="btn-continue-no">Показати курс</button>
+    </div>
   </div>
 </div>
 

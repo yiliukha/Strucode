@@ -12,6 +12,7 @@ let _state = {
   aiModel: 'llama3.2:3b',
   lastCourse: null,
   lastLesson: null,
+  starredCourse: null,
 };
 
 let _backStack = [];
@@ -58,6 +59,7 @@ function show(screenId) {
   if (screenId === 'home') { renderHome(); _startNewsAutoRefresh(); }
   else _stopNewsAutoRefresh();
   if (screenId === 'courses') renderCourses();
+  if (screenId === 'course-page') { /* rendered by openCoursePage */ }
   if (screenId === 'sandbox') initSandboxScreen();
   if (screenId === 'ai-chat') initAiChatScreen();
   if (screenId === 'settings') renderSettings();
@@ -73,6 +75,151 @@ function goBack() {
 function navigate(to, push = true) {
   if (push && _activeScreen !== to) _backStack.push(_activeScreen);
   show(to);
+}
+
+// ── Continue popup ────────────────────────────────────────────────────────────
+
+function _showContinuePopup(course, onYes, onNo) {
+  // Find last lesson the user was working on in this course
+  const lastLessonId = _state.lastLesson;
+  let lastLesson = null;
+  let lastCourseMatch = _state.lastCourse === course.id;
+  if (lastCourseMatch && lastLessonId) {
+    for (const mod of course.modules) {
+      lastLesson = mod.lessons.find(l => l.id === lastLessonId);
+      if (lastLesson) break;
+    }
+  }
+  // Fallback: find first incomplete lesson
+  if (!lastLesson) {
+    for (const mod of course.modules) {
+      for (const l of mod.lessons) {
+        const total = l.challenges ? l.challenges.length : 0;
+        const done  = l.challenges ? l.challenges.filter(c => _state.completedChallenges.includes(c.id)).length : 0;
+        if (total > 0 && done < total) { lastLesson = l; break; }
+      }
+      if (lastLesson) break;
+    }
+  }
+  if (!lastLesson) { onNo(); return; } // no progress yet — just open
+
+  const popup = document.getElementById('continue-popup');
+  const lessonEl = document.getElementById('continue-popup-lesson');
+  const iconEl   = document.getElementById('continue-popup-icon');
+  const yesBtn   = document.getElementById('btn-continue-yes');
+  const noBtn    = document.getElementById('btn-continue-no');
+  if (!popup) { onNo(); return; }
+
+  iconEl.textContent = course.logo ? '' : course.icon;
+  if (course.logo) iconEl.innerHTML = `<img src="${course.logo}" width="36" height="36" alt="${course.name}">`;
+  lessonEl.textContent = `${course.name} · ${lastLesson.title}`;
+  popup.style.display = 'flex';
+
+  const close = () => { popup.style.display = 'none'; yesBtn.onclick = null; noBtn.onclick = null; };
+  yesBtn.onclick = () => { close(); onYes(lastLesson); };
+  noBtn.onclick  = () => { close(); onNo(); };
+  popup.onclick  = e => { if (e.target === popup) { close(); onNo(); } };
+}
+
+// ── Course Page screen ────────────────────────────────────────────────────────
+
+function openCoursePage(course, skipPopup = false) {
+  const hasProgress = countCompleted(course) > 0;
+
+  if (!skipPopup && hasProgress) {
+    _showContinuePopup(
+      course,
+      (lesson) => { // yes — jump to lesson
+        _state.lastCourse = course.id;
+        saveState();
+        _backStack.push(_activeScreen);
+        openLesson(course, lesson);
+      },
+      () => _renderCoursePage(course) // no — show full course
+    );
+    return;
+  }
+  _renderCoursePage(course);
+}
+
+function _renderCoursePage(course) {
+  _state.lastCourse = course.id;
+  saveState();
+  _backStack.push(_activeScreen);
+
+  // Header
+  const headerInfo = document.getElementById('course-page-header-info');
+  if (headerInfo) {
+    const icon = course.logo
+      ? `<img class="lang-logo" src="${course.logo}" width="22" height="22" alt="${course.name}">`
+      : `<span style="font-size:20px">${course.icon}</span>`;
+    headerInfo.innerHTML = `${icon}<div><div class="cph-name">${course.name}</div></div>`;
+  }
+
+  // Star button
+  const starBtn = document.getElementById('btn-course-star');
+  if (starBtn) {
+    const isStarred = _state.starredCourse === course.id;
+    starBtn.textContent = isStarred ? '★' : '☆';
+    starBtn.className = 'btn-star' + (isStarred ? ' starred' : '');
+    starBtn.title = isStarred ? 'Прибрати з вибраного' : 'Обрати для навчання';
+    starBtn.onclick = () => {
+      _state.starredCourse = _state.starredCourse === course.id ? null : course.id;
+      saveState();
+      const nowStarred = _state.starredCourse === course.id;
+      starBtn.textContent = nowStarred ? '★' : '☆';
+      starBtn.className = 'btn-star' + (nowStarred ? ' starred' : '');
+      starBtn.title = nowStarred ? 'Прибрати з вибраного' : 'Обрати для навчання';
+      toast(nowStarred ? `★ ${course.name} — обрано для навчання` : `☆ Прибрано з вибраного`);
+    };
+  }
+
+  // Body
+  const body = document.getElementById('course-page-body');
+  if (!body) return;
+  body.innerHTML = '';
+
+  // Hero
+  const completed   = countCompleted(course);
+  const total       = countTotal(course);
+  const totalLessons = course.modules.reduce((s, m) => s + m.lessons.length, 0);
+  const cxp         = getCourseXp(course.id);
+  const pct         = total > 0 ? Math.round(completed / total * 100) : 0;
+
+  const hero = document.createElement('div');
+  hero.className = 'course-page-hero';
+  const logoHtml = course.logo
+    ? `<img src="${course.logo}" class="cph-logo" alt="${course.name}">`
+    : `<span style="font-size:48px;line-height:1">${course.icon}</span>`;
+  hero.innerHTML = `
+    ${logoHtml}
+    <div class="cph-details">
+      <div class="cph-title">${course.name}</div>
+      <div class="cph-desc">${course.desc}</div>
+      <div class="cph-stats">
+        <div class="cph-stat-item"><span class="cph-stat-num">${course.modules.length}</span><span class="cph-stat-lbl">Модулів</span></div>
+        <div class="cph-stat-item"><span class="cph-stat-num">${totalLessons}</span><span class="cph-stat-lbl">Уроків</span></div>
+        <div class="cph-stat-item"><span class="cph-stat-num">${completed}/${total}</span><span class="cph-stat-lbl">Задач</span></div>
+        <div class="cph-stat-item"><span class="cph-stat-num">${cxp}</span><span class="cph-stat-lbl">XP</span></div>
+      </div>
+      <div style="margin-top:10px">
+        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${course.color||'var(--primary)'};border-radius:2px;transition:width .5s ease"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct}% пройдено</div>
+      </div>
+    </div>`;
+  body.appendChild(hero);
+
+  // Modules
+  const modList = document.createElement('div');
+  modList.className = 'module-list open';
+  renderModules(course, modList);
+  body.appendChild(modList);
+
+  document.getElementById('btn-course-page-back').onclick = goBack;
+
+  show('course-page');
 }
 
 // ── Home screen ───────────────────────────────────────────────────────────────
@@ -98,53 +245,8 @@ function renderHome() {
 
   document.getElementById('btn-daily-start')?.addEventListener('click', () => navigate('courses'));
 
-  const continueWrap = document.getElementById('home-continue-wrap');
-  const continueList = document.getElementById('home-continue-list');
-  const continueTitleEl = document.getElementById('home-continue-title');
-  if (continueTitleEl) continueTitleEl.textContent = t('home_continue_title');
-  if (continueWrap && continueList) {
-    const started = Object.values(COURSES).filter(c => countCompleted(c) > 0);
-    if (started.length) {
-      continueWrap.style.display = 'block';
-      continueList.innerHTML = '';
-      started.forEach(course => {
-        const completed = countCompleted(course);
-        const total = countTotal(course);
-        const cxp = getCourseXp(course.id);
-        const ctxp = getCourseTotalXp(course.id);
-        const level = getLevel(cxp);
-        const next = getNextLevel(cxp);
-        const progress = getXpProgress(cxp);
-        const levelName = t('level_' + level.name) || level.name;
-
-        const card = document.createElement('div');
-        card.className = 'continue-course-card';
-        card.innerHTML = `
-          <div class="ccc-top">
-            <span class="ccc-icon">${course.logo ? `<img class="lang-logo" src="${course.logo}" width="32" height="32" alt="${course.name}">` : course.icon}</span>
-            <div class="ccc-info">
-              <div class="ccc-name">${course.name}</div>
-              <div class="ccc-meta">
-                <span class="level-badge-sm">${level.icon} ${levelName}</span>
-                <span class="ccc-tasks">${completed}/${total} ${t('home_continue_tasks')}</span>
-              </div>
-            </div>
-            <span class="ccc-arrow">→</span>
-          </div>
-          <div class="ccc-bar-wrap">
-            <div class="ccc-bar" style="width:${progress}%"></div>
-          </div>
-          <div class="ccc-xp-row">
-            <span>${cxp} XP</span>
-            <span>${next ? next.min + ' XP → ' + (t('level_' + next.name) || next.name) : t('xp_max')}</span>
-          </div>`;
-        card.addEventListener('click', () => navigate('courses'));
-        continueList.appendChild(card);
-      });
-    } else {
-      continueWrap.style.display = 'none';
-    }
-  }
+  // Featured course
+  _renderFeaturedCourse();
 
   const newsTitleEl = document.getElementById('home-news-title');
   const newsAllBtn = document.getElementById('btn-home-news-all');
@@ -209,6 +311,80 @@ function onTaskPassed(challengeId, xp) {
   toast(`+${xp} XP 🎉`);
 }
 
+// ── Featured Course (Home) ────────────────────────────────────────────────────
+
+function _renderFeaturedCourse() {
+  const wrap = document.getElementById('home-featured-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const starredId = _state.starredCourse;
+  const course    = starredId ? COURSES[starredId] : null;
+
+  if (!course) {
+    const prompt = document.createElement('div');
+    prompt.className = 'featured-pick-prompt';
+    prompt.innerHTML = `
+      <div class="fpp-icon">🎯</div>
+      <div class="fpp-title">Обери курс для навчання</div>
+      <div class="fpp-sub">Натисни ★ на будь-якому курсі щоб додати його сюди</div>`;
+    prompt.onclick = () => navigate('courses');
+    wrap.appendChild(prompt);
+    return;
+  }
+
+  const completed = countCompleted(course);
+  const total     = countTotal(course);
+  const cxp       = getCourseXp(course.id);
+  const level     = getLevel(cxp);
+  const pct       = total > 0 ? Math.round(completed / total * 100) : 0;
+  const levelName = t('level_' + level.name) || level.name;
+
+  const label = document.createElement('div');
+  label.className = 'section-title';
+  label.style.marginBottom = '8px';
+  label.textContent = '⭐ Навчаюсь зараз';
+  wrap.appendChild(label);
+
+  const card = document.createElement('div');
+  card.className = 'featured-course-card';
+  card.style.cssText += `;border-top:3px solid ${course.color || 'var(--primary)'}`;
+
+  const logoHtml = course.logo
+    ? `<img src="${course.logo}" class="fcc-logo" alt="${course.name}">`
+    : `<span style="font-size:44px;line-height:1">${course.icon}</span>`;
+
+  card.innerHTML = `
+    <div class="fcc-top">
+      ${logoHtml}
+      <div class="fcc-info">
+        <div class="fcc-name">${course.name}</div>
+        <div class="fcc-desc">${course.desc}</div>
+        <span class="fcc-badge level-badge-sm">${level.icon} ${levelName}</span>
+      </div>
+    </div>
+    <div class="fcc-progress">
+      <div class="fcc-bar-wrap">
+        <div class="fcc-bar" style="width:${pct}%;background:${course.color||'var(--primary)'}"></div>
+      </div>
+    </div>
+    <div class="fcc-bottom">
+      <div class="fcc-stats">
+        <span class="fcc-stat"><strong>${cxp}</strong> XP</span>
+        <span class="fcc-stat"><strong>${completed}/${total}</strong> задач</span>
+        <span class="fcc-stat"><strong>${pct}%</strong></span>
+      </div>
+      <button class="fcc-continue-btn">▶ Продовжити</button>
+    </div>`;
+
+  card.querySelector('.fcc-continue-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    openCoursePage(course);
+  });
+  card.addEventListener('click', () => openCoursePage(course));
+  wrap.appendChild(card);
+}
+
 // ── Courses screen ────────────────────────────────────────────────────────────
 
 function renderCourses() {
@@ -216,39 +392,36 @@ function renderCourses() {
   if (!list) return;
   list.innerHTML = '';
 
+  // Grid wrapper
+  const grid = document.createElement('div');
+  grid.className = 'course-cards-grid';
+
   Object.values(COURSES).forEach(course => {
     const completed = countCompleted(course);
-    const total = countTotal(course);
-    const item = document.createElement('div');
-    item.className = 'course-item fade-in';
-    item.innerHTML = `
-      <div class="course-item-header">
-        <div class="course-item-icon">${course.logo ? `<img class="lang-logo" src="${course.logo}" width="48" height="48" alt="${course.name}">` : course.icon}</div>
-        <div class="course-item-info">
-          <div class="course-item-name">${course.name}</div>
-          <div class="course-item-desc">${course.desc}</div>
-          <div class="course-item-meta">
-            <span class="course-item-stat">✅ ${completed}/${total} задач</span>
-            <span class="course-item-stat">🗣 ${course.language}</span>
-          </div>
-        </div>
-        <div class="course-item-arrow">▾</div>
-      </div>
-      <div class="module-list" id="modules-${course.id}"></div>`;
+    const total     = countTotal(course);
+    const pct       = total > 0 ? Math.round(completed / total * 100) : 0;
+    const isStarred = _state.starredCourse === course.id;
 
-    item.querySelector('.course-item-header').addEventListener('click', () => {
-      const ml = item.querySelector('.module-list');
-      const arrow = item.querySelector('.course-item-arrow');
-      const isOpen = ml.classList.contains('open');
-      ml.classList.toggle('open', !isOpen);
-      arrow.textContent = isOpen ? '▾' : '▴';
-      if (!ml.children.length) renderModules(course, ml);
-      _state.lastCourse = course.id;
-      saveState();
-    });
+    const card = document.createElement('div');
+    card.className = 'cc-card fade-in';
 
-    list.appendChild(item);
+    const iconHtml = course.logo
+      ? `<img src="${course.logo}" class="cc-icon" style="width:36px;height:36px;margin-top:4px" alt="${course.name}">`
+      : `<span class="cc-icon">${course.icon}</span>`;
+
+    card.innerHTML = `
+      <div class="cc-card-top-bar" style="background:${course.color || 'var(--primary)'}"></div>
+      ${iconHtml}
+      <div class="cc-name">${course.name}</div>
+      <div class="cc-stat">${completed}/${total} задач</div>
+      <div class="cc-bar-wrap"><div class="cc-bar" style="width:${pct}%;background:${course.color || 'var(--primary)'}"></div></div>
+      ${isStarred ? '<span class="cc-starred-dot">★</span>' : ''}`;
+
+    card.addEventListener('click', () => openCoursePage(course));
+    grid.appendChild(card);
   });
+
+  list.appendChild(grid);
 }
 
 function renderModules(course, container) {
