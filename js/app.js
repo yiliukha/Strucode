@@ -743,8 +743,6 @@ async function _renderOllamaSettings() {
   });
   ctrl.appendChild(popGrid);
 
-  _loadInstalledModels(modelList, popGrid);
-
   // ── AI Course verify model ──────────────────────────────────────────────
   const verifyLabel = document.createElement('div');
   verifyLabel.className = 'settings-label';
@@ -754,77 +752,69 @@ async function _renderOllamaSettings() {
 
   const verifyHint = document.createElement('div');
   verifyHint.style.cssText = 'font-size:12px;color:var(--text2);margin-bottom:8px';
-  verifyHint.textContent = t('settings_verify_model_hint') || 'Використовується для аналізу скріншотів при проходженні AI Basic курсів. Рекомендовано: moondream2';
+  verifyHint.textContent = t('settings_verify_model_hint') || 'Vision-модель для аналізу скріншотів при проходженні AI Foundation курсів.';
   ctrl.appendChild(verifyHint);
 
-  const verifyRow = document.createElement('div');
-  verifyRow.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  const VERIFY_MODELS = [
+    { id: 'moondream2', name: 'Moondream 2', size: '829MB', desc: 'Vision · перевірка скріншотів' },
+  ];
 
-  const verifyInput = document.createElement('input');
-  verifyInput.type = 'text';
-  verifyInput.style.cssText = 'flex:1;min-width:160px;max-width:260px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px';
-  verifyInput.placeholder = 'moondream2';
-
-  const verifySaveBtn = _makeBtn('btn-secondary', t('settings_verify_model_save') || 'Зберегти', async () => {
-    const m = verifyInput.value.trim();
-    if (!m) return;
-    verifySaveBtn.textContent = '⟳';
-    verifySaveBtn.disabled = true;
-    try {
-      const resp = await fetch('/api/verify-model', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: m }),
-      });
-      const { ok, error } = await resp.json();
-      if (ok) toast(`AI-верифікація: модель змінено на «${m}»`);
-      else toast('Помилка: ' + error);
-    } catch (e) { toast('Помилка: ' + e.message); }
-    verifySaveBtn.textContent = t('settings_verify_model_save') || 'Зберегти';
-    verifySaveBtn.disabled = false;
+  const verifyGrid = document.createElement('div');
+  verifyGrid.className = 'model-popular-grid';
+  VERIFY_MODELS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'model-popular-card';
+    card.dataset.modelId = m.id;
+    card.innerHTML = `<div class="mpcard-name">${m.name}</div><div class="mpcard-size">${m.size}</div><div class="mpcard-desc">${m.desc}</div>`;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary mpcard-btn';
+    btn.textContent = t('settings_model_dl') || 'Завантажити';
+    btn.onclick = () => _settingsPullModel(m.id, card, btn);
+    card.appendChild(btn);
+    verifyGrid.appendChild(card);
   });
+  ctrl.appendChild(verifyGrid);
 
-  verifyRow.append(verifyInput, verifySaveBtn);
-  ctrl.appendChild(verifyRow);
-
-  // load current model
-  fetch('/api/verify-model').then(r => r.json()).then(({ model }) => {
-    if (model) verifyInput.value = model;
-  }).catch(() => {});
+  _loadInstalledModels(modelList, popGrid, verifyGrid);
 }
 
-async function _loadInstalledModels(container, popGrid) {
+async function _loadInstalledModels(container, ...grids) {
   try {
     const resp = await fetch('/api/ollama-models');
     const { models = [] } = await resp.json();
-    container.innerHTML = '';
-    if (!models.length) {
-      container.innerHTML = `<span style="color:var(--text2);font-size:13px">${t('settings_models_none')}</span>`;
-      return;
-    }
-    models.forEach(name => {
-      const row = document.createElement('div');
-      row.className = 'model-row';
-      row.innerHTML = `<span class="model-row-name">${name}</span>`;
-      const del = document.createElement('button');
-      del.className = 'btn btn-danger model-row-del';
-      del.textContent = '🗑';
-      del.title = 'Видалити';
-      del.onclick = () => _settingsDeleteModel(name, row);
-      row.appendChild(del);
-      container.appendChild(row);
-      if (popGrid) {
-        popGrid.querySelectorAll('.model-popular-card').forEach(card => {
-          const baseId = card.dataset.modelId.split(':')[0];
-          if (name === card.dataset.modelId || name.startsWith(baseId + ':')) {
-            const btn = card.querySelector('.mpcard-btn');
-            btn.textContent = t('settings_model_ok');
-            btn.disabled = true;
-          }
+    if (container) {
+      container.innerHTML = '';
+      if (!models.length) {
+        container.innerHTML = `<span style="color:var(--text2);font-size:13px">${t('settings_models_none')}</span>`;
+      } else {
+        models.forEach(name => {
+          const row = document.createElement('div');
+          row.className = 'model-row';
+          row.innerHTML = `<span class="model-row-name">${name}</span>`;
+          const del = document.createElement('button');
+          del.className = 'btn btn-danger model-row-del';
+          del.textContent = '🗑';
+          del.title = 'Видалити';
+          del.onclick = () => _settingsDeleteModel(name, row);
+          row.appendChild(del);
+          container.appendChild(row);
         });
       }
+    }
+    grids.forEach(grid => {
+      if (!grid) return;
+      grid.querySelectorAll('.model-popular-card').forEach(card => {
+        const baseId = card.dataset.modelId.split(':')[0];
+        const installed = models.some(n => n === card.dataset.modelId || n.startsWith(baseId + ':'));
+        const btn = card.querySelector('.mpcard-btn');
+        if (installed) {
+          btn.textContent = '✅ Встановлено';
+          btn.disabled = true;
+        }
+      });
     });
   } catch {
-    container.innerHTML = `<span style="color:var(--red);font-size:13px">${t('settings_models_none')}</span>`;
+    if (container) container.innerHTML = `<span style="color:var(--red);font-size:13px">${t('settings_models_none')}</span>`;
   }
 }
 
@@ -1191,11 +1181,33 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-lesson-back')?.addEventListener('click', goBack);
   document.getElementById('btn-sandbox-back')?.addEventListener('click', goBack);
 
-  document.getElementById('btn-uninstall-app')?.addEventListener('click', () => {
+  document.getElementById('btn-uninstall-app')?.addEventListener('click', async () => {
     if (!confirm(t('settings_uninstall_confirm'))) return;
-    fetch('/api/uninstall-app', { method: 'POST' })
-      .then(() => toast(t('settings_uninstall_done')))
-      .catch(e => toast('Помилка: ' + e.message));
+    const btn = document.getElementById('btn-uninstall-app');
+    if (btn) { btn.disabled = true; btn.textContent = '⟳ Видалення…'; }
+
+    try {
+      // Step 1 — delete all installed models
+      const { models = [] } = await fetch('/api/ollama-models').then(r => r.json()).catch(() => ({ models: [] }));
+      for (const model of models) {
+        toast(`Видаляємо модель: ${model}…`);
+        await fetch('/api/delete-model', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model }),
+        }).catch(() => {});
+      }
+
+      // Step 2 — uninstall Ollama
+      toast('Видаляємо Ollama…');
+      await fetch('/api/uninstall-ollama', { method: 'POST' }).catch(() => {});
+
+      // Step 3 — uninstall app (server exits after reply)
+      toast('Видаляємо застосунок…');
+      await fetch('/api/uninstall-app', { method: 'POST' }).catch(() => {});
+    } catch (e) {
+      toast('Помилка: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall') || 'Видалити застосунок'; }
+    }
   });
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
