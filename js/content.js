@@ -7802,7 +7802,7 @@ curl http://localhost:11434/api/chat -d \'{
   <li>Безпечне використання AI (safety filters, responsible AI)</li>
 </ul>
 <h3>Посилання</h3>
-<p><a href="https://ai.google.dev/learn" target="_blank">ai.google.dev/learn</a> — Google AI for Developers</p>
+<p><a href="https://ai.google/learn-ai-skills/" target="_blank">ai.google/learn-ai-skills</a> — Google AI Skills</p>
 <h3>Підтвердження</h3>
 <p>Після завершення навчального шляху отримай бейдж або скріншот 100% прогресу та завантаж нижче.</p>`,
             screenshotVerify: { lessonId: 'gemini-academy', xp: 100 },
@@ -7970,22 +7970,23 @@ curl http://localhost:11434/api/chat -d \'{
             screenshotVerify: { lessonId: 'luma-dream-machine', xp: 90 },
           },
           {
-            id: 'ai-f-sora',
-            title: 'Sora Prep Course — Відеогенерація від OpenAI',
-            theory: `<h2>Sora (OpenAI) — Вступний курс</h2>
-<p>Sora — модель OpenAI для відеогенерації до 60 секунд. Розуміє фізику реального світу та складні сцени.</p>
+            id: 'ai-f-kling',
+            title: 'Kling AI — Мультишот відеогенерація',
+            theory: `<h2>Kling AI 3.0 (klingai.com)</h2>
+<p>Kling 3.0 від Kuaishou — один з найпотужніших AI-відеогенераторів 2026. Підтримує multi-shot сторіборд, нативне аудіо та безкоштовний доступ.</p>
 <h3>Що вивчиш</h3>
 <ul>
-  <li>Як Sora відрізняється від Runway та Luma</li>
-  <li>Структура промпту: сцена, камера, освітлення, настрій</li>
-  <li>Storyboard режим — кілька сцен в одному відео</li>
-  <li>Remix та Blend існуючих відео</li>
+  <li><strong>Multi-shot generation</strong> — до 6 окремих сцен в одному промпті з єдиним персонажем</li>
+  <li>Text-to-video та Image-to-video з фізично коректними рухами</li>
+  <li>Camera controls — pan, zoom, orbit, tracking shots</li>
+  <li>Kling API — інтеграція у власні застосунки</li>
 </ul>
 <h3>Посилання</h3>
-<p><a href="https://openai.com/sora" target="_blank">openai.com/sora</a> — офіційний сайт Sora</p>
+<p><a href="https://klingai.com/global/" target="_blank">klingai.com</a> — офіційний сайт (безкоштовний tier)<br>
+<a href="https://www.datacamp.com/tutorial/kling-3-0" target="_blank">datacamp.com/tutorial/kling-3-0</a> — повний гайд Kling 3.0</p>
 <h3>Підтвердження</h3>
-<p>Завантаж сертифікат або скріншот завершення будь-якого Sora/AI-відео курсу (Great Learning, Coursera, тощо).</p>`,
-            screenshotVerify: { lessonId: 'sora-prep-course', xp: 90 },
+<p>Згенеруй відео в Kling AI і зроби скріншот результату — має бути видно готове відео з кнопкою Download або галерея з генерацією.</p>`,
+            screenshotVerify: { lessonId: 'kling-ai', xp: 90 },
           },
           {
             id: 'ai-f-heygen',
@@ -8171,7 +8172,7 @@ curl http://localhost:11434/api/chat -d \'{
   <li>Реальні кейси: CRM, e-commerce, маркетинг, Slack-боти</li>
 </ul>
 <h3>Посилання</h3>
-<p><a href="https://www.make.com/en/academy" target="_blank">make.com/en/academy</a> — Make Academy (безкоштовно)</p>
+<p><a href="https://academy.make.com" target="_blank">academy.make.com</a> — Make Academy (безкоштовно)</p>
 <h3>Підтвердження</h3>
 <p>Завантаж сертифікат Foundation або Expert, або скріншот 100% завершення будь-якого рівня.</p>`,
             screenshotVerify: { lessonId: 'make-academy', xp: 100 },
@@ -8207,7 +8208,7 @@ curl http://localhost:11434/api/chat -d \'{
   <li>Self-hosting n8n на сервері або локально через Docker</li>
 </ul>
 <h3>Посилання</h3>
-<p><a href="https://n8n.io/courses" target="_blank">n8n.io/courses</a> — безкоштовні практичні курси</p>
+<p><a href="https://docs.n8n.io/courses/" target="_blank">docs.n8n.io/courses</a> — офіційні текстові курси (Level 1 & 2)</p>
 <h3>Підтвердження</h3>
 <p>Зроби скріншот успішно виконаного воркфлоу в n8n (зелені галочки на нодах або "Execution succeeded" у логах).</p>`,
             screenshotVerify: { lessonId: 'n8n-courses', xp: 100 },

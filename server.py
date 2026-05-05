@@ -628,11 +628,11 @@ _LESSON_VERIFY_PROMPTS = {
         '100% generation progress, Luma AI branding visible, or a completed video in the gallery. '
         'Answer only YES or NO.'
     ),
-    'sora-prep-course': (
-        'Look at this screenshot. Does it show a completed course or certificate about Sora '
-        'or AI video generation on any learning platform (Great Learning, Coursera, Udemy, etc.)? '
-        'Valid evidence: a certificate with a name, "Course complete" banner, badge, '
-        'or 100% progress on a Sora/AI video course. '
+    'kling-ai': (
+        'Look at this screenshot. Does it show Kling AI with a successfully generated video? '
+        'Valid evidence: a generated video thumbnail in the Kling AI gallery or editor, '
+        'Kling or klingai.com branding visible, a "Download" button on a finished video, '
+        'or a completed multi-shot video generation result. '
         'Answer only YES or NO.'
     ),
     'heygen-learning': (
