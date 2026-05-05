@@ -718,7 +718,6 @@ body {
 .lesson-theory li { font-size: 14px; color: var(--text); margin-bottom: 4px; }
 .lesson-theory strong { color: var(--primary); }
 
-.hearts-display { font-size: 16px; letter-spacing: 2px; }
 
 /* Challenge list */
 .challenge-list-item {

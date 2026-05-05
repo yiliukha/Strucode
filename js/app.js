@@ -8,7 +8,6 @@ let _state = {
   lastActivity: null,
   completedChallenges: [],
   verifiedLessons: [],
-  hearts: 3,
   theme: 'dark',
   aiModel: 'llama3.2:3b',
   lastCourse: null,
@@ -493,7 +492,6 @@ function openLesson(course, lesson) {
 
   document.getElementById('lesson-title').textContent = lesson.title;
   document.getElementById('lesson-theory').innerHTML = lesson.theory || '';
-  updateHeartsDisplay();
   _updateCourseXpStrip(course.id);
 
   const challengesBlock = document.getElementById('lesson-challenges-block');
@@ -602,11 +600,6 @@ function _renderScreenshotVerify(lesson, container) {
   });
 }
 
-function updateHeartsDisplay() {
-  const el = document.getElementById('hearts-display');
-  if (!el) return;
-  el.textContent = '❤️'.repeat(Math.max(0, _state.hearts)) + '🖤'.repeat(Math.max(0, 3 - _state.hearts));
-}
 
 function _updateCourseXpStrip(courseId) {
   const strip = document.getElementById('course-xp-strip');
@@ -1212,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
     if (confirm(t('settings_reset_confirm'))) {
-      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], verifiedLessons: [], hearts: 3, theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang };
+      _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], verifiedLessons: [], theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang };
       saveState();
       renderSettings();
       toast(t('settings_reset_done'));
