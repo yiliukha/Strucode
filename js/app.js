@@ -740,16 +740,16 @@ async function _renderOllamaSettings() {
   const verifyLabel = document.createElement('div');
   verifyLabel.className = 'settings-label';
   verifyLabel.style.marginTop = '20px';
-  verifyLabel.textContent = t('settings_verify_model_label') || 'Модель для перевірки AI курсів';
+  verifyLabel.textContent = t('settings_verify_section');
   ctrl.appendChild(verifyLabel);
 
   const verifyHint = document.createElement('div');
   verifyHint.style.cssText = 'font-size:12px;color:var(--text2);margin-bottom:8px';
-  verifyHint.textContent = t('settings_verify_model_hint') || 'Vision-модель для аналізу скріншотів при проходженні AI Foundation курсів.';
+  verifyHint.textContent = t('settings_verify_hint');
   ctrl.appendChild(verifyHint);
 
   const VERIFY_MODELS = [
-    { id: 'moondream2', name: 'Moondream 2', size: '829MB', desc: 'Vision · перевірка скріншотів' },
+    { id: 'moondream2', name: 'Moondream 2', size: '829MB', desc: t('settings_verify_installed_card') },
   ];
 
   const verifyGrid = document.createElement('div');
@@ -830,11 +830,18 @@ async function _settingsDeleteModel(modelName, rowEl) {
 async function _settingsPullModel(modelId, cardEl, btn) {
   btn.textContent = t('settings_model_dling');
   btn.disabled = true;
+  const _resetBtn = () => { btn.textContent = t('settings_model_dl'); btn.disabled = false; };
   try {
-    await fetch('/api/pull-model', {
+    const startResp = await fetch('/api/pull-model', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: modelId }),
     });
+    const { started } = await startResp.json();
+    if (!started) {
+      toast('Завантаження вже виконується, зачекай...');
+      _resetBtn();
+      return;
+    }
     const iv = setInterval(async () => {
       try {
         const { status, logs, message } = await (await fetch('/api/ollama-pull-progress')).json();
@@ -845,17 +852,19 @@ async function _settingsPullModel(modelId, cardEl, btn) {
           _renderOllamaSettings();
         } else if (status === 'error') {
           clearInterval(iv);
-          btn.textContent = '❌ Помилка';
-          btn.disabled = false;
-          toast('Помилка: ' + message);
+          toast('Помилка завантаження: ' + (message || 'невідома'));
+          _resetBtn();
+        } else if (status === 'idle') {
+          clearInterval(iv);
+          _resetBtn();
         } else if (logs?.length) {
           btn.textContent = ('⟳ ' + logs[logs.length - 1]).slice(0, 28);
         }
       } catch {}
     }, 1500);
   } catch (e) {
-    btn.textContent = '❌ ' + e.message.slice(0, 20);
-    btn.disabled = false;
+    toast('Помилка: ' + e.message);
+    _resetBtn();
   }
 }
 
