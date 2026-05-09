@@ -28,7 +28,7 @@ jobs:
           PLATFORM="${{ inputs.platform || 'all' }}"
           LINUX='{"os":"ubuntu-latest","artifact":"Strucode-linux","pyinstaller_args":"--onedir --noconsole"}'
           MACOS='{"os":"macos-latest","artifact":"Strucode-mac","pyinstaller_args":"--onedir --windowed"}'
-          WIN='{"os":"windows-latest","artifact":"Strucode-windows","pyinstaller_args":"--onedir --noconsole"}'
+          WIN='{"os":"windows-2025-vs2026","artifact":"Strucode-windows","pyinstaller_args":"--onedir --noconsole"}'
           case "$PLATFORM" in
             linux)   echo "matrix={\"include\":[$LINUX]}" >> $GITHUB_OUTPUT ;;
             macos)   echo "matrix={\"include\":[$MACOS]}" >> $GITHUB_OUTPUT ;;
