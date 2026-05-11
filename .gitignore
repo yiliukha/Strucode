@@ -8,3 +8,4 @@ build/
 Thumbs.db
 *.log
 node_modules/
+js/courses-en-deep.progress.json

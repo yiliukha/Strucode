@@ -1,0 +1,221 @@
+C	javascript		Основа веб-розробки. Від змінних до async/await, класів та модулів.
+M	javascript	js-basics	Основи
+L	javascript	js-basics|js-l01	Змінні: let і const
+L	javascript	js-basics|js-l02	Умови: if / else
+L	javascript	js-basics|js-l03	Цикли: for і while
+L	javascript	js-basics|js-l04	Функції
+L	javascript	js-basics|js-l05	Масиви
+M	javascript	js-objects	Об'єкти та деструктуризація
+L	javascript	js-objects|js-l06	Об'єкти
+L	javascript	js-objects|js-l07	Деструктуризація
+M	javascript	js-modern	Сучасний JS
+L	javascript	js-modern|js-l08	Promises і async/await
+M	javascript	js-types	Типи даних
+L	javascript	js-types|js-l09	Числа та математика
+L	javascript	js-types|js-l10	Рядки (String)
+L	javascript	js-types|js-l11	Масиви — поглиблено
+L	javascript	js-types|js-l12	Map і Set
+L	javascript	js-types|js-l13	Date і час
+M	javascript	js-functions-advanced	Функції — поглиблено
+L	javascript	js-functions-advanced|js-l14	Замикання та область видимості
+L	javascript	js-functions-advanced|js-l15	Рекурсія
+L	javascript	js-functions-advanced|js-l16	Rest, Spread та аргументи
+L	javascript	js-functions-advanced|js-l17	bind, call та apply
+L	javascript	js-functions-advanced|js-l18	Декоратори та функції вищого порядку
+M	javascript	js-oop	ООП в JavaScript
+L	javascript	js-oop|js-l19	this — контекст виклику
+L	javascript	js-oop|js-l20	Прототипи та ланцюжок прототипів
+L	javascript	js-oop|js-l21	Класи (class)
+L	javascript	js-oop|js-l22	Наслідування класів
+L	javascript	js-oop|js-l23	Статичні члени та приватні поля
+M	javascript	js-errors	Обробка помилок
+L	javascript	js-errors|js-l24	try...catch...finally
+L	javascript	js-errors|js-l25	Власні класи помилок
+M	javascript	js-async	Асинхронний JS
+L	javascript	js-async|js-l26	Callbacks та Event Loop
+L	javascript	js-async|js-l27	Promise — поглиблено
+L	javascript	js-async|js-l28	async/await — поглиблено
+L	javascript	js-async|js-l29	Generators та ітератори
+M	javascript	js-dom	DOM та браузер
+L	javascript	js-dom|js-l30	DOM — дерево документа
+L	javascript	js-dom|js-l31	Пошук елементів
+L	javascript	js-dom|js-l32	Маніпуляція DOM
+L	javascript	js-dom|js-l33	Події (Events)
+L	javascript	js-dom|js-l34	Делегування подій
+L	javascript	js-dom|js-l35	Форми та введення
+M	javascript	js-modules	Модулі
+L	javascript	js-modules|js-l36	export та import
+L	javascript	js-modules|js-l37	Динамічний import()
+M	javascript	js-advanced	Просунутий JS
+L	javascript	js-advanced|js-l38	Symbol та ітерованість
+L	javascript	js-advanced|js-l39	Proxy та Reflect
+L	javascript	js-advanced|js-l40	RegExp — регулярні вирази
+L	javascript	js-advanced|js-l41	Менеджмент пам'яті та WeakRef
+C	java		Мова для Android, enterprise та backend. Строга типізація, ООП.
+M	java	java-basics	Основи Java
+L	java	java-basics|java-l01	Перша програма
+L	java	java-basics|java-l02	Змінні та типи
+L	java	java-basics|java-l03	Умови та цикли
+M	java	java-oop	ООП у Java
+L	java	java-oop|java-l04	Класи та об'єкти
+L	java	java-oop|java-l05	Методи та повернення значення
+M	java	java-types	Типи та операції
+L	java	java-types|java-l06	Примітивні типи — детально
+L	java	java-types|java-l07	String — методи та операції
+L	java	java-types|java-l08	Масиви (Arrays)
+L	java	java-types|java-l09	Enum (перелічення)
+L	java	java-types|java-l10	Оператори та вирази
+M	java	java-oop-advanced	ООП — поглиблено
+L	java	java-oop-advanced|java-l11	Encapsulation: getters та setters
+L	java	java-oop-advanced|java-l12	Наслідування (extends)
+L	java	java-oop-advanced|java-l13	Поліморфізм та @Override
+L	java	java-oop-advanced|java-l14	Abstract класи та інтерфейси
+L	java	java-oop-advanced|java-l15	Static члени класу
+L	java	java-oop-advanced|java-l16	Вкладені та анонімні класи
+M	java	java-functional	Функціональне програмування
+L	java	java-functional|java-l17	Lambda вирази
+L	java	java-functional|java-l18	Functional interfaces
+L	java	java-functional|java-l19	Method references
+L	java	java-functional|java-l20	Optional
+M	java	java-collections	Колекції Java
+L	java	java-collections|java-l21	List: ArrayList та LinkedList
+L	java	java-collections|java-l22	Set: HashSet та TreeSet
+L	java	java-collections|java-l23	Map: HashMap та TreeMap
+L	java	java-collections|java-l24	Generics (узагальнення)
+L	java	java-collections|java-l25	Collections — утиліти
+M	java	java-streams	Streams API
+L	java	java-streams|java-l26	Stream — введення
+L	java	java-streams|java-l27	Intermediate операції
+L	java	java-streams|java-l28	Terminal операції та Collectors
+L	java	java-streams|java-l29	Паралельні потоки
+M	java	java-exceptions	Обробка виключень
+L	java	java-exceptions|java-l30	try-catch-finally
+L	java	java-exceptions|java-l31	throw та власні виключення
+M	java	java-strings-advanced	Рядки — поглиблено
+L	java	java-strings-advanced|java-l32	StringBuilder та StringBuffer
+L	java	java-strings-advanced|java-l33	Регулярні вирази
+L	java	java-strings-advanced|java-l34	Text Blocks (Java 15+)
+M	java	java-modern	Сучасна Java
+L	java	java-modern|java-l35	Records (Java 16+)
+L	java	java-modern|java-l36	Sealed Classes (Java 17+)
+L	java	java-modern|java-l37	Switch Expressions (Java 14+)
+L	java	java-modern|java-l38	Pattern Matching (Java 16–21)
+L	java	java-modern|java-l39	Concurrency — основи
+L	java	java-modern|java-l40	CompletableFuture
+C	python		Мова №1 для AI, data science і автоматизації.
+M	python	py-basics	Основи Python
+L	python	py-basics|py-l01	Змінні і типи
+L	python	py-basics|py-l02	Списки і словники
+L	python	py-basics|py-l03	Функції і лямбди
+M	python	py-strings	Рядки
+L	python	py-strings|py-l04	Рядки — методи
+L	python	py-strings|py-l05	Форматування рядків
+M	python	py-collections	Колекції
+L	python	py-collections|py-l06	Списки — поглиблено
+L	python	py-collections|py-l07	Кортежі (tuple)
+L	python	py-collections|py-l08	Множини (set)
+L	python	py-collections|py-l09	Словники — поглиблено
+M	python	py-control	Управління потоком
+L	python	py-control|py-l10	Умови if/elif/else
+L	python	py-control|py-l11	Цикли for та while
+L	python	py-control|py-l12	Comprehensions
+M	python	py-functions	Функції — поглиблено
+L	python	py-functions|py-l13	*args та **kwargs
+L	python	py-functions|py-l14	Замикання та декоратори
+L	python	py-functions|py-l15	map, filter, reduce
+L	python	py-functions|py-l16	Генератори та yield
+M	python	py-oop	ООП в Python
+L	python	py-oop|py-l17	Класи та об'єкти
+L	python	py-oop|py-l18	Наслідування та поліморфізм
+L	python	py-oop|py-l19	Магічні методи (__dunder__)
+L	python	py-oop|py-l20	@property та dataclass
+M	python	py-errors	Обробка помилок
+L	python	py-errors|py-l21	try / except / finally
+L	python	py-errors|py-l22	Власні виключення та with
+M	python	py-modules	Модулі та stdlib
+L	python	py-modules|py-l23	import та модулі
+L	python	py-modules|py-l24	os, sys та pathlib
+L	python	py-modules|py-l25	datetime та time
+L	python	py-modules|py-l26	json та csv
+M	python	py-functional	Функціональний Python
+L	python	py-functional|py-l27	itertools
+L	python	py-functional|py-l28	functools та typing
+L	python	py-functional|py-l29	Регулярні вирази (re)
+M	python	py-advanced	Просунутий Python
+L	python	py-advanced|py-l30	asyncio — асинхронний Python
+L	python	py-advanced|py-l31	Протоколи та ABC
+L	python	py-advanced|py-l32	Декоратори класів та метакласи
+L	python	py-advanced|py-l33	Threading та multiprocessing
+L	python	py-advanced|py-l34	Introspection та __dunder__
+C	ai_basics		Від основ LLM до реальних AI-інструментів: редактори, відео, дизайн, агенти.
+M	ai_basics	ai-intro	Основи AI
+L	ai_basics	ai-intro|ai-l01	Як працює LLM
+L	ai_basics	ai-intro|ai-l02	Prompt Engineering
+L	ai_basics	ai-intro|ai-l03	AI Інструменти
+M	ai_basics	ai-gemini	Google Gemini & AI-інфраструктура
+L	ai_basics	ai-gemini|ai-f-gemini-academy	Gemini Academy — Google Developers
+L	ai_basics	ai-gemini|ai-f-gen-ai-dev	Generative AI for Developers — Google Cloud
+L	ai_basics	ai-gemini|ai-f-google-essentials	Google AI Essentials — Coursera
+M	ai_basics	ai-coding-tools	Кодинг та AI-редактори
+L	ai_basics	ai-coding-tools|ai-f-cursor	Cursor — AI-редактор коду
+L	ai_basics	ai-coding-tools|ai-f-gh-copilot-skills	GitHub Copilot Skills — Інтерактивні вправи
+L	ai_basics	ai-coding-tools|ai-f-copilot-ms-learn	Copilot for Developers — Microsoft Learn
+L	ai_basics	ai-coding-tools|ai-f-windsurf	Windsurf Guide — Codeium
+M	ai_basics	ai-video-gen	Відеогенерація
+L	ai_basics	ai-video-gen|ai-f-runway	Runway Academy — Gen-3 Alpha
+L	ai_basics	ai-video-gen|ai-f-luma	Luma Dream Machine — Реалістичне відео
+L	ai_basics	ai-video-gen|ai-f-kling	Kling AI — Мультишот відеогенерація
+L	ai_basics	ai-video-gen|ai-f-heygen	HeyGen — AI-аватари та переклад відео
+M	ai_basics	ai-design	Дизайн та Зображення
+L	ai_basics	ai-design|ai-f-midjourney	Midjourney Guide — Генерація зображень
+L	ai_basics	ai-design|ai-f-firefly	Adobe Firefly — AI у Photoshop
+L	ai_basics	ai-design|ai-f-canva	Canva Design School — Magic Studio
+L	ai_basics	ai-design|ai-f-stable-diffusion	Stable Diffusion — Локальна генерація (Civitai)
+M	ai_basics	ai-agents	AI Агенти та Боти
+L	ai_basics	ai-agents|ai-f-deeplearning	DeepLearning.AI Short Courses
+L	ai_basics	ai-agents|ai-f-langchain	LangChain Academy — AI-ланцюжки
+L	ai_basics	ai-agents|ai-f-crewai	CrewAI — Мультиагентні системи
+M	ai_basics	ai-automation	Автоматизація
+L	ai_basics	ai-automation|ai-f-make	Make Academy — Візуальна автоматизація
+L	ai_basics	ai-automation|ai-f-zapier	Zapier University — Автоматизація без коду
+L	ai_basics	ai-automation|ai-f-n8n	n8n Courses — Технічна автоматизація
+L	ai_basics	ai-automation|ai-f-hubspot	HubSpot — Marketing Automation
+L	ai_basics	ai-automation|ai-f-activecampaign	ActiveCampaign — Стратегія автоматизації
+L	ai_basics	ai-automation|ai-f-uipath	UiPath RPA Academy — Роботизація процесів
+M	ai_basics	ai-research	Пошук та Дослідження
+L	ai_basics	ai-research|ai-f-cookbooks	Anthropic Cookbooks — Claude API
+L	ai_basics	ai-research|ai-f-perplexity	Perplexity — AI-дослідження
+C	sql		Мова запитів до баз даних. Must-have для будь-якого розробника.
+M	sql	sql-basics	Основи SQL
+L	sql	sql-basics|sql-l01	SELECT і WHERE
+L	sql	sql-basics|sql-l02	AND, OR, NOT
+L	sql	sql-basics|sql-l03	LIKE та wildcards
+L	sql	sql-basics|sql-l04	IN, BETWEEN, IS NULL
+M	sql	sql-dml	Зміна даних (DML)
+L	sql	sql-dml|sql-l05	INSERT INTO
+L	sql	sql-dml|sql-l06	UPDATE
+L	sql	sql-dml|sql-l07	DELETE
+M	sql	sql-aggregate	Агрегація та групування
+L	sql	sql-aggregate|sql-l08	COUNT, SUM, AVG, MIN, MAX
+L	sql	sql-aggregate|sql-l09	GROUP BY та HAVING
+L	sql	sql-aggregate|sql-l10	DISTINCT та аліаси
+M	sql	sql-joins	JOIN — з'єднання таблиць
+L	sql	sql-joins|sql-l11	INNER JOIN
+L	sql	sql-joins|sql-l12	LEFT, RIGHT та FULL JOIN
+L	sql	sql-joins|sql-l13	SELF JOIN та CROSS JOIN
+M	sql	sql-advanced	Просунутий SQL
+L	sql	sql-advanced|sql-l14	Підзапити (Subqueries)
+L	sql	sql-advanced|sql-l15	EXISTS, ANY, ALL
+L	sql	sql-advanced|sql-l16	CASE вирази
+L	sql	sql-advanced|sql-l17	CTE та рекурсивні запити
+L	sql	sql-advanced|sql-l18	Вікнові функції (Window Functions)
+M	sql	sql-ddl	DDL — структура бази
+L	sql	sql-ddl|sql-l19	CREATE TABLE та типи даних
+L	sql	sql-ddl|sql-l20	Constraints: PRIMARY KEY та FOREIGN KEY
+L	sql	sql-ddl|sql-l21	ALTER TABLE та DROP
+L	sql	sql-ddl|sql-l22	Індекси (INDEX)
+L	sql	sql-ddl|sql-l23	Views (представлення)
+M	sql	sql-functions	Функції SQL
+L	sql	sql-functions|sql-l24	Рядкові функції
+L	sql	sql-functions|sql-l25	Числові та NULL функції
+L	sql	sql-functions|sql-l26	Функції дати та часу

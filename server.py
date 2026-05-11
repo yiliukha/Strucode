@@ -20,6 +20,7 @@ import tempfile
 import threading
 import time
 import base64
+import urllib.error
 import urllib.request
 import uuid
 import webbrowser
@@ -126,6 +127,7 @@ def _download_file(url, dest):
 
 _ollama_install_progress = None
 _ollama_pull_progress = None
+_ollama_pull_model = None
 
 
 def _install_ollama_thread(progress_list):
@@ -312,12 +314,42 @@ const __runner__ = new Function('__tests__', '__testResults__', `
 
 for (const __t__ of __tests__) {
   try {
+    const __exRaw__ = String(__t__.expression || '').trim();
+    let __ex = __exRaw__;
+    while (__ex.startsWith('(') && __ex.endsWith(')')) __ex = __ex.slice(1, -1).trim();
+    const __isTypeof = /^typeof\\b/i.test(__ex);
+    const __outBefore = __testOutput__.length;
     const __val__ = eval(__t__.expression);
+    let __cmp = __val__;
+    if (!__isTypeof && (__val__ === undefined || __val__ === null) && __testOutput__.length > __outBefore) {
+      __cmp = __testOutput__[__testOutput__.length - 1];
+    }
+    let __passed__;
+    let __expectedOut;
+    if (__isTypeof) {
+      const __got = String(__val__).trim().toLowerCase();
+      const __wr = __t__.expected;
+      let __want;
+      if (typeof __wr === 'number' && Number.isFinite(__wr)) {
+        __want = String(typeof __wr).toLowerCase();
+      } else if (typeof __wr === 'boolean') {
+        __want = String(typeof __wr).toLowerCase();
+      } else if (__wr === null) {
+        __want = 'object';
+      } else {
+        __want = String(__wr).trim().toLowerCase();
+      }
+      __passed__ = __got === __want;
+      __expectedOut = __want;
+    } else {
+      __passed__ = String(__cmp).trim() === String(__t__.expected).trim();
+      __expectedOut = String(__t__.expected);
+    }
     __testResults__.push({
       desc: __t__.desc,
-      passed: String(__val__) === String(__t__.expected),
-      got: String(__val__),
-      expected: String(__t__.expected)
+      passed: __passed__,
+      got: String(__isTypeof ? __val__ : __cmp),
+      expected: __expectedOut
     });
   } catch(__e__) {
     __testResults__.push({ desc: __t__.desc, passed: false, error: __e__.message });
@@ -379,6 +411,94 @@ print(_json.dumps({'output': _buf.getvalue(), 'results': _results}))
 def _indent_code(code: str, spaces: int = 2) -> str:
     pad = ' ' * spaces
     return '\n'.join(pad + line for line in code.splitlines())
+
+
+def _run_sql(code: str, tables_sql: str = '') -> dict:
+    import sqlite3 as _sqlite3
+    t0 = time.time()
+    try:
+        conn = _sqlite3.connect(':memory:')
+        conn.row_factory = _sqlite3.Row
+        output_lines = []
+        if tables_sql.strip():
+            try:
+                conn.executescript(tables_sql)
+            except Exception as e:
+                conn.close()
+                return {'output': '', 'error': f'Помилка таблиць: {e}', 'runtime_ms': 0}
+        statements = [s.strip() for s in code.split(';') if s.strip()]
+        for stmt in statements:
+            try:
+                cur = conn.execute(stmt)
+                if cur.description:
+                    cols = [d[0] for d in cur.description]
+                    rows = cur.fetchall()
+                    rows = [tuple(r) for r in rows]
+                    if rows:
+                        ws = [max(len(str(c)), max(len(str(r[i])) for r in rows)) for i, c in enumerate(cols)]
+                        output_lines.append(' │ '.join(str(c).ljust(ws[i]) for i, c in enumerate(cols)))
+                        output_lines.append('─┼─'.join('─' * w for w in ws))
+                        for row in rows:
+                            output_lines.append(' │ '.join(str(row[i]).ljust(ws[i]) for i in range(len(cols))))
+                    else:
+                        output_lines.append('(0 рядків)')
+                else:
+                    output_lines.append(f'✓ {cur.rowcount} рядків змінено')
+            except Exception as e:
+                output_lines.append(f'Помилка: {e}')
+        conn.commit()
+        conn.close()
+        ms = int((time.time() - t0) * 1000)
+        return {'output': '\n'.join(output_lines) or '(немає виводу)', 'error': None, 'runtime_ms': ms}
+    except Exception as e:
+        return {'output': '', 'error': str(e), 'runtime_ms': 0}
+
+
+def _install_jdk() -> dict:
+    plat = sys.platform
+    if plat == 'darwin':
+        cmd = ['brew', 'install', 'openjdk']
+    elif plat.startswith('linux'):
+        apt = shutil.which('apt-get') or shutil.which('apt')
+        if apt:
+            cmd = [apt, 'install', '-y', 'default-jdk']
+        else:
+            return {'error': 'apt не знайдено. Встанови JDK вручну.', 'output': '', 'success': False}
+    elif plat == 'win32':
+        winget = shutil.which('winget.exe') or shutil.which('winget')
+        if not winget:
+            return {
+                'error': 'winget не знайдено. Відкрий PowerShell і виконай: winget install -e --id EclipseAdoptium.Temurin.21.JDK',
+                'output': '',
+                'success': False,
+            }
+        cmd = [
+            winget, 'install', '-e', '--id', 'EclipseAdoptium.Temurin.21.JDK',
+            '--accept-package-agreements', '--accept-source-agreements', '--silent',
+        ]
+    else:
+        return {
+            'error': 'Автоматичне встановлення недоступне для цієї ОС. Встанови JDK вручну.',
+            'output': '',
+            'success': False,
+        }
+    try:
+        env = os.environ.copy()
+        env['DEBIAN_FRONTEND'] = 'noninteractive'
+        timeout_sec = 600 if plat == 'win32' else 180
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_sec,
+                           env=env, **_W)
+        out = (r.stdout + '\n' + r.stderr).strip()
+        if _check_java().get('javac'):
+            return {'output': out, 'success': True, 'message': '✅ JDK встановлено! Перезапусти Strucode.'}
+        hint = 'Перезапусти Strucode або новий термінал: javac може з\'явитися в PATH із затримкою.'
+        if plat == 'win32':
+            hint = 'Перезапусти Strucode (або ПК), щоб Windows оновив PATH і з\'явився javac.'
+        return {'output': out, 'success': False, 'error': 'JDK ще не видно в PATH. ' + hint}
+    except subprocess.TimeoutExpired:
+        return {'error': 'Timeout при встановленні JDK.', 'output': ''}
+    except Exception as e:
+        return {'error': str(e), 'output': ''}
 
 
 def _run_js(code: str) -> dict:
@@ -979,7 +1099,7 @@ def _fetch_news_bg():
 
 # ── HTTP server ───────────────────────────────────────────────────────────────
 
-PORT = 8767
+PORT = 8800
 
 
 def _find_free_port(preferred):
@@ -1043,6 +1163,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._verify_lesson()
         elif path == '/api/verify-model':
             self._verify_model_set()
+        elif path == '/api/install-jdk':
+            self._json(_install_jdk())
         else:
             self.send_error(404)
 
@@ -1063,12 +1185,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = self._read_body()
             lang = body.get('language', 'javascript').lower()
             code = body.get('code', '')
+            tables_sql = body.get('tables_sql', '')
             if lang in ('javascript', 'js'):
                 result = _run_js(code)
             elif lang in ('python', 'py'):
                 result = _run_python(code)
             elif lang in ('java',):
                 result = _run_java(code)
+            elif lang in ('sql',):
+                result = _run_sql(code, tables_sql)
             else:
                 result = {'output': '', 'error': f'Мова "{lang}" поки не підтримується.', 'runtime_ms': 0}
             self._json(result)
@@ -1168,7 +1293,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             req = urllib.request.Request('http://localhost:11434/api/tags')
             with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read())
-            models = [m['name'] for m in data.get('models', [])]
+            raw = data.get('models') or []
+            models = []
+            seen = set()
+            for m in raw:
+                n = (m.get('name') or m.get('model') or '').strip()
+                if not n:
+                    continue
+                key = n.lower()
+                if key not in seen:
+                    seen.add(key)
+                    models.append(n)
             self._json({'models': models})
         except Exception as e:
             self._json({'models': [], 'error': str(e)})
@@ -1222,32 +1357,47 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return self._json({'status': last, 'logs': logs})
 
     def _pull_model(self):
-        global _ollama_pull_progress
+        global _ollama_pull_progress, _ollama_pull_model
         if _ollama_pull_progress is not None:
             return self._json({'started': False, 'reason': 'already_running'})
         body = self._read_body()
-        model = body.get('model', 'llama3.2:3b')
+        model = (body.get('model') or 'llama3.2:3b').strip()
+        if not model:
+            return self._json({'started': False, 'reason': 'no_model'})
+        _ollama_pull_model = model
         _ollama_pull_progress = []
         threading.Thread(target=_pull_model_thread, args=(model, _ollama_pull_progress), daemon=True).start()
-        self._json({'started': True})
+        self._json({'started': True, 'model': model})
 
     def _ollama_pull_progress_ep(self):
-        global _ollama_pull_progress
+        global _ollama_pull_progress, _ollama_pull_model
         if _ollama_pull_progress is None:
-            return self._json({'status': 'idle', 'logs': []})
+            return self._json({'status': 'idle', 'logs': [], 'pullModel': None, 'pulling': False})
         if not _ollama_pull_progress:
-            return self._json({'status': 'pending', 'logs': []})
+            return self._json({
+                'status': 'pending',
+                'logs': [],
+                'pullModel': _ollama_pull_model,
+                'pulling': True,
+            })
         logs = [e[4:] for e in _ollama_pull_progress if e.startswith('log:')]
         statuses = [e for e in _ollama_pull_progress if not e.startswith('log:')]
         last = statuses[-1] if statuses else 'pending'
         if last == 'done':
             _ollama_pull_progress = None
-            return self._json({'status': 'done', 'logs': logs})
+            _ollama_pull_model = None
+            return self._json({'status': 'done', 'logs': logs, 'pullModel': None, 'pulling': False})
         if last.startswith('error:'):
             msg = last[6:]
             _ollama_pull_progress = None
-            return self._json({'status': 'error', 'message': msg, 'logs': logs})
-        return self._json({'status': last, 'logs': logs})
+            _ollama_pull_model = None
+            return self._json({'status': 'error', 'message': msg, 'logs': logs, 'pullModel': None, 'pulling': False})
+        return self._json({
+            'status': last,
+            'logs': logs,
+            'pullModel': _ollama_pull_model,
+            'pulling': True,
+        })
 
     # ── /api/delete-model  POST {model} ─────────────────────────────────────
     def _delete_model(self):
@@ -1333,6 +1483,36 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     except FileNotFoundError:
                         pass
                 shutil.rmtree(Path.home() / '.ollama', ignore_errors=True)
+            elif plat == 'win32':
+                subprocess.run(
+                    ['taskkill', '/F', '/IM', 'ollama.exe'],
+                    capture_output=True, timeout=15, **_W,
+                )
+                subprocess.run(
+                    ['taskkill', '/F', '/IM', 'Ollama.exe'],
+                    capture_output=True, timeout=15, **_W,
+                )
+                local = os.environ.get('LOCALAPPDATA', '') or str(Path.home() / 'AppData' / 'Local')
+                ollama_prog = Path(local) / 'Programs' / 'Ollama'
+                for un_name in ('Uninstall Ollama.exe', 'uninstall.exe'):
+                    un = ollama_prog / un_name
+                    if un.is_file():
+                        subprocess.run(
+                            [str(un), '/S'],
+                            capture_output=True, text=True, timeout=180, **_W,
+                        )
+                        break
+                winget = shutil.which('winget.exe') or shutil.which('winget')
+                if winget:
+                    subprocess.run(
+                        [
+                            winget, 'uninstall', '-e', '--id', 'Ollama.Ollama',
+                            '--silent', '--accept-package-agreements',
+                        ],
+                        capture_output=True, text=True, timeout=300, **_W,
+                    )
+                shutil.rmtree(Path.home() / '.ollama', ignore_errors=True)
+                shutil.rmtree(ollama_prog, ignore_errors=True)
             self._json({'ok': True})
         except Exception as e:
             self._json({'ok': False, 'error': str(e)})
@@ -1366,6 +1546,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(resp.read())
             reply = data.get('message', {}).get('content', '…')
             self._json({'reply': reply})
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                self._json({
+                    'error': 'Ollama: модель не знайдена (404). Відкрий «AI Ментор», перевір список моделей і завантаж або обери іншу модель.',
+                })
+            else:
+                reason = e.reason
+                if isinstance(reason, bytes):
+                    reason = reason.decode('utf-8', 'replace')
+                self._json({'error': f'Ollama HTTP {e.code}: {reason}'})
         except Exception as e:
             self._json({'error': str(e)})
 
@@ -1451,7 +1641,7 @@ if __name__ == '__main__':
         os.chdir(Path(__file__).parent)
     ollama_proc = _start_ollama()
     PORT_actual = _find_free_port(PORT)
-    srv = http.server.ThreadingHTTPServer(('localhost', PORT_actual), Handler)
+    srv = http.server.ThreadingHTTPServer(('0.0.0.0', PORT_actual), Handler)
     srv_thread = threading.Thread(target=srv.serve_forever, daemon=True)
     srv_thread.start()
     print(f'  🚀  Strucode →  http://localhost:{PORT_actual}')

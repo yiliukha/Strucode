@@ -3,6 +3,160 @@
 let _aiModel = 'llama3.2:3b';
 let _aiAvailable = false;
 
+let _activeRecognition = null;
+let _ollamaModelsCache = { at: 0, models: [] };
+
+function _apiOriginPrefix() {
+  try {
+    const o = window.location.origin;
+    if (o && o !== 'null' && /^https?:/i.test(window.location.protocol || '')) return o;
+  } catch { /* ignore */ }
+  return '';
+}
+
+function apiUrl(path) {
+  const p = path.startsWith('/') ? path : '/' + path;
+  return _apiOriginPrefix() + p;
+}
+
+async function getInstalledModelNamesForChat() {
+  const now = Date.now();
+  if (now - _ollamaModelsCache.at < 8000 && _ollamaModelsCache.models.length) {
+    return _ollamaModelsCache.models;
+  }
+  const models = await getOllamaModels();
+  _ollamaModelsCache = { at: now, models };
+  return models;
+}
+
+async function _ensureChatModelExists() {
+  const models = await getInstalledModelNamesForChat();
+  if (!models.length) return;
+  if (!models.includes(_aiModel)) setAiModel(models[0]);
+}
+
+function setAiVoiceMascotState(state) {
+  const el = document.getElementById('ai-voice-mascot');
+  if (el) el.dataset.state = state || 'idle';
+}
+
+function stopActiveRecognition() {
+  if (_activeRecognition) {
+    try { _activeRecognition.stop(); } catch { /* ignore */ }
+    _activeRecognition = null;
+  }
+}
+
+function speakTextForInterview(text) {
+  return new Promise(resolve => {
+    try {
+      window.speechSynthesis.cancel();
+    } catch { /* ignore */ }
+    const chunk = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 6000);
+    if (!chunk) {
+      resolve();
+      return;
+    }
+    const lang = typeof getLang === 'function' && getLang() === 'en' ? 'en-US' : 'uk-UA';
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = lang;
+    u.rate = 1;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    try {
+      window.speechSynthesis.speak(u);
+    } catch {
+      resolve();
+    }
+  });
+}
+
+function startVoiceDictationToInput(inputEl) {
+  if (!inputEl) return;
+  stopActiveRecognition();
+  const C = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!C) {
+    window._app?.toast?.('Розпізнавання мови не підтримується в цьому браузері');
+    return;
+  }
+  const lang = typeof getLang === 'function' && getLang() === 'en' ? 'en-US' : 'uk-UA';
+  const R = new C();
+  R.lang = lang;
+  R.interimResults = false;
+  R.maxAlternatives = 1;
+  _activeRecognition = R;
+  R.onresult = e => {
+    const t = (e.results[0] && e.results[0][0] && e.results[0][0].transcript || '').trim();
+    if (t) {
+      const cur = inputEl.value || '';
+      inputEl.value = cur ? `${cur} ${t}` : t;
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    _activeRecognition = null;
+    setAiVoiceMascotState('idle');
+  };
+  R.onerror = () => {
+    _activeRecognition = null;
+    setAiVoiceMascotState('idle');
+  };
+  R.onend = () => {
+    if (_activeRecognition === R) _activeRecognition = null;
+    setAiVoiceMascotState('idle');
+  };
+  try {
+    setAiVoiceMascotState('listen');
+    R.start();
+  } catch {
+    _activeRecognition = null;
+    setAiVoiceMascotState('idle');
+  }
+}
+
+function startInterviewListen() {
+  if (!window._aiVoiceInterview) return;
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  stopActiveRecognition();
+  const C = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!C) return;
+  const lang = typeof getLang === 'function' && getLang() === 'en' ? 'en-US' : 'uk-UA';
+  const R = new C();
+  R.lang = lang;
+  R.interimResults = false;
+  R.maxAlternatives = 1;
+  _activeRecognition = R;
+  setAiVoiceMascotState('listen');
+  R.onresult = e => {
+    const t = (e.results[0] && e.results[0][0] && e.results[0][0].transcript || '').trim();
+    _activeRecognition = null;
+    if (!window._aiVoiceInterview) {
+      setAiVoiceMascotState('idle');
+      return;
+    }
+    if (!t) {
+      startInterviewListen();
+      return;
+    }
+    input.value = t;
+    sendChatMessage();
+  };
+  R.onerror = () => {
+    _activeRecognition = null;
+    if (window._aiVoiceInterview) startInterviewListen();
+    else setAiVoiceMascotState('idle');
+  };
+  R.onend = () => {
+    if (_activeRecognition === R) _activeRecognition = null;
+  };
+  try {
+    R.start();
+  } catch {
+    if (window._aiVoiceInterview) startInterviewListen();
+  }
+}
+
+window.startVoiceDictation = startVoiceDictationToInput;
+
 const AI_SYSTEM_PROMPT = `Ти AI-ментор для навчання програмування на платформі Strucode.
 Твоя роль: допомагати студентам ДУМАТИ, а не давати готові відповіді.
 
@@ -39,18 +193,58 @@ ${code}
 Помилка: ${error || '(невідома)'}`,
 };
 
+/** Системний промпт: щоденна задача (відповідь лише JSON для парсингу в app.js). */
+const AI_DAILY_TASK_SYSTEM = `Ти генератор навчальних задач для Strucode. Відповідь — СТРОГО один JSON-об'єкт (UTF-8), без markdown, без тексту до/після JSON.
+
+Схема:
+{"title":"короткий заголовок","prompt":"HTML-опис умови (дозволено: code, strong, em, ul, li, p)","starterCode":"стартовий код у редакторі","language":"javascript або python","tests":[{"expression":"...","expected":"...","desc":"..."}],"xp":15}
+
+Правила:
+- Задача нова, не копія з курсу дослівно. Тематика — лише з концептів тем, які студент УЖЕ повністю пройшов (список у повідомленні користувача). Якщо таких тем немає — дуже проста вправа рівня першого модуля курсу.
+- language має збігатися з мовою курсу в повідомленні (javascript або python).
+- tests: 2–4 тести; expression — валідний вираз у глобальній області після об'єднання starterCode і коду студента; expected — значення для порівняння (рядки в JSON у лапках); desc — коротко українською.
+- xp: ціле 10–25.
+- title, prompt, desc — українською.`;
+
+/** Системний промпт: задача для пісочниці за описом студента (лише JSON). */
+const AI_SANDBOX_TASK_GEN_SYSTEM = `Ти генератор задач для пісочниці Strucode. Студент описав, яку задачу згенерувати. Відповідь — СТРОГО один JSON, без markdown, без тексту поза JSON.
+
+Схема:
+{"title":"...","prompt":"HTML...","starterCode":"...","language":"javascript|python|java|sql","tests":[...],"xp":15}
+
+Правила:
+- language обери за змістом запиту (наприклад streaming API — javascript або python).
+- Java: кожен тест {"type":"output_contains","expected":"фрагмент виводу","desc":"..."} (2–3 тести).
+- SQL: тести type output_contains на очікуваний фрагмент результату (1–3).
+- JavaScript/Python: тести {"expression","expected","desc"} як у курсі (2–4 тести).
+- xp 10–25. Українською title/prompt/desc.`;
+
 async function aiChat(userMessage, systemOverride) {
+  await _ensureChatModelExists();
   const messages = [
     { role: 'system', content: systemOverride || AI_SYSTEM_PROMPT },
     { role: 'user', content: userMessage },
   ];
-  const resp = await fetch('/api/chat', {
+  const resp = await fetch(apiUrl('/api/chat'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: _aiModel, messages }),
   });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error);
+  let data = {};
+  try {
+    data = await resp.json();
+  } catch {
+    throw new Error(
+      resp.status === 404
+        ? 'Сервер повернув 404. Переконайся, що Strucode запущено (python server.py).'
+        : `Некоректна відповідь сервера (HTTP ${resp.status}).`,
+    );
+  }
+  if (!resp.ok) {
+    const err = data.error || data.message || `HTTP ${resp.status}`;
+    throw new Error(String(err));
+  }
+  if (data.error) throw new Error(String(data.error));
   return data.reply;
 }
 
@@ -108,25 +302,34 @@ function initAiChatScreen() {
   const systemInfoEl = document.getElementById('ai-system-info');
   const ollamaSection = document.getElementById('ai-ollama-section');
   const modelSection = document.getElementById('ai-model-section');
+  const checkOverlay = document.getElementById('ai-ollama-checking');
+  const voiceRow = document.getElementById('ai-voice-row');
 
   async function refresh() {
-    const { installed, running } = await checkOllamaStatus();
-    statusBadge.className = 'ai-status ' + (running ? 'online' : 'offline');
-
-    if (running) {
-      const models = await getOllamaModels();
-      if (models.length > 0) {
-        setupEl.style.display = 'none';
-        chatWrapEl.style.display = 'flex';
-        modelBarEl.style.display = 'flex';
-        renderModelSelect(models);
-        return;
-      }
+    if (checkOverlay) {
+      checkOverlay.style.display = 'flex';
+      checkOverlay.setAttribute('aria-busy', 'true');
     }
+    try {
+      const { installed, running } = await checkOllamaStatus();
+      statusBadge.className = 'ai-status ' + (running ? 'online' : 'offline');
 
-    setupEl.style.display = 'flex';
-    chatWrapEl.style.display = 'none';
-    modelBarEl.style.display = 'none';
+      if (running) {
+        const models = await getOllamaModels();
+        if (models.length > 0) {
+          setupEl.style.display = 'none';
+          chatWrapEl.style.display = 'flex';
+          modelBarEl.style.display = 'flex';
+          if (voiceRow) voiceRow.style.display = 'flex';
+          renderModelSelect(models);
+          return;
+        }
+      }
+
+      setupEl.style.display = 'flex';
+      chatWrapEl.style.display = 'none';
+      modelBarEl.style.display = 'none';
+      if (voiceRow) voiceRow.style.display = 'none';
 
     if (!installed) {
       ollamaSection.style.display = 'block';
@@ -139,6 +342,12 @@ function initAiChatScreen() {
     }
 
     loadSystemInfo(systemInfoEl);
+    } finally {
+      if (checkOverlay) {
+        checkOverlay.style.display = 'none';
+        checkOverlay.setAttribute('aria-busy', 'false');
+      }
+    }
   }
 
   refresh();
@@ -156,15 +365,35 @@ function initAiChatScreen() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
   });
 
+  document.getElementById('btn-chat-voice')?.addEventListener('click', () => {
+    const input = document.getElementById('chat-input');
+    startVoiceDictationToInput(input);
+  });
+
+  document.getElementById('btn-chat-voice-interview')?.addEventListener('click', () => {
+    window._aiVoiceInterview = !window._aiVoiceInterview;
+    const btn = document.getElementById('btn-chat-voice-interview');
+    if (window._aiVoiceInterview) {
+      btn?.classList.add('active');
+      window.speechSynthesis?.cancel();
+      startInterviewListen();
+    } else {
+      btn?.classList.remove('active');
+      stopActiveRecognition();
+      window.speechSynthesis?.cancel();
+      setAiVoiceMascotState('idle');
+    }
+  });
+
   document.querySelectorAll('.scenario-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const scenario = btn.dataset.scenario;
       const input = document.getElementById('chat-input');
       const scenarios = {
-        explain: 'Поясни мені концепцію замикань (closures) в JavaScript',
-        review: 'Переглянь мій код:\n\nfunction sum(a, b) {\n  var result = a + b;\n  return result;\n}',
-        interview: 'Давай проведемо технічну співбесіду по JavaScript',
-        debug: 'Допоможи знайти баг:\n\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 100);\n}\n// Очікував 0,1,2 але отримую 3,3,3',
+        explain: t('ai_sc_prompt_explain'),
+        review: t('ai_sc_prompt_review'),
+        interview: t('ai_sc_prompt_interview'),
+        debug: t('ai_sc_prompt_debug'),
       };
       if (input && scenarios[scenario]) {
         input.value = scenarios[scenario];
@@ -177,16 +406,19 @@ function initAiChatScreen() {
 function renderModelSelect(models) {
   const sel = document.getElementById('chat-model-select');
   if (!sel) return;
+  _ollamaModelsCache = { at: Date.now(), models: models.slice() };
   sel.innerHTML = '';
+  if (!models.length) return;
+  const pick = models.includes(_aiModel) ? _aiModel : models[0];
+  setAiModel(pick);
   models.forEach(m => {
     const opt = document.createElement('option');
     opt.value = m;
     opt.textContent = m;
-    if (m === _aiModel) opt.selected = true;
+    if (m === pick) opt.selected = true;
     sel.appendChild(opt);
   });
-  sel.addEventListener('change', () => setAiModel(sel.value));
-  if (models.length) setAiModel(models[0]);
+  sel.onchange = () => setAiModel(sel.value);
 }
 
 async function loadSystemInfo(el) {
@@ -198,10 +430,10 @@ async function loadSystemInfo(el) {
     if (info.ram_gb) lines.push(`RAM: ${info.ram_gb} GB`);
     if (info.gpu) lines.push(`GPU: ${info.gpu}`);
     if (info.vram_gb) lines.push(`VRAM: ${info.vram_gb} GB`);
-    if (!lines.length) lines.push('Системна інформація недоступна');
+    if (!lines.length) lines.push(t('ai_sysinfo_na'));
     el.textContent = lines.join(' · ');
   } catch {
-    el.textContent = 'Системна інформація недоступна';
+    el.textContent = t('ai_sysinfo_na');
   }
 }
 
@@ -215,14 +447,28 @@ async function sendChatMessage() {
   input.value = '';
   appendMsg(messages, text, 'user');
   const loadingEl = appendMsg(messages, '...', 'ai loading');
+  if (window._aiVoiceInterview) setAiVoiceMascotState('think');
 
   try {
     const reply = await aiChat(text);
     loadingEl.textContent = reply;
     loadingEl.className = 'chat-msg ai';
+    if (window._aiVoiceInterview) {
+      if (reply) {
+        setAiVoiceMascotState('speak');
+        await speakTextForInterview(reply);
+      }
+      setAiVoiceMascotState('idle');
+      if (window._aiVoiceInterview) startInterviewListen();
+    } else {
+      setAiVoiceMascotState('idle');
+    }
   } catch (e) {
-    loadingEl.textContent = '❌ Ollama не відповідає. Перевір чи запущена.';
+    const msg = e && e.message ? String(e.message) : t('ai_err_unknown');
+    loadingEl.textContent = '❌ ' + msg;
     loadingEl.className = 'chat-msg ai';
+    setAiVoiceMascotState('idle');
+    if (window._aiVoiceInterview) startInterviewListen();
   }
   messages.scrollTop = messages.scrollHeight;
 }
@@ -260,7 +506,7 @@ async function startOllamaInstall(onDone) {
         onDone();
       } else if (data.status === 'error') {
         clearInterval(interval);
-        if (progressText) progressText.textContent = '❌ Помилка: ' + (data.message || 'невідома');
+        if (progressText) progressText.textContent = t('ai_install_err', data.message || t('settings_error_unknown'));
       }
     } catch {}
   }, 1500);
@@ -295,18 +541,20 @@ async function startModelPull(model, onDone) {
         onDone();
       } else if (data.status === 'error') {
         clearInterval(interval);
-        if (progressText) progressText.textContent = '❌ ' + (data.message || 'Помилка завантаження');
+        if (progressText) progressText.textContent = t('ai_pull_err', data.message || t('settings_pull_fail'));
       }
     } catch {}
   }, 1500);
 }
 
 function getStatusText(status) {
-  return {
-    idle: 'Очікування...',
-    pending: 'Підготовка...',
-    downloading: 'Завантаження...',
-    installing: 'Встановлення...',
-    done: 'Готово!',
-  }[status] || status;
+  const m = {
+    idle: 'ai_status_idle',
+    pending: 'ai_status_pending',
+    downloading: 'ai_status_downloading',
+    installing: 'ai_status_installing',
+    done: 'ai_status_done',
+  };
+  const k = m[status];
+  return k ? t(k) : status;
 }

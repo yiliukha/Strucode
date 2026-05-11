@@ -1,0 +1,221 @@
+The foundation of web development: from variables to async/await, classes, and modules.
+Basics
+Variables: let and const
+Conditionals: if / else
+Loops: for and while
+Functions
+Arrays
+Objects and destructuring
+Objects
+Destructuring
+Modern JavaScript
+Promises and async/await
+Data types
+Numbers and math
+Strings (String)
+Arrays — deep dive
+Map and Set
+Date and time
+Functions — advanced
+Closures and scope
+Recursion
+Rest, spread, and arguments
+bind, call, and apply
+Decorators and higher-order functions
+Object-oriented JavaScript
+this — call context
+Prototypes and the prototype chain
+Classes (class)
+Class inheritance
+Static members and private fields
+Error handling
+try...catch...finally
+Custom error classes
+Asynchronous JavaScript
+Callbacks and the event loop
+Promise — advanced
+async/await — advanced
+Generators and iterators
+DOM and the browser
+DOM — document tree
+Finding elements
+Manipulating the DOM
+Events
+Event delegation
+Forms and input
+Modules
+export and import
+Dynamic import()
+Advanced JavaScript
+Symbol and iterability
+Proxy and Reflect
+RegExp — regular expressions
+Memory management and WeakRef
+The language for Android, enterprise, and backends: static typing and OOP.
+Java basics
+First program
+Variables and types
+Conditionals and loops
+OOP in Java
+Classes and objects
+Methods and return values
+Types and operations
+Primitive types in detail
+String — methods and operations
+Arrays
+Enum (enumerations)
+Operators and expressions
+OOP — advanced
+Encapsulation: getters and setters
+Inheritance (extends)
+Polymorphism and @Override
+Abstract classes and interfaces
+Static class members
+Nested and anonymous classes
+Functional programming
+Lambda expressions
+Functional interfaces
+Method references
+Optional
+Java collections
+List: ArrayList and LinkedList
+Set: HashSet and TreeSet
+Map: HashMap and TreeMap
+Generics
+Collections — utilities
+Streams API
+Stream — introduction
+Intermediate operations
+Terminal operations and Collectors
+Parallel streams
+Exception handling
+try-catch-finally
+throw and custom exceptions
+Strings — advanced
+StringBuilder and StringBuffer
+Regular expressions
+Text blocks (Java 15+)
+Modern Java
+Records (Java 16+)
+Sealed classes (Java 17+)
+Switch expressions (Java 14+)
+Pattern matching (Java 16–21)
+Concurrency — fundamentals
+CompletableFuture
+The #1 language for AI, data science, and automation.
+Python basics
+Variables and types
+Lists and dictionaries
+Functions and lambdas
+Strings
+String methods
+String formatting
+Collections
+Lists — deep dive
+Tuples (tuple)
+Sets (set)
+Dictionaries — deep dive
+Control flow
+if / elif / else conditions
+for and while loops
+Comprehensions
+Functions — advanced
+*args and **kwargs
+Closures and decorators
+map, filter, reduce
+Generators and yield
+OOP in Python
+Classes and objects
+Inheritance and polymorphism
+Magic methods (__dunder__)
+@property and dataclass
+Error handling
+try / except / finally
+Custom exceptions and with
+Modules and the standard library
+import and modules
+os, sys, and pathlib
+datetime and time
+json and csv
+Functional Python
+itertools
+functools and typing
+Regular expressions (re)
+Advanced Python
+asyncio — asynchronous Python
+Protocols and ABC
+Class decorators and metaclasses
+Threading and multiprocessing
+Introspection and __dunder__
+From LLM fundamentals to real AI tools: editors, video, design, and agents.
+AI fundamentals
+How an LLM works
+Prompt engineering
+AI tools
+Google Gemini and AI infrastructure
+Gemini Academy — Google Developers
+Generative AI for Developers — Google Cloud
+Google AI Essentials — Coursera
+Coding and AI editors
+Cursor — AI code editor
+GitHub Copilot Skills — interactive exercises
+Copilot for Developers — Microsoft Learn
+Windsurf Guide — Codeium
+Video generation
+Runway Academy — Gen-3 Alpha
+Luma Dream Machine — realistic video
+Kling AI — multi-shot video generation
+HeyGen — AI avatars and video translation
+Design and images
+Midjourney guide — image generation
+Adobe Firefly — AI in Photoshop
+Canva Design School — Magic Studio
+Stable Diffusion — local generation (Civitai)
+AI agents and bots
+DeepLearning.AI Short Courses
+LangChain Academy — AI chains
+CrewAI — multi-agent systems
+Automation
+Make Academy — visual automation
+Zapier University — no-code automation
+n8n courses — technical automation
+HubSpot — marketing automation
+ActiveCampaign — automation strategy
+UiPath RPA Academy — process robotization
+Search and research
+Anthropic Cookbooks — Claude API
+Perplexity — AI research
+The query language for databases. A must-have for every developer.
+SQL basics
+SELECT and WHERE
+AND, OR, NOT
+LIKE and wildcards
+IN, BETWEEN, IS NULL
+Changing data (DML)
+INSERT INTO
+UPDATE
+DELETE
+Aggregation and grouping
+COUNT, SUM, AVG, MIN, MAX
+GROUP BY and HAVING
+DISTINCT and aliases
+JOIN — joining tables
+INNER JOIN
+LEFT, RIGHT, and FULL JOIN
+SELF JOIN and CROSS JOIN
+Advanced SQL
+Subqueries
+EXISTS, ANY, ALL
+CASE expressions
+CTEs and recursive queries
+Window functions
+DDL — database structure
+CREATE TABLE and data types
+Constraints: PRIMARY KEY and FOREIGN KEY
+ALTER TABLE and DROP
+Indexes (INDEX)
+Views
+SQL functions
+String functions
+Numeric and NULL functions
+Date and time functions
