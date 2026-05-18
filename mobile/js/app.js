@@ -1804,17 +1804,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-uninstall-app')?.addEventListener('click', () => {
-    showConfirm('🗑', t('settings_uninstall_title'), t('settings_uninstall_confirm'), t('modal_delete'), t('modal_cancel'), async () => {
+    const desc = getLang() === 'en'
+      ? 'All app data, caches and service worker will be cleared. The app will reload. To remove the icon — long-press it and tap Remove.'
+      : 'Всі дані, кеш і сервісний воркер буде видалено. Додаток перезавантажиться. Щоб прибрати іконку — утримайте її та оберіть «Видалити».';
+    showConfirm('🗑', t('settings_uninstall_title'), desc, t('modal_delete'), t('modal_cancel'), async () => {
       const btn = document.getElementById('btn-uninstall-app');
       if (btn) { btn.disabled = true; btn.textContent = t('settings_uninstall_btn_busy'); }
-      try {
-        localStorage.clear();
-        toast('Дані видалено. Для видалення PWA використайте браузер.');
-        if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
-      } catch (e) {
-        toast(t('error_prefix') + e.message);
-        if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
+      try { localStorage.clear(); } catch {}
+      try { sessionStorage.clear(); } catch {}
+      if ('caches' in window) {
+        try { const ns = await caches.keys(); await Promise.all(ns.map(n => caches.delete(n))); } catch {}
       }
+      if ('serviceWorker' in navigator) {
+        try { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister())); } catch {}
+      }
+      toast('✅ ' + (getLang() === 'en'
+        ? 'Data cleared. To remove the icon — long-press it.'
+        : 'Дані видалено. Щоб прибрати іконку — утримайте її.'));
+      setTimeout(() => location.reload(), 1800);
     });
   });
 
