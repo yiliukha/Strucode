@@ -2641,3 +2641,14 @@ html[data-theme="custom"] {
 @media (min-width: 680px) {
   .bottom-nav { display: none !important; }
 }
+
+/* ══ CODEMIRROR OVERRIDES ════════════════════════════════════════════════════ */
+.CodeMirror {
+  height: 100%;
+  width: 100%;
+  font-family: "Fira Code", "Consolas", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.CodeMirror-scroll { height: 100%; }
+#editor, #sandbox-editor { height: 100%; overflow: hidden; }

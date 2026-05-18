@@ -80,24 +80,35 @@ async function pistonCheckTask(lang, code, tests, xp) {
 
 let _challengeEditor = null;
 let _sandboxEditor = null;
-let _monacoLoaded = false;
+let _monacoLoaded = true; // CodeMirror is sync — always "loaded"
 let _monacoLoading = false;
 let _currentChallenge = null;
 
-const MONACO_CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs';
-
 const STARTER_CODE = {
-  javascript: '// Напишіть ваш JavaScript тут\nconsole.log("Hello, World!");\n',
-  python: '# Напишіть ваш Python тут\nprint("Hello, World!")\n',
-  java: '// Java sandbox - поки що теорія\n// Запуск Java потребує встановленого JDK\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}\n',
-  sql: '-- SQL запит (теоретичний формат)\nSELECT * FROM users WHERE age > 18 ORDER BY name;\n',
+  javascript: '// JavaScript\nconsole.log("Hello, World!");\n',
+  python: '# Python\nprint("Hello, World!")\n',
+  java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}\n',
+  sql: '-- SQL\nSELECT "Hello, World!" AS greeting;\n',
+  cpp: '#include <iostream>\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}\n',
+  rust: 'fn main() {\n    println!("Hello, World!");\n}\n',
+  go: 'package main\nimport "fmt"\nfunc main() {\n    fmt.Println("Hello, World!")\n}\n',
+  php: '<?php\necho "Hello, World!";\n',
+  kotlin: 'fun main() {\n    println("Hello, World!")\n}\n',
+  swift: 'print("Hello, World!")\n',
 };
 
+// CodeMirror 5 mode names
 const LANG_MAP = {
   javascript: 'javascript',
   python: 'python',
-  java: 'java',
+  java: 'text/x-java',
   sql: 'sql',
+  cpp: 'text/x-c++src',
+  rust: 'rust',
+  go: 'go',
+  php: 'application/x-httpd-php',
+  kotlin: 'text/x-kotlin',
+  swift: 'text/x-swift',
 };
 
 const LANG_DD_UI = {
@@ -121,68 +132,33 @@ function refreshLangDropdownVisual(selectId) {
   btn.innerHTML = `<img src="${ic}" alt="" width="16" height="16"><span>${lb}</span>`;
 }
 
-// ── Load Monaco ───────────────────────────────────────────────────────────────
+// ── CodeMirror 5 (replaces Monaco — no unsafe-eval needed) ───────────────────
 
 function loadMonaco(callback) {
-  if (_monacoLoaded) { callback(); return; }
-  if (_monacoLoading) { const t = setInterval(() => { if (_monacoLoaded) { clearInterval(t); callback(); } }, 100); return; }
-  _monacoLoading = true;
-
-  const script = document.createElement('script');
-  script.src = MONACO_CDN + '/loader.js';
-  script.onload = () => {
-    window.require.config({ paths: { vs: MONACO_CDN } });
-    window.require(['vs/editor/editor.main'], () => {
-      _monacoLoaded = true;
-      _monacoLoading = false;
-      callback();
-    });
-  };
-  script.onerror = () => {
-    _monacoLoading = false;
-    console.error('Monaco CDN не завантажився. Перевірте підключення до інтернету.');
-    showMonacoFallback('editor');
-    showMonacoFallback('sandbox-editor');
-  };
-  document.head.appendChild(script);
+  // CodeMirror is loaded synchronously via <script> tags — always ready
+  callback();
 }
 
-function getMonacoTheme() {
-  const t = document.documentElement.dataset.theme || 'dark';
-  return t === 'light' ? 'vs' : 'vs-dark';
-}
-
-function createEditor(containerId, language, initialCode, options = {}) {
+function createEditor(containerId, language, initialCode) {
   const container = document.getElementById(containerId);
   if (!container) return null;
   container.innerHTML = '';
-  return monaco.editor.create(container, {
+  const cm = CodeMirror(container, {
     value: initialCode || STARTER_CODE[language] || '',
-    language: LANG_MAP[language] || 'javascript',
-    theme: getMonacoTheme(),
-    minimap: { enabled: false },
-    fontSize: 14,
-    lineNumbers: 'on',
-    scrollBeyondLastLine: false,
-    automaticLayout: true,
-    wordWrap: 'on',
+    mode: LANG_MAP[language] || 'javascript',
+    theme: 'dracula',
+    lineNumbers: true,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    indentUnit: 2,
     tabSize: 2,
-    renderLineHighlight: 'line',
-    cursorBlinking: 'smooth',
-    formatOnPaste: true,
-    ...options,
+    indentWithTabs: false,
+    lineWrapping: true,
+    extraKeys: { Tab: cm => cm.execCommand('insertSoftTab') },
   });
-}
-
-function showMonacoFallback(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = `
-    <textarea style="
-      width:100%;height:100%;background:#0d1117;color:#e6edf3;
-      border:none;padding:12px;font-family:monospace;font-size:14px;
-      resize:none;outline:none;line-height:1.6;
-    " placeholder="// Monaco Editor потребує підключення до інтернету&#10;// Введіть ваш код тут..."></textarea>`;
+  // Force refresh after container becomes visible
+  setTimeout(() => cm.refresh(), 50);
+  return cm;
 }
 
 function getEditorCode(editorInstance, containerId) {
@@ -248,7 +224,8 @@ function setupChallengeHandlers() {
     const lang = e.target.value;
     refreshLangDropdownVisual('challenge-lang-select');
     if (_challengeEditor && _monacoLoaded) {
-      monaco.editor.setModelLanguage(_challengeEditor.getModel(), LANG_MAP[lang] || 'javascript');
+      CodeMirror.autoLoadMode(_challengeEditor, LANG_MAP[lang] || 'javascript');
+      _challengeEditor.setOption('mode', LANG_MAP[lang] || 'javascript');
     }
     const sqlBtn = document.getElementById('btn-challenge-sql-tables');
     if (sqlBtn) sqlBtn.style.display = lang === 'sql' ? '' : 'none';
@@ -326,7 +303,7 @@ function setupSandboxHandlers() {
     const lang = e.target.value;
     refreshLangDropdownVisual('sandbox-lang-select');
     if (_sandboxEditor && _monacoLoaded) {
-      monaco.editor.setModelLanguage(_sandboxEditor.getModel(), LANG_MAP[lang] || 'javascript');
+      _sandboxEditor.setOption('mode', LANG_MAP[lang] || 'javascript');
       if (!_sandboxEditor.getValue().trim()) {
         _sandboxEditor.setValue(STARTER_CODE[lang] || '');
       }
@@ -575,7 +552,7 @@ function applySandboxImportedTask(task) {
   setActiveLang('sandbox-lang-select', lang);
   const run = () => {
     if (_sandboxEditor && _monacoLoaded) {
-      monaco.editor.setModelLanguage(_sandboxEditor.getModel(), LANG_MAP[lang] || 'javascript');
+      _sandboxEditor.setOption('mode', LANG_MAP[lang] || 'javascript');
       _sandboxEditor.setValue(task.starterCode || STARTER_CODE[lang] || '');
     }
     const ban = document.getElementById('sandbox-task-banner');
@@ -618,9 +595,7 @@ function _appendSandboxTaskOffer(msgs, task) {
 window._applySandboxImportedTask = applySandboxImportedTask;
 
 function updateEditorTheme() {
-  if (!_monacoLoaded) return;
-  const theme = getMonacoTheme();
-  monaco.editor.setTheme(theme);
+  // CodeMirror theme is set at creation time (dracula) — no runtime switch needed
 }
 
 // ── Resizable handle between output and AI chat ───────────────────────────────
