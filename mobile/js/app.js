@@ -100,6 +100,19 @@ function initAiChatScreen() {
 
 const STORAGE_KEY = 'strucode_v1';
 
+// Generic confirm modal
+let _confirmCb = null;
+function showConfirm(icon, title, desc, okLabel, cancelLabel, cb) {
+  const g = id => document.getElementById(id);
+  g('modal-confirm-icon').textContent = icon;
+  g('modal-confirm-title').textContent = title;
+  g('modal-confirm-desc').textContent = desc;
+  g('modal-confirm-ok').textContent = okLabel;
+  g('modal-confirm-cancel').textContent = cancelLabel;
+  _confirmCb = cb;
+  g('modal-confirm').style.display = 'flex';
+}
+
 let _state = {
   xp: 0,
   streak: 0,
@@ -1782,32 +1795,38 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-lesson-back')?.addEventListener('click', goBack);
   document.getElementById('btn-sandbox-back')?.addEventListener('click', goBack);
 
-  document.getElementById('btn-uninstall-app')?.addEventListener('click', async () => {
-    if (!confirm(t('settings_uninstall_confirm'))) return;
-    const btn = document.getElementById('btn-uninstall-app');
-    if (btn) { btn.disabled = true; btn.textContent = t('settings_uninstall_btn_busy'); }
+  const _closeConfirm = () => { document.getElementById('modal-confirm').style.display = 'none'; _confirmCb = null; };
+  document.getElementById('modal-confirm-cancel')?.addEventListener('click', _closeConfirm);
+  document.getElementById('modal-confirm')?.addEventListener('click', e => { if (e.target.id === 'modal-confirm') _closeConfirm(); });
+  document.getElementById('modal-confirm-ok')?.addEventListener('click', () => {
+    document.getElementById('modal-confirm').style.display = 'none';
+    const cb = _confirmCb; _confirmCb = null; cb?.();
+  });
 
-    try {
-      // stub: uninstall-app not available in mobile PWA
-      // Just clear all local data
-      localStorage.clear();
-      toast('Дані видалено. Для видалення PWA використайте браузер.');
-      if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
-    } catch (e) {
-      toast(t('error_prefix') + e.message);
-      if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
-    }
+  document.getElementById('btn-uninstall-app')?.addEventListener('click', () => {
+    showConfirm('🗑', t('settings_uninstall_title'), t('settings_uninstall_confirm'), t('modal_delete'), t('modal_cancel'), async () => {
+      const btn = document.getElementById('btn-uninstall-app');
+      if (btn) { btn.disabled = true; btn.textContent = t('settings_uninstall_btn_busy'); }
+      try {
+        localStorage.clear();
+        toast('Дані видалено. Для видалення PWA використайте браузер.');
+        if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
+      } catch (e) {
+        toast(t('error_prefix') + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = t('settings_uninstall'); }
+      }
+    });
   });
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
-    if (confirm(t('settings_reset_confirm'))) {
+    showConfirm('🗑', t('settings_reset_title'), t('settings_reset_confirm'), t('modal_reset'), t('modal_cancel'), () => {
       _state = { xp: 0, streak: 0, lastActivity: null, completedChallenges: [], verifiedLessons: [],
         theme: _state.theme, aiModel: _state.aiModel, lang: _state.lang,
         userName: _state.userName, customPaletteId: _state.customPaletteId, customColors: _state.customColors };
       saveState();
       renderSettings();
       toast(t('settings_reset_done'));
-    }
+    });
   });
 
   document.querySelectorAll('.theme-preset-btn').forEach(btn => {
