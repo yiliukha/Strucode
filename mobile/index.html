@@ -532,26 +532,48 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
 <div id="toast" class="toast" style="display:none"></div>
 
 <!-- ══ iOS INSTALL PROMPT ══════════════════════════════════════════════════ -->
-<div id="ios-install-overlay" style="display:none;position:fixed;inset:0;z-index:9000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center;">
-  <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;position:relative;border-top:1px solid var(--border);">
-    <button onclick="document.getElementById('ios-install-overlay').style.display='none';localStorage.setItem('ios-prompt-dismissed','1')" style="position:absolute;top:16px;right:16px;background:var(--bg3);border:none;color:var(--text2);border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-    <div style="font-size:40px;text-align:center;margin-bottom:12px;">📲</div>
-    <div style="font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;">Додай на головний екран</div>
-    <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:20px;">Відкрий Strucode як повноцінну апку — без браузера, без адресного рядка.</div>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
-        <span style="font-size:24px;flex-shrink:0;">1️⃣</span>
-        <span style="font-size:14px;color:var(--text);">Натисни <strong style="color:var(--primary);">кнопку «Поділитись»</strong> внизу Safari <span style="font-size:18px;">⬆️</span></span>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
-        <span style="font-size:24px;flex-shrink:0;">2️⃣</span>
-        <span style="font-size:14px;color:var(--text);">Вибери <strong style="color:var(--primary);">«На екран «Початок»»</strong></span>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
-        <span style="font-size:24px;flex-shrink:0;">3️⃣</span>
-        <span style="font-size:14px;color:var(--text);">Натисни <strong style="color:var(--primary);">«Додати»</strong> — готово!</span>
+<div id="ios-install-overlay" style="display:none;position:fixed;inset:0;z-index:9000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px 44px;width:100%;max-width:480px;position:relative;border-top:1px solid var(--border);">
+    <button onclick="document.getElementById('ios-install-overlay').style.display='none';localStorage.setItem('ios-prompt-dismissed','1')" style="position:absolute;top:14px;right:14px;background:var(--bg3);border:none;color:var(--text2);border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);text-align:center;margin-bottom:6px;">Встанови як апку</div>
+    <div style="font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px;">Strucode на твоєму iPhone</div>
+    <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px;">Без браузера. Без адресного рядка. Як справжня апка.</div>
+    <!-- Step 1 -->
+    <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:14px;padding:14px 16px;">
+      <div style="width:36px;height:36px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">1</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Натисни кнопку внизу Safari</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Це квадрат зі стрілкою вгору, ось так виглядає: <svg style="vertical-align:middle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div>
       </div>
     </div>
+    <!-- Step 2 -->
+    <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:14px;padding:14px 16px;margin-top:10px;">
+      <div style="width:36px;height:36px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">2</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Знайди і натисни цей пункт:</div>
+        <!-- Mock iOS menu item -->
+        <div style="margin-top:8px;background:#1c1c1e;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.1);">
+          <div style="width:30px;height:30px;background:#3a3a3c;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7-7 7 7"/><rect x="3" y="17" width="18" height="4" rx="1" fill="white" stroke="none"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;color:white;font-weight:500;">Add to Home Screen</div>
+            <div style="font-size:11px;color:#8e8e93;">На екран «Початок»</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:14px;padding:14px 16px;margin-top:10px;">
+      <div style="width:36px;height:36px;background:#22c55e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Натисни «Add» / «Додати» — готово!</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Іконка Strucode з'явиться на головному екрані</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text2);">Кнопка «Поділитись» — внизу екрану Safari ↓</div>
   </div>
 </div>
 
