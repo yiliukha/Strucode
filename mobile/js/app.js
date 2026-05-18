@@ -102,6 +102,30 @@ const STORAGE_KEY = 'strucode_v1';
 
 // Generic confirm modal
 let _confirmCb = null;
+let _pwaInstallPrompt = null;
+const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const _isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaInstallPrompt = e;
+  const grp = document.getElementById('sett-install-grp');
+  if (grp && !_isStandalone) grp.style.display = '';
+  if (!_isIOS && !_isStandalone && !localStorage.getItem('sc-android-dismissed')) {
+    setTimeout(() => {
+      const b = document.getElementById('android-install-banner');
+      if (b && !localStorage.getItem('sc-android-dismissed')) b.style.display = 'block';
+    }, 3000);
+  }
+});
+window.addEventListener('appinstalled', () => {
+  _pwaInstallPrompt = null;
+  localStorage.setItem('sc-pwa-installed', '1');
+  const grp = document.getElementById('sett-install-grp');
+  if (grp) grp.style.display = 'none';
+  const b = document.getElementById('android-install-banner');
+  if (b) b.style.display = 'none';
+});
+
 function showConfirm(icon, title, desc, okLabel, cancelLabel, cb) {
   const g = id => document.getElementById(id);
   g('modal-confirm-icon').textContent = icon;
@@ -1801,6 +1825,51 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-confirm-ok')?.addEventListener('click', () => {
     document.getElementById('modal-confirm').style.display = 'none';
     const cb = _confirmCb; _confirmCb = null; cb?.();
+  });
+
+  // PWA install button (settings)
+  const _scInstallGrp = document.getElementById('sett-install-grp');
+  const _scInstallBtn = document.getElementById('btn-install-pwa');
+  if (!_isStandalone && _scInstallGrp && _scInstallBtn) {
+    if (_isIOS) {
+      _scInstallGrp.style.display = '';
+      _scInstallBtn.onclick = () => {
+        localStorage.removeItem('ios-prompt-dismissed');
+        const el = document.getElementById('ios-install-overlay');
+        if (el) el.style.display = 'flex';
+      };
+    } else {
+      if (_pwaInstallPrompt) _scInstallGrp.style.display = '';
+      _scInstallBtn.onclick = async () => {
+        if (!_pwaInstallPrompt) return;
+        _pwaInstallPrompt.prompt();
+        const { outcome } = await _pwaInstallPrompt.userChoice;
+        if (outcome === 'accepted') { _pwaInstallPrompt = null; _scInstallGrp.style.display = 'none'; }
+      };
+    }
+  }
+
+  // Android install banner
+  const _scBanner = document.getElementById('android-install-banner');
+  const _dismissScBanner = () => { if (_scBanner) _scBanner.style.display = 'none'; localStorage.setItem('sc-android-dismissed', '1'); };
+  document.getElementById('android-banner-close')?.addEventListener('click', _dismissScBanner);
+  document.getElementById('android-banner-later')?.addEventListener('click', _dismissScBanner);
+  document.getElementById('android-banner-install')?.addEventListener('click', async () => {
+    if (!_pwaInstallPrompt) return;
+    _pwaInstallPrompt.prompt();
+    const { outcome } = await _pwaInstallPrompt.userChoice;
+    if (outcome === 'accepted') { _pwaInstallPrompt = null; _dismissScBanner(); }
+  });
+
+  // Open-in-app overlay
+  document.getElementById('btn-open-in-app')?.addEventListener('click', () => {
+    document.getElementById('open-app-overlay').style.display = 'none';
+    localStorage.setItem('sc-open-app-dismissed', Date.now().toString());
+    toast('Відкрийте Strucode з головного екрану 🏠');
+  });
+  document.getElementById('btn-continue-in-browser')?.addEventListener('click', () => {
+    document.getElementById('open-app-overlay').style.display = 'none';
+    localStorage.setItem('sc-open-app-dismissed', Date.now().toString());
   });
 
   document.getElementById('btn-reset-progress')?.addEventListener('click', () => {

@@ -1,4 +1,4 @@
-const CACHE = 'mobile-v7';
+const CACHE = 'mobile-v8';
 const ASSETS = ['/', '/index.html', '/css/style.css', '/manifest.json'];
 
 self.addEventListener('install', e => {

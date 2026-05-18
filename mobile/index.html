@@ -464,6 +464,11 @@
             <div class="profile-meta" id="profile-meta">Введіть ім'я для персоналізації</div>
           </div>
         </div>
+        <div class="sett-grp" id="sett-install-grp" style="display:none;">
+          <div class="sett-grp-lbl">📲 Додаток</div>
+          <button class="sett-action-btn" id="btn-install-pwa" style="color:var(--primary);">📲 Встановити Strucode на головний екран</button>
+        </div>
+
         <div class="sett-grp">
           <div class="sett-grp-lbl" data-i18n="settings_progress">Прогрес</div>
           <div class="settings-info" id="settings-progress-info"></div>
@@ -527,6 +532,33 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
 
 <!-- ══ TOAST ══════════════════════════════════════════════════════════════ -->
 <div id="toast" class="toast" style="display:none"></div>
+
+<!-- ══ OPEN-IN-APP OVERLAY (already installed, before splash) ════════════ -->
+<div id="open-app-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(13,17,23,.97);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+  <div style="text-align:center;max-width:300px;padding:0 24px;">
+    <div style="font-size:56px;margin-bottom:20px;">📱</div>
+    <div style="font-size:21px;font-weight:700;color:#f1f5f9;margin-bottom:10px;">Відкрити в додатку?</div>
+    <div style="font-size:14px;color:#94a3b8;line-height:1.55;margin-bottom:28px;">Strucode встановлено на вашому пристрої. Відкрийте його для кращого досвіду.</div>
+    <button id="btn-open-in-app" style="width:100%;padding:15px;border-radius:14px;border:none;background:var(--primary,#6366f1);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;">Відкрити додаток</button>
+    <button id="btn-continue-in-browser" style="width:100%;padding:13px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;">Продовжити в браузері</button>
+  </div>
+</div>
+
+<!-- ══ ANDROID INSTALL BANNER (3-sec, first visit) ════════════════════════ -->
+<div id="android-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9100;background:#0f172a;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:20px 20px 36px;">
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+    <div style="font-size:36px;line-height:1;">📲</div>
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Встановити Strucode</div>
+      <div style="font-size:13px;color:#94a3b8;line-height:1.4;">Відкривайте без браузера, як звичайну апку — швидко і зручно.</div>
+    </div>
+    <button id="android-banner-close" style="background:rgba(255,255,255,.08);border:none;color:#94a3b8;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;flex-shrink:0;">✕</button>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <button id="android-banner-later" style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;">Пізніше</button>
+    <button id="android-banner-install" style="flex:2;padding:13px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">📲 Встановити</button>
+  </div>
+</div>
 
 <!-- ══ iOS INSTALL PROMPT ══════════════════════════════════════════════════ -->
 <div id="ios-install-overlay" style="display:none;position:fixed;inset:0;z-index:9000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center;">
@@ -634,16 +666,25 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
     navigator.serviceWorker.register('/service-worker.js');
   }
 
-  // iOS "Add to Home Screen" prompt
-  const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const _isStandalone = window.navigator.standalone === true;
-  const _dismissed = localStorage.getItem('ios-prompt-dismissed');
-  if (_isIOS && !_isStandalone && !_dismissed) {
+  // iOS prompt auto-show (3 sec, first visit)
+  // _isIOS and _isStandalone are defined in app.js (loaded above)
+  if (_isIOS && !_isStandalone && !localStorage.getItem('ios-prompt-dismissed')) {
     setTimeout(() => {
       const el = document.getElementById('ios-install-overlay');
       if (el) el.style.display = 'flex';
     }, 3000);
   }
+
+  // Open-in-app overlay: if user already installed the app but opens the website
+  (function() {
+    var installed = localStorage.getItem('sc-pwa-installed') === '1';
+    var dismissedAt = parseInt(localStorage.getItem('sc-open-app-dismissed') || '0');
+    var recentlyDismissed = (Date.now() - dismissedAt) < 86400000;
+    if (installed && !_isStandalone && !recentlyDismissed) {
+      var el = document.getElementById('open-app-overlay');
+      if (el) el.style.display = 'flex';
+    }
+  })();
 </script>
 </body>
 </html>
