@@ -28,12 +28,13 @@ jobs:
           # Copy icons
           cp -r icons mobile/ || true
 
-          # Copy shared JS files that mobile app can reference
-          cp js/content.js       mobile/js/ 2>/dev/null || true
-          cp js/i18n.js          mobile/js/ 2>/dev/null || true
-          cp js/coursesLocale.js mobile/js/ 2>/dev/null || true
+          # Copy all shared JS files into mobile/js/
+          cp js/i18n.js               mobile/js/ 2>/dev/null || true
+          cp js/content.js            mobile/js/ 2>/dev/null || true
           cp js/courses-en-strings.js mobile/js/ 2>/dev/null || true
           cp js/courses-en-deep.js    mobile/js/ 2>/dev/null || true
+          cp js/coursesLocale.js      mobile/js/ 2>/dev/null || true
+          cp js/ai.js                 mobile/js/ 2>/dev/null || true
 
       - uses: actions/configure-pages@v4
 

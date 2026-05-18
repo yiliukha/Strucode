@@ -2,278 +2,546 @@
 <html lang="uk" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Strucode">
-  <meta name="theme-color" content="#0d1117">
   <title>Strucode</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0d1117">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    if (!/Mac|iPhone|iPad|iPod/.test(navigator.platform) && !/Mac OS X/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('noto-emoji');
+      const l1 = document.createElement('link'); l1.rel = 'preconnect'; l1.href = 'https://fonts.googleapis.com';
+      const l2 = document.createElement('link'); l2.rel = 'preconnect'; l2.href = 'https://fonts.gstatic.com'; l2.crossOrigin = '';
+      const l3 = document.createElement('link'); l3.rel = 'stylesheet';
+      l3.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+      document.head.append(l1, l2, l3);
+    }
+  </script>
 </head>
 <body>
 
 <!-- ══ SPLASH ══════════════════════════════════════════════════════════════ -->
-<div id="splash">
-  <div class="splash-icon">
-    <svg width="60" height="60" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M24 14L16 14L16 58L24 58" stroke="#6366f1" stroke-width="4" stroke-linecap="round"/>
-      <path d="M48 14L56 14L56 58L48 58" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-      <rect x="28" y="20" width="16" height="7" rx="2" fill="#6366f1"/>
-      <rect x="28" y="33" width="20" height="7" rx="2" fill="#6366f1" opacity="0.55"/>
-      <rect x="28" y="46" width="12" height="7" rx="2" fill="#22d3ee"/>
-    </svg>
+<div id="splash-overlay" style="position:fixed;inset:0;z-index:9999;background:#0a0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s ease;">
+  <div class="sp-icon-wrap">
+    <div class="sp-icon-box">
+      <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 14 L16 14 L16 58 L24 58" fill="none" stroke="#6366f1" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M48 14 L56 14 L56 58 L48 58" fill="none" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="28" y="18" width="16" height="8" rx="2.5" fill="#6366f1"/>
+        <rect x="28" y="32" width="22" height="8" rx="2.5" fill="#6366f1" opacity="0.6"/>
+        <rect x="28" y="46" width="12" height="8" rx="2.5" fill="#22d3ee"/>
+        <circle cx="56" cy="16" r="5" fill="#22d3ee"/>
+        <circle cx="56" cy="16" r="2.5" fill="#0a0f1a"/>
+      </svg>
+    </div>
   </div>
-  <div class="splash-title">Stru<span>code</span></div>
-  <div class="splash-sub">Будуй. Вчись. Кодуй.</div>
+  <div class="sp-title"><span class="sp-s1">Stru</span><span class="sp-s2">co</span><span class="sp-s3">d</span><span class="sp-s4">e</span></div>
+  <div class="sp-sub" data-i18n="splash_tagline">Будуй. Вчись. Кодуй.</div>
 </div>
 
 <div id="app">
 
-<!-- ══ SCREEN: HOME ════════════════════════════════════════════════════════ -->
-<div id="screen-home" class="screen active">
-  <div class="home-body">
-    <div class="user-card">
-      <div class="user-avatar" id="home-avatar">С</div>
-      <div>
-        <div class="user-name" id="home-name">Студент</div>
-        <div class="user-meta">AI Coding School</div>
-      </div>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-val" id="stat-xp">0</div>
-        <div class="stat-lbl">XP</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🔥</div>
-        <div class="stat-val" id="stat-streak">0</div>
-        <div class="stat-lbl">Серія</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-val" id="stat-lessons">0</div>
-        <div class="stat-lbl">Уроки</div>
-      </div>
-    </div>
-
-    <div id="home-featured"></div>
+<!-- ══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <svg class="sb-logo-icon" width="26" height="26" viewBox="0 0 72 72" fill="none">
+      <path d="M24 14L16 14L16 58L24 58" stroke="#6366f1" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 14L56 14L56 58L48 58" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"/>
+      <rect x="28" y="20" width="16" height="7" rx="2" fill="#6366f1"/>
+      <rect x="28" y="33" width="20" height="7" rx="2" fill="#6366f1" opacity="0.5"/>
+      <rect x="28" y="46" width="12" height="7" rx="2" fill="#22d3ee"/>
+    </svg>
+    <span class="sb-logo-text">Stru<span>code</span></span>
   </div>
-</div>
-
-<!-- ══ SCREEN: COURSES ═════════════════════════════════════════════════════ -->
-<div id="screen-courses" class="screen">
-  <div class="screen-header">
-    <h2>📚 Курси</h2>
+  <div class="sb-nav">
+    <button class="sb-item" id="sb-home"><span class="sb-item-icon">🏠</span><span class="sb-item-lbl" data-i18n="nav_home">Головна</span></button>
+    <button class="sb-item" id="sb-courses"><span class="sb-item-icon">📚</span><span class="sb-item-lbl" data-i18n="nav_courses">Курси</span></button>
+    <button class="sb-item" id="sb-sandbox"><span class="sb-item-icon">🔬</span><span class="sb-item-lbl" data-i18n="nav_sandbox">Sandbox</span></button>
+    <button class="sb-item" id="sb-ai-chat"><span class="sb-item-icon">🤖</span><span class="sb-item-lbl" data-i18n="nav_ai">AI</span></button>
+    <button class="sb-item" id="sb-settings"><span class="sb-item-icon">⚙️</span><span class="sb-item-lbl" data-i18n="nav_settings">Налаштування</span></button>
+    <button class="sb-collapse-btn" id="sb-collapse-btn">
+      <span class="sb-item-icon sb-collapse-icon">‹</span>
+      <span class="sb-item-lbl sb-collapse-lbl" data-i18n="nav_sb_collapse">Згорнути</span>
+    </button>
   </div>
-  <div class="courses-body" id="course-list"></div>
-</div>
-
-<!-- ══ SCREEN: COURSE DETAIL ═══════════════════════════════════════════════ -->
-<div id="screen-course-detail" class="screen">
-  <div class="screen-header">
-    <button class="btn-back" id="btn-back-course-detail">←</button>
-    <h2 id="course-detail-title">Курс</h2>
-  </div>
-  <div class="course-detail-body" id="course-detail-body"></div>
-</div>
-
-<!-- ══ SCREEN: LESSON ══════════════════════════════════════════════════════ -->
-<div id="screen-lesson" class="screen">
-  <div class="screen-header">
-    <button class="btn-back" id="btn-back-lesson">←</button>
-    <h2 id="lesson-title">Урок</h2>
-  </div>
-  <div class="lesson-body">
-    <div class="lesson-theory" id="lesson-theory"></div>
-    <div id="lesson-challenges"></div>
-  </div>
-</div>
-
-<!-- ══ SCREEN: CHALLENGE ═══════════════════════════════════════════════════ -->
-<div id="screen-challenge" class="screen">
-  <div class="screen-header">
-    <button class="btn-back" id="btn-back-challenge">←</button>
-    <span class="screen-title" id="challenge-title">Задача</span>
-    <span id="challenge-xp" style="font-size:0.78rem;color:var(--gold);font-weight:700">+10 XP</span>
-  </div>
-  <div class="challenge-solve-wrap">
-    <div class="task-desc" id="challenge-desc"></div>
-    <div class="editor-area">
-      <div class="editor-toolbar">
-        <button class="btn btn-primary btn-sm" id="btn-challenge-run">▶ Run</button>
-        <button class="btn btn-secondary btn-sm" id="btn-challenge-check">✓ Check</button>
-        <select class="lang-select" id="challenge-lang-select" style="margin-left:auto">
-          <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="sql">SQL</option>
-          <option value="cpp">C++</option>
-          <option value="rust">Rust</option>
-          <option value="go">Go</option>
-        </select>
-      </div>
-      <div id="challenge-editor-wrap" style="flex:1;overflow:hidden;min-height:180px"></div>
-    </div>
-    <div class="output-area">
-      <div class="output-header">
-        <span>Вивід</span>
-        <span id="challenge-runtime" style="font-size:0.75rem;color:var(--text3)"></span>
-      </div>
-      <div class="output-panel" id="challenge-output">
-        <span class="output-placeholder">// Натисни ▶ Run</span>
-      </div>
-      <div class="test-results" id="challenge-tests"></div>
+  <div class="sb-user">
+    <div class="sb-avatar" id="sb-avatar">S</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name" id="sb-user-name">Студент</div>
+      <div class="sb-user-sub" data-i18n="home_user_meta">AI Coding School</div>
     </div>
   </div>
-</div>
-
-<!-- ══ SCREEN: SANDBOX ═════════════════════════════════════════════════════ -->
-<div id="screen-sandbox" class="screen">
-  <div class="screen-header">
-    <h2>🔬 Sandbox</h2>
-    <span id="sandbox-runtime" style="font-size:0.75rem;color:var(--text3);margin-left:auto"></span>
-  </div>
-  <div class="sandbox-wrap">
-    <div class="editor-toolbar">
-      <button class="btn btn-primary btn-sm" id="btn-sandbox-run">▶ Run</button>
-      <button class="btn btn-secondary btn-sm" id="btn-sandbox-clear">🧹</button>
-      <select class="lang-select" id="sandbox-lang-select" style="margin-left:auto">
-        <option value="python">Python</option>
-        <option value="javascript">JavaScript</option>
-        <option value="java">Java</option>
-        <option value="sql">SQL</option>
-        <option value="cpp">C++</option>
-        <option value="rust">Rust</option>
-        <option value="go">Go</option>
-        <option value="php">PHP</option>
-        <option value="kotlin">Kotlin</option>
-        <option value="swift">Swift</option>
-      </select>
-    </div>
-    <div id="sandbox-editor-wrap" style="flex:1;overflow:hidden;min-height:250px"></div>
-    <div class="output-area" style="max-height:35vh">
-      <div class="output-header"><span>Вивід</span></div>
-      <div class="output-panel" id="sandbox-output">
-        <span class="output-placeholder">// Натисни ▶ Run щоб виконати код</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SCREEN: AI ═══════════════════════════════════════════════════════════ -->
-<div id="screen-ai" class="screen">
-  <div class="screen-header">
-    <h2>🤖 AI Ментор</h2>
-  </div>
-  <div class="ai-body">
-    <div id="ai-key-banner" class="api-key-banner">
-      <div style="font-weight:600;margin-bottom:6px">Потрібен Gemini API ключ</div>
-      <div style="font-size:0.82rem;color:var(--text3)">Отримай безкоштовно на <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></div>
-      <input type="password" id="ai-key-input" placeholder="AIza..." autocomplete="off">
-      <button class="btn btn-primary btn-sm" id="btn-save-ai-key" style="margin-top:8px;width:100%">Зберегти ключ</button>
-    </div>
-
-    <div class="ai-scenarios" id="ai-scenarios">
-      <button class="scenario-btn" data-prompt="Поясни мені концепцію рекурсії з прикладом на Python">🎓 Поясни концепцію</button>
-      <button class="scenario-btn" data-prompt="Перевір мій код та дай поради щодо покращення">🔍 Перевір код</button>
-      <button class="scenario-btn" data-prompt="Задай мені питання для підготовки до Junior Developer інтерв'ю">💼 Режим інтерв'ю</button>
-      <button class="scenario-btn" data-prompt="Допоможи мені знайти та виправити баг у коді">🐛 Знайти баг</button>
-    </div>
-
-    <div class="chat-messages" id="ai-messages"></div>
-
-    <div class="chat-input-row">
-      <textarea class="chat-textarea" id="ai-input" placeholder="Запитай AI-ментора..." rows="1"></textarea>
-      <button class="btn btn-primary btn-icon" id="btn-ai-send">↑</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SCREEN: SETTINGS ════════════════════════════════════════════════════ -->
-<div id="screen-settings" class="screen">
-  <div class="screen-header">
-    <h2>⚙️ Налаштування</h2>
-  </div>
-  <div class="settings-body">
-
-    <div class="settings-section">
-      <div class="settings-section-title">Профіль</div>
-      <div class="profile-card">
-        <div class="profile-avatar">С</div>
-        <input type="text" class="profile-input" id="settings-name" placeholder="Ваше ім'я" maxlength="24" autocomplete="off">
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-title">Тема</div>
-      <div class="theme-btns">
-        <button class="theme-btn active" data-theme="dark">🌙 Темна</button>
-        <button class="theme-btn" data-theme="light">☀️ Світла</button>
-        <button class="theme-btn" data-theme="aurora">🌌 Aurora</button>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-title">AI (Gemini)</div>
-      <div style="padding:14px 16px">
-        <div style="font-size:0.85rem;color:var(--text2);margin-bottom:8px">
-          Gemini API ключ (безкоштовно на <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>)
-        </div>
-        <input type="password" class="settings-input" id="settings-gemini-key" placeholder="AIza..." autocomplete="off">
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-title">Прогрес</div>
-      <div class="settings-row" style="cursor:default">
-        <span class="settings-row-label">XP</span>
-        <span class="settings-row-value" id="sett-xp">0</span>
-      </div>
-      <div style="padding:12px 16px">
-        <button class="btn btn-danger btn-sm" id="btn-reset-progress" style="width:100%">🗑 Скинути прогрес</button>
-      </div>
-    </div>
-
-    <div style="text-align:center;padding:16px;font-size:0.78rem;color:var(--text3)">
-      Strucode Mobile v1.0 · AI Coding School
-    </div>
-
-  </div>
-</div>
-
-<!-- ══ BOTTOM NAV ═══════════════════════════════════════════════════════════ -->
-<nav class="bottom-nav">
-  <button class="bn-item active" data-screen="home">
-    <span class="bn-icon">🏠</span>
-    <span class="bn-lbl">Головна</span>
-  </button>
-  <button class="bn-item" data-screen="courses">
-    <span class="bn-icon">📚</span>
-    <span class="bn-lbl">Курси</span>
-  </button>
-  <button class="bn-item" data-screen="sandbox">
-    <span class="bn-icon">🔬</span>
-    <span class="bn-lbl">Sandbox</span>
-  </button>
-  <button class="bn-item" data-screen="ai">
-    <span class="bn-icon">🤖</span>
-    <span class="bn-lbl">AI</span>
-  </button>
-  <button class="bn-item" data-screen="settings">
-    <span class="bn-icon">⚙️</span>
-    <span class="bn-lbl">Ще</span>
-  </button>
 </nav>
 
-</div><!-- #app -->
+<!-- ══ SCREEN: HOME ════════════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+  <div class="screen-body">
+    <div class="home-user-card">
+      <div class="home-user-avatar" id="home-user-avatar">S</div>
+      <div>
+        <div class="home-user-name" id="home-user-name-lbl">Студент</div>
+        <div class="home-user-meta" data-i18n="home_user_meta">AI Coding School</div>
+      </div>
+    </div>
+    <div class="home-greeting" id="home-greeting"></div>
 
-<div id="toast"></div>
+    <div id="home-featured-wrap"></div>
 
+    <div class="section-title" id="home-daily-title"></div>
+    <div class="daily-card" id="daily-card">
+      <div class="daily-icon">⚡</div>
+      <div class="daily-info">
+        <div class="daily-title" id="daily-title"></div>
+        <div class="daily-meta" id="daily-meta"></div>
+      </div>
+      <button class="btn btn-primary" id="btn-daily-start" data-i18n="home_daily_start">Почати</button>
+    </div>
+
+    <div class="section-title-row">
+      <span class="section-title" id="home-news-title"></span>
+      <div class="section-title-actions">
+        <button class="btn-text" id="btn-home-news-refresh">↻</button>
+        <button class="btn-text" id="btn-home-news-all"></button>
+      </div>
+    </div>
+    <div id="home-news-list"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: COURSE PAGE ════════════════════════════════════════════════ -->
+<div id="screen-course-page" class="screen">
+  <div class="app-header course-page-app-header">
+    <div class="course-page-header-top">
+      <button class="btn-back" id="btn-course-page-back" data-i18n="challenge_back_nav">← Назад</button>
+      <button class="btn-star" id="btn-course-star" data-i18n-title="course_star_add" title="Обрати для навчання">☆</button>
+    </div>
+    <div class="course-page-header-info" id="course-page-header-info"></div>
+  </div>
+  <div class="screen-body course-page-screen-body" id="course-page-body"></div>
+</div>
+
+<!-- ══ CONTINUE POPUP ════════════════════════════════════════════════════ -->
+
+<!-- ══ SCREEN: COURSES ════════════════════════════════════════════════════ -->
+<div id="screen-courses" class="screen">
+  <div class="app-header">
+    <span class="logo-text" data-i18n="courses_title">📚 Курси</span>
+  </div>
+  <div class="screen-body">
+    <div class="course-list" id="course-list"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: LESSON ═════════════════════════════════════════════════════ -->
+<div id="screen-lesson" class="screen">
+  <div class="app-header">
+    <button class="btn-back" id="btn-lesson-back" data-i18n="lesson_back">← Назад</button>
+    <span class="screen-title" id="lesson-title">Урок</span>
+  </div>
+  <div id="course-xp-strip" class="course-xp-strip" style="display:none"></div>
+  <div class="screen-body lesson-body">
+    <div class="lesson-theory" id="lesson-theory"></div>
+    <div class="lesson-challenges" id="lesson-challenges-block">
+      <div class="section-title" data-i18n="lesson_tasks">Задачі</div>
+      <div id="challenge-list"></div>
+    </div>
+    <div id="screenshot-verify-section" style="display:none">
+      <div class="section-title" data-i18n="screenshot_section_title">Підтвердження проходження</div>
+      <div id="screenshot-verify-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: CHALLENGE ══════════════════════════════════════════════════ -->
+<div id="screen-challenge" class="screen">
+  <div class="challenge-header">
+    <button class="btn-back" id="btn-challenge-back" data-i18n="challenge_back_nav">← Назад</button>
+    <div class="challenge-meta">
+      <span class="challenge-title" id="challenge-title">Задача</span>
+      <span class="challenge-xp" id="challenge-xp-badge">+10 XP</span>
+    </div>
+  </div>
+  <div class="challenge-layout">
+    <div class="challenge-left">
+      <div class="task-description" id="task-description"></div>
+      <div id="editor" class="editor-wrap"></div>
+      <div class="editor-bottom-bar">
+        <div class="editor-bottom-bar-left">
+          <button class="btn btn-run" id="btn-run" data-i18n="challenge_run">▶ Run</button>
+          <button class="btn btn-check" id="btn-check" data-i18n="challenge_check">✓ Check</button>
+          <button class="btn btn-check btn-tables" id="btn-challenge-sql-tables" style="display:none" data-i18n-title="challenge_sql_tables_title" title="SQL таблиці">📋</button>
+          <button class="btn btn-icon-sm" id="btn-challenge-clear" data-i18n-title="challenge_clear_title" title="Очистити output">🧹</button>
+        </div>
+        <div class="lang-dd" id="challenge-lang-dd">
+          <button type="button" class="lang-dd-btn" id="challenge-lang-dd-btn" data-i18n-aria-label="lang_picker_aria" aria-label="Мова"></button>
+          <div class="lang-dd-menu" id="challenge-lang-dd-menu" role="listbox" data-i18n-aria-label="lang_picker_aria" aria-label="Вибір мови">
+            <button type="button" class="lang-dd-item" data-lang="javascript"><img src="icons/langs/javascript.svg" alt="" width="16" height="16">JavaScript</button>
+            <button type="button" class="lang-dd-item" data-lang="python"><img src="icons/langs/python.svg" alt="" width="16" height="16">Python</button>
+            <button type="button" class="lang-dd-item" data-lang="java"><img src="icons/langs/java.svg" alt="" width="16" height="16">Java</button>
+            <button type="button" class="lang-dd-item" data-lang="sql"><img src="icons/langs/sql.svg" alt="" width="16" height="16">SQL</button>
+          </div>
+          <select class="lang-select-drop lang-select-native" id="challenge-lang-select" aria-hidden="true" tabindex="-1">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="sql">SQL</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="challenge-right">
+      <div class="output-toolbar">
+        <span class="runtime-badge" id="runtime-badge"></span>
+      </div>
+      <div class="output-header"><span data-i18n="challenge_output">Output</span></div>
+      <div class="output-section" id="challenge-output-section">
+        <div class="output-panel" id="output-panel"></div>
+        <div class="test-results" id="test-results"></div>
+      </div>
+      <div class="ai-resize-handle" id="challenge-resize-handle"></div>
+      <div class="ai-chat-panel" id="challenge-ai-chat">
+        <div class="ai-chat-hdr" data-i18n="challenge_ai_chat">🤖 AI Чат</div>
+        <div class="ai-chat-msgs" id="challenge-ai-msgs"></div>
+      </div>
+      <div class="ai-bottom-bar">
+        <div class="ai-chat-input-row">
+          <input type="text" class="ai-chat-input" id="challenge-ai-input" data-i18n-placeholder="challenge_ai_placeholder" placeholder="Запитай AI про задачу...">
+          <button class="ai-chat-send" id="challenge-ai-send">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SANDBOX ════════════════════════════════════════════════════ -->
+<div id="screen-sandbox" class="screen">
+  <div class="challenge-header sandbox-header">
+    <button class="btn-back" id="btn-sandbox-back" data-i18n="sandbox_back">← Назад</button>
+    <span class="sandbox-logo-label" data-i18n="sandbox_title">🔬 Sandbox</span>
+    <div class="sandbox-header-spacer"></div>
+  </div>
+  <div class="challenge-layout">
+    <div class="challenge-left">
+      <div id="sandbox-task-banner" class="sandbox-task-banner" style="display:none" aria-live="polite"></div>
+      <div id="sandbox-editor" class="editor-wrap"></div>
+      <div class="editor-bottom-bar">
+        <div class="editor-bottom-bar-left">
+          <button class="btn btn-run" id="btn-sandbox-run" data-i18n="sandbox_run">▶ Run</button>
+          <button class="btn btn-check btn-tables" id="btn-sandbox-sql-tables" style="display:none" data-i18n-title="challenge_sql_tables_title" title="SQL таблиці">📋 Tables</button>
+          <button class="btn btn-icon-sm" id="btn-sandbox-clear" data-i18n-title="sandbox_clear_title" title="Очистити">🧹</button>
+        </div>
+        <div class="lang-dd" id="sandbox-lang-dd">
+          <button type="button" class="lang-dd-btn" id="sandbox-lang-dd-btn" data-i18n-aria-label="lang_picker_aria" aria-label="Мова"></button>
+          <div class="lang-dd-menu" id="sandbox-lang-dd-menu" role="listbox" data-i18n-aria-label="lang_picker_aria" aria-label="Вибір мови">
+            <button type="button" class="lang-dd-item" data-lang="javascript"><img src="icons/langs/javascript.svg" alt="" width="16" height="16">JavaScript</button>
+            <button type="button" class="lang-dd-item" data-lang="python"><img src="icons/langs/python.svg" alt="" width="16" height="16">Python</button>
+            <button type="button" class="lang-dd-item" data-lang="java"><img src="icons/langs/java.svg" alt="" width="16" height="16">Java</button>
+            <button type="button" class="lang-dd-item" data-lang="sql"><img src="icons/langs/sql.svg" alt="" width="16" height="16">SQL</button>
+          </div>
+          <select class="lang-select-drop lang-select-native" id="sandbox-lang-select" aria-hidden="true" tabindex="-1">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="sql">SQL</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="challenge-right">
+      <div class="output-toolbar">
+        <span class="runtime-badge" id="sandbox-runtime-badge"></span>
+      </div>
+      <div class="output-header"><span data-i18n="challenge_output">Output</span></div>
+      <div class="output-section" id="sandbox-output-section">
+        <div class="output-panel" id="sandbox-output-panel"><span class="output-placeholder" data-i18n="sandbox_placeholder">// Натисни ▶ Run щоб виконати код</span></div>
+      </div>
+      <div class="ai-resize-handle" id="sandbox-resize-handle"></div>
+      <div class="ai-chat-panel" id="sandbox-ai-chat">
+        <div class="ai-chat-hdr" data-i18n="sandbox_ai_chat">🤖 AI Чат</div>
+        <div class="ai-chat-msgs" id="sandbox-ai-msgs"></div>
+      </div>
+      <div class="ai-bottom-bar">
+        <div class="ai-chat-input-row">
+          <input type="text" class="ai-chat-input" id="sandbox-ai-input" data-i18n-placeholder="sandbox_ai_placeholder" placeholder="Запитай AI про код...">
+          <button class="ai-chat-send" id="sandbox-ai-send">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: AI CHAT ════════════════════════════════════════════════════ -->
+<div id="screen-ai-chat" class="screen">
+  <div class="app-header">
+    <span class="logo-text" data-i18n="ai_mentor_title">🤖 AI Ментор</span>
+    <div class="ai-status" id="ai-status-badge">●</div>
+  </div>
+  <div class="screen-body">
+    <div id="ai-ollama-checking" class="ai-ollama-checking" style="display:none" aria-live="polite" aria-busy="false">
+      <div class="ai-ollama-checking-inner">
+        <div class="ai-ollama-checking-dot"></div>
+        <p data-i18n="ai_checking_ollama">Перевірка AI…</p>
+      </div>
+    </div>
+    <div class="ai-setup" id="ai-setup">
+      <div class="ai-setup-icon">🤖</div>
+      <h2 data-i18n="ai_mentor_title">AI Ментор</h2>
+      <p data-i18n-html="ai_setup_desc">Для AI-ментора потрібен <strong>Ollama</strong> — локальний AI на твоїй машині.</p>
+      <div class="ai-system-info" id="ai-system-info"></div>
+      <div id="ai-ollama-section">
+        <button class="btn btn-primary" id="btn-install-ollama" data-i18n="ai_install_btn">Встановити Ollama</button>
+        <div class="install-progress" id="install-progress" style="display:none">
+          <div class="progress-text" id="install-progress-text" data-i18n="ai_install_progress_label">Встановлення...</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="install-progress-bar"></div></div>
+        </div>
+      </div>
+      <div id="ai-model-section" style="display:none">
+        <div class="model-list" id="model-list"></div>
+        <button class="btn btn-secondary" id="btn-pull-model" data-i18n="ai_pull_btn">Завантажити llama3.2:3b (2GB)</button>
+        <div class="install-progress" id="pull-progress" style="display:none">
+          <div class="progress-text" id="pull-progress-text" data-i18n="ai_pull_progress_label">Завантаження моделі...</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-chat-wrap" id="ai-chat-wrap" style="display:none">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-scenarios">
+        <button class="scenario-btn" data-scenario="explain" data-i18n="ai_scenario_explain">Поясни концепцію</button>
+        <button class="scenario-btn" data-scenario="review" data-i18n="ai_scenario_review">Перевір мій код</button>
+        <button class="scenario-btn" data-scenario="interview" data-i18n="ai_scenario_interview">Режим співбесіди</button>
+        <button class="scenario-btn" data-scenario="debug" data-i18n="ai_scenario_debug">Допоможи з багом</button>
+      </div>
+      <div class="ai-voice-row" id="ai-voice-row" style="display:none">
+        <div id="ai-voice-mascot" class="ai-voice-mascot" data-state="idle" aria-hidden="true"></div>
+        <div class="ai-voice-row-actions">
+          <button type="button" class="btn btn-secondary btn-icon-sm" id="btn-chat-voice" data-i18n-title="ai_voice_input_title" title="Голосовий ввід">🎤</button>
+          <button type="button" class="btn btn-secondary btn-icon-sm" id="btn-chat-voice-interview" data-i18n-title="ai_voice_interview_title" title="Голосове інтерв’ю">🎙️</button>
+        </div>
+        <span class="ai-voice-hint" id="ai-voice-hint" data-i18n="ai_voice_hint"></span>
+      </div>
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chat-input" data-i18n="ai_placeholder" placeholder="Запитай AI-ментора..." rows="3"></textarea>
+        <button class="btn btn-primary chat-send" id="btn-chat-send" data-i18n="ai_send">Надіслати</button>
+      </div>
+    </div>
+    <div class="model-select-bar" id="model-select-bar" style="display:none">
+      <label data-i18n="ai_model">Модель:</label>
+      <select id="chat-model-select" class="lang-select"></select>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: NEWS ════════════════════════════════════════════════════════ -->
+<div id="screen-news" class="screen">
+  <div class="app-header">
+    <button class="btn-back" id="btn-news-back" data-i18n="news_back">←</button>
+    <span class="logo-text" data-i18n="news_title">📰 AI Новини</span>
+    <button class="btn btn-icon-sm" id="btn-news-refresh" data-i18n="news_refresh" data-i18n-title="news_refresh" title="↻ Оновити">↻ Оновити</button>
+  </div>
+  <div class="screen-body">
+    <div id="news-full-list"></div>
+    <div id="news-pagination" class="news-pagination" style="display:none">
+      <button class="btn btn-icon-sm" id="btn-news-prev" data-i18n="news_pagination_prev">← Назад</button>
+      <span id="news-page-info" class="news-page-info"></span>
+      <button class="btn btn-icon-sm" id="btn-news-next" data-i18n="news_pagination_next">Далі →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SETTINGS ══════════════════════════════════════════════════ -->
+<div id="screen-settings" class="screen">
+  <div class="sett-wrap">
+
+    <!-- Mobile tabs -->
+    <div class="sett-tabs">
+      <button class="sett-tab active" data-section="appearance">🎨 <span data-i18n="sett_appearance">Вигляд</span></button>
+      <button class="sett-tab" data-section="language">🌍 <span data-i18n="sett_language">Мова</span></button>
+      <button class="sett-tab" data-section="ai"><span data-i18n="settings_tab_ai">🤖 AI-ментор</span></button>
+      <button class="sett-tab" data-section="account">👤 <span data-i18n="sett_account">Акаунт</span></button>
+    </div>
+
+    <!-- Desktop sidenav -->
+    <div class="sett-sidenav">
+      <div class="sett-sidenav-hdr" data-i18n="settings_title">Налаштування</div>
+      <button class="sett-nav-item active" data-section="appearance">🎨 <span data-i18n="sett_appearance">Вигляд</span></button>
+      <button class="sett-nav-item" data-section="language">🌍 <span data-i18n="sett_language">Мова</span></button>
+      <button class="sett-nav-item" data-section="ai"><span data-i18n="settings_tab_ai">🤖 AI-ментор</span></button>
+      <button class="sett-nav-item" data-section="account">👤 <span data-i18n="sett_account">Акаунт</span></button>
+    </div>
+
+    <!-- Content -->
+    <div class="sett-content">
+
+      <!-- ── APPEARANCE ── -->
+      <div class="sett-section active" id="sett-appearance">
+        <div class="sett-section-hdr">
+          <h2 data-i18n="sett_appearance">Вигляд</h2>
+          <p data-i18n="sett_appearance_desc">Тема та кольори інтерфейсу</p>
+        </div>
+        <div class="sett-grp">
+          <div class="sett-grp-lbl" data-i18n="settings_theme">Тема</div>
+          <div class="theme-preset-grid">
+            <button class="theme-preset-btn" data-theme="dark">🌙 <span data-i18n="settings_theme_dark">Темна</span></button>
+            <button class="theme-preset-btn" data-theme="light">☀️ <span data-i18n="settings_theme_light">Світла</span></button>
+            <button class="theme-preset-btn" data-theme="aurora"><span data-i18n="settings_theme_aurora">🌌 Aurora</span></button>
+            <button class="theme-preset-btn" data-theme="custom">🎨 <span data-i18n="sett_custom">Своя</span></button>
+          </div>
+        </div>
+        <div class="custom-theme-editor" id="custom-theme-editor">
+          <div class="sett-grp">
+            <div class="sett-grp-lbl">🎨 <span data-i18n="sett_palettes">Готові палітри</span></div>
+            <div class="palette-grid" id="palette-grid"></div>
+          </div>
+          <div class="sett-grp">
+            <div class="sett-grp-lbl" data-i18n="sett_custom_colors">Свої кольори</div>
+            <div class="color-picker-grid" id="color-picker-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LANGUAGE ── -->
+      <div class="sett-section" id="sett-language">
+        <div class="sett-section-hdr">
+          <h2 data-i18n="sett_language">Мова інтерфейсу</h2>
+          <p data-i18n="sett_language_desc">Мова кнопок та підказок у застосунку</p>
+        </div>
+        <div class="sett-grp">
+          <div class="sett-grp-lbl" data-i18n="settings_lang">Оберіть мову</div>
+          <div class="lang-grid">
+            <button class="lang-toggle-btn active" data-lang="uk">🇺🇦 Українська</button>
+            <button class="lang-toggle-btn" data-lang="en">🇬🇧 English</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI ── -->
+      <div class="sett-section" id="sett-ai">
+        <div class="sett-section-hdr">
+          <h2 data-i18n="sett_ai_title">AI-ментор (Gemini)</h2>
+          <p data-i18n="sett_ai_desc">Gemini API для AI-ментора у мобільній версії.</p>
+        </div>
+        <div class="sett-grp">
+          <div class="sett-grp-lbl">Gemini API Key</div>
+          <input type="password" id="gemini-api-key-input" class="settings-model-custom-input"
+            placeholder="Вставте ваш Gemini API key"
+            style="width:100%;box-sizing:border-box;"
+            autocomplete="off" spellcheck="false">
+          <p style="font-size:.78rem;color:var(--text2);margin-top:6px;">
+            Отримайте безкоштовний ключ на <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--primary);">aistudio.google.com</a>
+          </p>
+          <div id="settings-ollama-info" style="display:none"></div>
+          <div id="settings-ollama-controls" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- ── ACCOUNT ── -->
+      <div class="sett-section" id="sett-account">
+        <div class="sett-section-hdr">
+          <h2 data-i18n="sett_account">Акаунт</h2>
+          <p data-i18n="sett_account_desc">Ваш профіль та прогрес</p>
+        </div>
+        <div class="profile-card">
+          <div class="profile-avatar" id="profile-avatar">S</div>
+          <div class="profile-details">
+            <input type="text" class="profile-name-input" id="profile-name"
+              data-i18n-placeholder="profile_name_placeholder" placeholder="Ваше ім'я" maxlength="24" autocomplete="off">
+            <div class="profile-meta" id="profile-meta">Введіть ім'я для персоналізації</div>
+          </div>
+        </div>
+        <div class="sett-grp">
+          <div class="sett-grp-lbl" data-i18n="settings_progress">Прогрес</div>
+          <div class="settings-info" id="settings-progress-info"></div>
+          <button class="sett-action-btn sett-action-danger" id="btn-reset-progress">🗑 <span data-i18n="settings_reset">Скинути прогрес</span></button>
+        </div>
+        <div class="sett-grp">
+          <div class="sett-grp-lbl" data-i18n="settings_app">Додаток</div>
+          <button class="sett-action-btn sett-action-danger" id="btn-uninstall-app">🗑 <span data-i18n="settings_uninstall">Видалити Strucode</span></button>
+        </div>
+        <div class="settings-footer">
+          <div data-i18n="settings_footer_v">Strucode v1.0</div>
+          <div data-i18n="settings_footer_sub">AI Coding School · Python + HTML/JS</div>
+        </div>
+      </div>
+
+    </div><!-- .sett-content -->
+  </div><!-- .sett-wrap -->
+</div>
+
+<!-- ══ BOTTOM NAV ═════════════════════════════════════════════════════════ -->
+</div><!-- /#app -->
+
+<div id="daily-preparing-overlay" class="daily-preparing-overlay" style="display:none" aria-busy="true" aria-live="polite">
+  <div class="daily-preparing-inner">
+    <div class="daily-preparing-spin" aria-hidden="true"></div>
+    <p class="daily-preparing-text" data-i18n="daily_preparing">Готуємо щоденну задачу…</p>
+    <p class="daily-preparing-sub" data-i18n="daily_preparing_sub">Зачекай, не закривай вкладку.</p>
+  </div>
+</div>
+
+<!-- ══ SQL TABLES MODAL ═══════════════════════════════════════════════════ -->
+<div id="sql-tables-modal" class="sql-modal-overlay" style="display:none">
+  <div class="sql-modal-sheet">
+    <div class="sql-modal-header">
+      <span data-i18n="sql_modal_title">📋 SQL Таблиці</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary" id="btn-save-sql-tables" style="padding:8px 16px;font-size:.85rem" data-i18n="sql_modal_save">💾 Зберегти</button>
+        <button class="btn btn-icon-sm" id="btn-close-sql-tables" data-i18n-title="sql_modal_close" title="Закрити">✕</button>
+      </div>
+    </div>
+    <div class="sql-modal-desc" data-i18n="sql_modal_desc">Визначте таблиці та дані які будуть автоматично створені перед виконанням SQL коду.</div>
+    <textarea class="sql-modal-editor" id="sql-tables-textarea" spellcheck="false" data-i18n-placeholder="sql_modal_editor_placeholder" placeholder="-- Визначте свої таблиці тут
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  age INTEGER
+);
+INSERT INTO users VALUES (1, 'Alice', 25);
+INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
+  </div>
+</div>
+
+<!-- ══ CONTINUE POPUP ════════════════════════════════════════════════════ -->
+<div id="continue-popup" class="continue-popup-overlay" style="display:none">
+  <div class="continue-popup-sheet">
+    <div class="continue-popup-icon" id="continue-popup-icon">📖</div>
+    <div class="continue-popup-title" data-i18n="continue_popup_title">Продовжити навчання?</div>
+    <div class="continue-popup-lesson" id="continue-popup-lesson"></div>
+    <div class="continue-popup-actions">
+      <button class="btn btn-primary" id="btn-continue-yes" data-i18n="continue_popup_yes">▶ Продовжити</button>
+      <button class="btn btn-secondary" id="btn-continue-no" data-i18n="continue_popup_show_course">Показати курс</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══════════════════════════════════════════════════════════════ -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<!-- ══ MODALS ═════════════════════════════════════════════════════════════ -->
+<div id="modal-xp-gain" class="modal-overlay" style="display:none">
+  <div class="modal-box xp-modal">
+    <div class="xp-modal-icon">⭐</div>
+    <div class="xp-modal-text" id="xp-modal-text">+10 XP</div>
+    <div class="xp-modal-sub" id="xp-modal-sub"></div>
+    <button class="btn btn-primary" id="btn-xp-modal-close" data-i18n="modal_next">Далі</button>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════════════════════ -->
+<script src="js/i18n.js"></script>
+<script src="js/content.js"></script>
+<script src="js/courses-en-strings.js"></script>
+<script src="js/courses-en-deep.js"></script>
+<script src="js/coursesLocale.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/sandbox.js"></script>
 <script src="js/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js');
+  }
+</script>
 </body>
 </html>
