@@ -1,0 +1,45 @@
+name: Deploy Mobile PWA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy shared assets into mobile/
+        run: |
+          # Copy icons
+          cp -r icons mobile/ || true
+
+          # Copy shared JS files that mobile app can reference
+          cp js/content.js       mobile/js/ 2>/dev/null || true
+          cp js/i18n.js          mobile/js/ 2>/dev/null || true
+          cp js/coursesLocale.js mobile/js/ 2>/dev/null || true
+          cp js/courses-en-strings.js mobile/js/ 2>/dev/null || true
+          cp js/courses-en-deep.js    mobile/js/ 2>/dev/null || true
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./mobile
+
+      - uses: actions/deploy-pages@v4
+        id: deployment
