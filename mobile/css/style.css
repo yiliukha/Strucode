@@ -2630,3 +2630,14 @@ html[data-theme="custom"] {
   min-height: 240px;
 }
 .sql-modal-editor::placeholder { color: var(--text3); }
+
+/* ══ MOBILE OVERRIDES ═══════════════════════════════════════════════════════ */
+@media (max-width: 679px) {
+  #sidebar { display: none !important; }
+  #app { padding-left: 0 !important; margin-left: 0 !important; }
+  .screen { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+  .bottom-nav { display: flex !important; }
+}
+@media (min-width: 680px) {
+  .bottom-nav { display: none !important; }
+}

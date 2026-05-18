@@ -154,6 +154,11 @@ const _SB_MAP = {
   'ai-chat': 'sb-ai-chat', 'settings': 'sb-settings'
 };
 
+const _BN_MAP = {
+  'home': 'bn-home', 'courses': 'bn-courses', 'sandbox': 'bn-sandbox',
+  'ai-chat': 'bn-ai-chat', 'settings': 'bn-settings'
+};
+
 // ── Custom theme ───────────────────────────────────────────────────────────
 const PALETTES = [
   {id:'sakura', name:'Sakura',     bg:'#120810',bg2:'#1e0f18',bg3:'#2a1220',card:'#180d14',border:'rgba(255,255,255,.06)',border2:'#3a1a2a',primary:'#f472b6','primary_d':'#c84b92',text:'#fce7f3',text2:'#c08fac'},
@@ -239,6 +244,11 @@ function show(screenId) {
   document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
   const sbId = _SB_MAP[screenId];
   if (sbId) document.getElementById(sbId)?.classList.add('active');
+
+  // Bottom nav active state (mobile)
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const bnId = _BN_MAP[screenId];
+  if (bnId) document.getElementById(bnId)?.classList.add('active');
 
   // Sync sidebar XP/streak
   _sbSyncUser();

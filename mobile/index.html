@@ -529,6 +529,30 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
   </div>
 </div>
 
+<!-- ══ BOTTOM NAV (mobile) ════════════════════════════════════════════════ -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn" id="bn-home" onclick="show('home')">
+    <span class="nav-btn-icon">🏠</span>
+    <span class="nav-btn-lbl" data-i18n="nav_home">Головна</span>
+  </button>
+  <button class="nav-btn" id="bn-courses" onclick="show('courses')">
+    <span class="nav-btn-icon">📚</span>
+    <span class="nav-btn-lbl" data-i18n="nav_courses">Курси</span>
+  </button>
+  <button class="nav-btn" id="bn-sandbox" onclick="show('sandbox')">
+    <span class="nav-btn-icon">🔬</span>
+    <span class="nav-btn-lbl" data-i18n="nav_sandbox">Sandbox</span>
+  </button>
+  <button class="nav-btn" id="bn-ai-chat" onclick="show('ai-chat')">
+    <span class="nav-btn-icon">🤖</span>
+    <span class="nav-btn-lbl" data-i18n="nav_ai">AI</span>
+  </button>
+  <button class="nav-btn" id="bn-settings" onclick="show('settings')">
+    <span class="nav-btn-icon">⚙️</span>
+    <span class="nav-btn-lbl" data-i18n="nav_settings">Ще</span>
+  </button>
+</nav>
+
 <!-- ══ SCRIPTS ════════════════════════════════════════════════════════════ -->
 <script src="js/i18n.js"></script>
 <script src="js/content.js"></script>
