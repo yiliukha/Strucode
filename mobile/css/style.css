@@ -2652,3 +2652,27 @@ html[data-theme="custom"] {
 }
 .CodeMirror-scroll { height: 100%; }
 #editor, #sandbox-editor { height: 100%; overflow: hidden; }
+
+/* ══ MOBILE SETTINGS: tabs fit without scroll ═══════════════════════════════ */
+@media (max-width: 679px) {
+  .sett-tabs {
+    overflow-x: visible;
+    flex-wrap: nowrap;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .sett-tab {
+    flex: 1;
+    text-align: center;
+    padding: 7px 4px;
+    font-size: .72rem;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .sett-content { overflow: hidden; }
+  .sett-section.active {
+    overflow-y: auto;
+    padding: 16px 14px calc(80px + env(safe-area-inset-bottom));
+    gap: 16px;
+  }
+}
