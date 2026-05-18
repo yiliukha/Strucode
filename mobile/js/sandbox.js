@@ -156,8 +156,9 @@ function createEditor(containerId, language, initialCode) {
     lineWrapping: true,
     extraKeys: { Tab: cm => cm.execCommand('insertSoftTab') },
   });
-  // Force refresh after container becomes visible
-  setTimeout(() => cm.refresh(), 50);
+  // Refresh after container is visible (CSS transitions need time)
+  setTimeout(() => cm.refresh(), 100);
+  setTimeout(() => cm.refresh(), 400);
   return cm;
 }
 

@@ -531,6 +531,30 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
 <!-- ══ TOAST ══════════════════════════════════════════════════════════════ -->
 <div id="toast" class="toast" style="display:none"></div>
 
+<!-- ══ iOS INSTALL PROMPT ══════════════════════════════════════════════════ -->
+<div id="ios-install-overlay" style="display:none;position:fixed;inset:0;z-index:9000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;position:relative;border-top:1px solid var(--border);">
+    <button onclick="document.getElementById('ios-install-overlay').style.display='none';localStorage.setItem('ios-prompt-dismissed','1')" style="position:absolute;top:16px;right:16px;background:var(--bg3);border:none;color:var(--text2);border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div style="font-size:40px;text-align:center;margin-bottom:12px;">📲</div>
+    <div style="font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;">Додай на головний екран</div>
+    <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:20px;">Відкрий Strucode як повноцінну апку — без браузера, без адресного рядка.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
+        <span style="font-size:24px;flex-shrink:0;">1️⃣</span>
+        <span style="font-size:14px;color:var(--text);">Натисни <strong style="color:var(--primary);">кнопку «Поділитись»</strong> внизу Safari <span style="font-size:18px;">⬆️</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
+        <span style="font-size:24px;flex-shrink:0;">2️⃣</span>
+        <span style="font-size:14px;color:var(--text);">Вибери <strong style="color:var(--primary);">«На екран «Початок»»</strong></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:12px;padding:14px;">
+        <span style="font-size:24px;flex-shrink:0;">3️⃣</span>
+        <span style="font-size:14px;color:var(--text);">Натисни <strong style="color:var(--primary);">«Додати»</strong> — готово!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODALS ═════════════════════════════════════════════════════════════ -->
 <div id="modal-xp-gain" class="modal-overlay" style="display:none">
   <div class="modal-box xp-modal">
@@ -577,6 +601,17 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
+  }
+
+  // iOS "Add to Home Screen" prompt
+  const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const _isStandalone = window.navigator.standalone === true;
+  const _dismissed = localStorage.getItem('ios-prompt-dismissed');
+  if (_isIOS && !_isStandalone && !_dismissed) {
+    setTimeout(() => {
+      const el = document.getElementById('ios-install-overlay');
+      if (el) el.style.display = 'flex';
+    }, 3000);
   }
 </script>
 </body>
