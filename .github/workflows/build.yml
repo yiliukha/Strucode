@@ -148,3 +148,31 @@ jobs:
           name: ${{ matrix.artifact }}
           path: dist/Strucode-*.zip
           retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v7
+
+      - name: Publish to GitHub Releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view latest --repo ${{ github.repository }} 2>/dev/null || \
+            gh release create latest \
+              --repo ${{ github.repository }} \
+              --title "Latest Build" \
+              --notes "Auto-built from ${{ github.sha }}"
+
+          for platform in windows mac linux; do
+            FILE="Strucode-${platform}/Strucode-${platform}.zip"
+            if [ -f "$FILE" ]; then
+              gh release upload latest "$FILE" \
+                --repo ${{ github.repository }} \
+                --clobber
+            fi
+          done
