@@ -147,7 +147,7 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: dist/Strucode-*.zip
-          retention-days: 30
+          retention-days: 1
 
   release:
     needs: build
