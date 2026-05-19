@@ -104,17 +104,25 @@ const STORAGE_KEY = 'strucode_v1';
 let _confirmCb = null;
 let _pwaInstallPrompt = null;
 const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const _isAndroid = /Android/.test(navigator.userAgent);
+const _isMobile = _isIOS || _isAndroid;
 const _isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _pwaInstallPrompt = e;
   const grp = document.getElementById('sett-install-grp');
   if (grp && !_isStandalone) grp.style.display = '';
-  if (!_isIOS && !_isStandalone && !localStorage.getItem('sc-android-dismissed')) {
+  if (_isAndroid && !_isStandalone && !localStorage.getItem('sc-android-dismissed')) {
     setTimeout(() => {
       const b = document.getElementById('android-install-banner');
       if (b && !localStorage.getItem('sc-android-dismissed')) b.style.display = 'block';
     }, 3000);
+  }
+  if (!_isMobile && !_isStandalone) {
+    setTimeout(() => {
+      const b = document.getElementById('desktop-download-banner');
+      if (b && !localStorage.getItem('sc-desktop-dismissed')) b.style.display = 'block';
+    }, 1500);
   }
 });
 window.addEventListener('appinstalled', () => {

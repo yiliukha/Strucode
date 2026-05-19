@@ -560,6 +560,22 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
   </div>
 </div>
 
+<!-- ══ DESKTOP DOWNLOAD BANNER ═════════════════════════════════════════════ -->
+<div id="desktop-download-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9100;background:#0f172a;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:20px 20px 36px;">
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+    <div style="font-size:36px;line-height:1;">🖥️</div>
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Завантажити Strucode</div>
+      <div style="font-size:13px;color:#94a3b8;line-height:1.4;">Нативна десктопна апка для Windows, macOS і Linux.</div>
+    </div>
+    <button onclick="document.getElementById('desktop-download-banner').style.display='none';localStorage.setItem('sc-desktop-dismissed','1')" style="background:rgba(255,255,255,.08);border:none;color:#94a3b8;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;flex-shrink:0;">✕</button>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <button onclick="document.getElementById('desktop-download-banner').style.display='none';localStorage.setItem('sc-desktop-dismissed','1')" style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;">Пізніше</button>
+    <a href="https://strucode-download.illluha-evgeniy.workers.dev/" style="flex:2;padding:13px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">⬇️ Завантажити</a>
+  </div>
+</div>
+
 <!-- ══ iOS INSTALL PROMPT ══════════════════════════════════════════════════ -->
 <div id="ios-install-overlay" style="display:none;position:fixed;inset:0;z-index:9000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center;">
   <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px 44px;width:100%;max-width:480px;position:relative;border-top:1px solid var(--border);">
