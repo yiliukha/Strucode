@@ -41,6 +41,8 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v6
@@ -142,22 +144,6 @@ jobs:
           EOF
           cd dist && zip -r Strucode-linux.zip Strucode
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.artifact }}
-          path: dist/Strucode-*.zip
-          retention-days: 30
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download built artifacts
-        uses: actions/download-artifact@v7
-
       - name: Publish to GitHub Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -169,24 +155,11 @@ jobs:
               --notes "Auto-built from ${{ github.sha }}"
 
           for platform in windows mac linux; do
-            FILE="Strucode-${platform}/Strucode-${platform}.zip"
+            FILE="dist/Strucode-${platform}.zip"
             if [ -f "$FILE" ]; then
               gh release upload latest "$FILE" \
                 --repo ${{ github.repository }} \
                 --clobber
             fi
           done
-
-  cleanup:
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Keep only last 5 builds worth of artifacts
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api repos/${{ github.repository }}/actions/artifacts \
-            --paginate --jq '.artifacts | sort_by(.created_at) | reverse | .[15:] | .[].id' \
-          | xargs -r -I {} gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/{}
+        shell: bash
