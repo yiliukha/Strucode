@@ -147,7 +147,7 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: dist/Strucode-*.zip
-          retention-days: 1
+          retention-days: 30
 
   release:
     needs: build
@@ -176,3 +176,17 @@ jobs:
                 --clobber
             fi
           done
+
+  cleanup:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Keep only last 5 builds worth of artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts \
+            --paginate --jq '.artifacts | sort_by(.created_at) | reverse | .[15:] | .[].id' \
+          | xargs -r -I {} gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/{}
