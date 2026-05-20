@@ -121,7 +121,7 @@ window.addEventListener('beforeinstallprompt', e => {
   if (!_isMobile && !_isStandalone) {
     setTimeout(() => {
       const b = document.getElementById('desktop-download-banner');
-      if (b && !localStorage.getItem('sc-desktop-dismissed')) b.style.display = 'block';
+      if (b && !localStorage.getItem('sc-desktop-dismissed') && !localStorage.getItem('sc-app-downloaded')) b.style.display = 'block';
     }, 1500);
   }
 });

@@ -572,7 +572,7 @@ INSERT INTO users VALUES (2, 'Bob', 30);"></textarea>
   </div>
   <div style="display:flex;gap:10px;">
     <button onclick="document.getElementById('desktop-download-banner').style.display='none';localStorage.setItem('sc-desktop-dismissed','1')" style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;">Пізніше</button>
-    <a href="https://strucode-download.illluha-evgeniy.workers.dev/" style="flex:2;padding:13px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">⬇️ Завантажити</a>
+    <a href="https://strucode-download.illluha-evgeniy.workers.dev/" onclick="localStorage.setItem('sc-app-downloaded','1');setTimeout(()=>{document.getElementById('desktop-download-banner').style.display='none'},500)" style="flex:2;padding:13px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;">⬇️ Завантажити</a>
   </div>
 </div>
 
